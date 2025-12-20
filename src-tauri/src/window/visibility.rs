@@ -18,6 +18,15 @@ fn is_webview_console_debug_enabled() -> bool {
 /// This helps detect when a window has become off-screen due to monitor disconnection
 /// or configuration changes.
 fn is_window_on_screen(app: &AppHandle, window: &tauri::WebviewWindow) -> bool {
+    // If the window isn't associated with any monitor, it's effectively off-screen.
+    if let Ok(None) = window.current_monitor() {
+        cc_debug_if!(
+            is_window_visibility_debug_enabled(),
+            "[CursorChanger] Window has no current monitor; treating as off-screen"
+        );
+        return false;
+    }
+
     // Get window position and size
     let window_pos = match window.outer_position() {
         Ok(pos) => pos,
@@ -54,6 +63,17 @@ fn is_window_on_screen(app: &AppHandle, window: &tauri::WebviewWindow) -> bool {
     let win_y = window_pos.y;
     let win_w = window_size.width as i32;
     let win_h = window_size.height as i32;
+
+    // Minimized/hidden windows can report a near-zero size; treat that as off-screen so we recenter.
+    if win_w <= 1 || win_h <= 1 {
+        cc_debug_if!(
+            is_window_visibility_debug_enabled(),
+            "[CursorChanger] Window size is {},{} (likely minimized/hidden); treating as off-screen",
+            win_w,
+            win_h
+        );
+        return false;
+    }
 
     cc_debug_if!(
         is_window_visibility_debug_enabled(),

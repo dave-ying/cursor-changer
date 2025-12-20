@@ -80,6 +80,12 @@ pub fn initialize_main_window(app: &AppHandle) {
     // Calculate and apply optimal window size
     apply_optimal_window_size(app, &win);
 
+    // Default to maximized window on startup
+    match win.maximize() {
+        Ok(_) => cc_debug!("[CursorChanger] Window maximized on startup"),
+        Err(e) => cc_error!("[CursorChanger] Failed to maximize window on startup: {}", e),
+    }
+
     // Open developer tools if requested (debug builds only)
     try_open_devtools(&win);
 
@@ -104,6 +110,10 @@ pub fn reset_main_window_size(app: &AppHandle) -> Result<(), String> {
     }
 
     apply_optimal_window_size(app, &win);
+    match win.maximize() {
+        Ok(_) => cc_debug!("[CursorChanger] Window maximized after reset"),
+        Err(e) => cc_error!("[CursorChanger] Failed to maximize window after reset: {}", e),
+    }
     Ok(())
 }
 

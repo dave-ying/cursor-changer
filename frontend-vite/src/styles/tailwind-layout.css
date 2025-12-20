@@ -282,32 +282,69 @@
 }
 
 /* ========================================
-   NAVIGATION TOOLBAR
+   NAVIGATION SIDEBAR
    ======================================== */
-/* Toolbar container - positioned on the left side */
 #toolbar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background: var(--bg-elevated);
+    border-right: 1px solid var(--border-default);
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    padding: 0;
-    align-items: center;
+    padding: 1rem 0.75rem;
+    align-items: stretch;
     justify-content: flex-start;
     flex-shrink: 0;
-    min-width: fit-content;
+    height: calc(100vh - var(--titlebar-height) - (clamp(1.5rem, 3vw, 3rem) * 2));
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
-.cursor-toolbar {
+.cursor-sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    padding: 0;
-    align-items: center;
-    justify-content: flex-start;
-    flex-shrink: 0;
+    gap: 0.5rem;
+    height: 100%;
 }
 
-/* Ensure toolbar buttons have proper sizing and spacing */
-#toolbar>button,
-.cursor-toolbar>button {
+.cursor-sidebar-button {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: transparent;
+}
+
+.cursor-sidebar-button:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.cursor-sidebar-button[data-variant="default"],
+.cursor-sidebar-button.variant-default,
+.cursor-sidebar-button:where(.bg-primary) {
+    background: var(--brand-secondary);
+    color: var(--text-primary);
+    box-shadow: none;
+}
+
+.cursor-sidebar-icon {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    color: currentColor;
+}
+
+.cursor-sidebar-text {
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+    color: inherit;
 }

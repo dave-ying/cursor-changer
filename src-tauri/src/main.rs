@@ -33,6 +33,7 @@ fn main() {
         .manage(Mutex::new(FolderWatcherState::default()))
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_shell::init())
         .setup(|app| Ok(startup::setup_app(app)?))
         .on_window_event(|window, event| window_events::on_window_event(window, event));
 

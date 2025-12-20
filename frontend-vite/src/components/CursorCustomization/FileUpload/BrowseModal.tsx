@@ -35,9 +35,6 @@ export function BrowseModal({
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Only render if modal should be open
-  if (!isOpen) return null;
-
   const handleClose = useCallback(() => {
     onClose?.();
   }, [onClose]);
@@ -54,6 +51,9 @@ export function BrowseModal({
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [isOpen, handleClose]);
+
+  // Only render if modal should be open. Placed after hooks to keep hook order stable.
+  if (!isOpen) return null;
 
   const processFile = (file: File) => {
     const name = file.name || '';
