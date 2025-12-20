@@ -7,15 +7,27 @@ import { GeneralSettings } from './Settings/GeneralSettings';
 import { KeyboardShortcuts } from './Settings/KeyboardShortcuts';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
+type SettingsTab = 'cursor' | 'general' | 'shortcuts' | 'interface';
+
 interface SettingsProps {
   isModal?: boolean;
   onClose?: (() => void) | null;
-  initialTab?: 'cursor' | 'general' | 'shortcuts';
+  initialTab?: SettingsTab;
 }
 
-export function Settings({ isModal = false, onClose = null, initialTab = 'cursor' }: SettingsProps): React.JSX.Element {
+const DEFAULT_TAB: SettingsTab = 'cursor';
+
+const isValidTab = (tab: string): tab is SettingsTab =>
+  ['cursor', 'general', 'shortcuts', 'interface'].includes(tab as SettingsTab);
+
+const resolveContentTab = (tab: SettingsTab): Exclude<SettingsTab, 'interface'> =>
+  tab === 'interface' ? 'general' : tab;
+
+export function Settings({ isModal = false, onClose = null, initialTab = DEFAULT_TAB }: SettingsProps): React.JSX.Element {
   const cursorState = useAppStore((s) => s.cursorState);
-  const [activeTab, setActiveTab] = useState<'cursor' | 'general' | 'shortcuts'>(initialTab || 'cursor');
+  const safeInitialTab = isValidTab(initialTab) ? initialTab : DEFAULT_TAB;
+  const [activeTab, setActiveTab] = useState<SettingsTab>(safeInitialTab);
+  const contentTab = resolveContentTab(activeTab);
 
   // Guard: ensure cursorState is loaded before rendering
   if (!cursorState) {
@@ -28,9 +40,9 @@ export function Settings({ isModal = false, onClose = null, initialTab = 'cursor
 
   const settingsContent = (
     <div className="space-y-6">
-      {activeTab === 'cursor' && <CursorSettings />}
-      {activeTab === 'general' && <GeneralSettings />}
-      {activeTab === 'shortcuts' && <KeyboardShortcuts />}
+      {contentTab === 'cursor' && <CursorSettings />}
+      {contentTab === 'general' && <GeneralSettings />}
+      {contentTab === 'shortcuts' && <KeyboardShortcuts />}
     </div>
   );
 
@@ -50,7 +62,7 @@ export function Settings({ isModal = false, onClose = null, initialTab = 'cursor
               onValueChange={(v) => {
                 // Only change tab if the value is different and not empty
                 if (v && v !== activeTab) {
-                  setActiveTab(v as 'cursor' | 'general' | 'shortcuts');
+                  setActiveTab(isValidTab(v) ? v : DEFAULT_TAB);
                 }
               }}
               className="bg-muted rounded-full p-1"
@@ -61,6 +73,12 @@ export function Settings({ isModal = false, onClose = null, initialTab = 'cursor
                 className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
               >
                 Cursor
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="interface"
+                className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              >
+                Interface
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="shortcuts"
@@ -96,7 +114,7 @@ export function Settings({ isModal = false, onClose = null, initialTab = 'cursor
             onValueChange={(v) => {
               // Only change tab if the value is different and not empty
               if (v && v !== activeTab) {
-                setActiveTab(v as 'cursor' | 'general' | 'shortcuts');
+                setActiveTab(isValidTab(v) ? v : DEFAULT_TAB);
               }
             }}
             className="bg-muted rounded-full p-1"
@@ -107,6 +125,12 @@ export function Settings({ isModal = false, onClose = null, initialTab = 'cursor
               className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
               Cursor
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="interface"
+              className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            >
+              Interface
             </ToggleGroupItem>
             <ToggleGroupItem
               value="shortcuts"

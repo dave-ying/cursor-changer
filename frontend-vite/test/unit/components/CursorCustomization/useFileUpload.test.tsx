@@ -87,6 +87,51 @@ describe('CursorCustomization/FileUpload/useFileUpload', () => {
     });
   });
 
+  it('handleFileSelect closes modal after successful cursor upload even when refresh fails', async () => {
+    const { useFileUpload } = await import('@/components/CursorCustomization/FileUpload/useFileUpload');
+
+    mockInvoke.mockResolvedValue({ id: 'drag', name: 'Duplicate Cursor' });
+    mockLoadLibraryCursors.mockRejectedValueOnce(new Error('refresh fail'));
+
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const fileBytes = new Uint8Array([7, 8]);
+    const file = new File([fileBytes], 'drag.cur', { type: 'application/octet-stream' });
+    Object.defineProperty(file, 'arrayBuffer', { value: async () => fileBytes.buffer });
+
+    const fileList: any = {
+      length: 1,
+      item: (index: number) => (index === 0 ? file : null),
+      0: file
+    };
+
+    const event = { target: { files: fileList } } as any;
+
+    const { result } = renderHook(() => useFileUpload());
+
+    act(() => result.current.openBrowseModal());
+    expect(result.current.showBrowseModal).toBe(true);
+
+    await act(async () => {
+      await result.current.handleFileSelect(event);
+    });
+
+    expect(mockInvoke).toHaveBeenCalledWith('add_uploaded_cursor_to_library', {
+      filename: 'drag.cur',
+      data: [7, 8],
+    });
+    expect(mockShowMessage).toHaveBeenCalledWith('Added Duplicate Cursor to library', 'success');
+    expect(mockLoadLibraryCursors).toHaveBeenCalled();
+    expect(result.current.showBrowseModal).toBe(false);
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[WARN]',
+      'Failed to refresh cursor library after upload:',
+      expect.any(Error)
+    );
+
+    warnSpy.mockRestore();
+  });
+
   it('handleFileSelect sets clickPointFile and returns type=image for supported image files', async () => {
     const { useFileUpload } = await import('@/components/CursorCustomization/FileUpload/useFileUpload');
 
@@ -152,5 +197,41 @@ describe('CursorCustomization/FileUpload/useFileUpload', () => {
     await waitFor(() => {
       expect(result.current.isUploading).toBe(false);
     });
+  });
+
+  it('clearClickPointFile resets both clickPointFile and clickPointFilePath', async () => {
+    const { useFileUpload } = await import('@/components/CursorCustomization/FileUpload/useFileUpload');
+
+    const { result } = renderHook(() => useFileUpload());
+
+    const file = new File([new Uint8Array([3])], 'picker.png', { type: 'image/png' });
+
+    act(() => {
+      result.current.setClickPointFileForPicker(file);
+      result.current.setClickPointFilePathForPicker('path/to/file.cur');
+    });
+
+    expect(result.current.clickPointFile).toBe(file);
+    expect(result.current.clickPointFilePath).toBe('path/to/file.cur');
+
+    act(() => {
+      result.current.clearClickPointFile();
+    });
+
+    expect(result.current.clickPointFile).toBeNull();
+    expect(result.current.clickPointFilePath).toBeNull();
+  });
+
+  it('handleFileSelect exits early when no files are provided', async () => {
+    const { useFileUpload } = await import('@/components/CursorCustomization/FileUpload/useFileUpload');
+
+    const { result } = renderHook(() => useFileUpload());
+
+    await act(async () => {
+      await result.current.handleFileSelect({ target: { files: [] } } as any);
+    });
+
+    expect(mockInvoke).not.toHaveBeenCalled();
+    expect(result.current.isUploading).toBe(false);
   });
 });

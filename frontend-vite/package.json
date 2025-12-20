@@ -9,7 +9,7 @@
     "test": "vitest run --reporter=verbose",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage && node scripts/coverage-summary.js",
     "test:single": "vitest run test/unit/store/cursorOperations.test.ts --reporter=verbose",
     "test:debug": "vitest run --reporter=verbose --no-coverage",
     "lint": "eslint src",

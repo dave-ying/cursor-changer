@@ -7,20 +7,21 @@ describe('CursorCustomization/FileUpload/BrowseModal', () => {
     vi.restoreAllMocks();
 
     if (!(globalThis as any).DataTransfer) {
-      class DT {
-        items = {
-          add: (_file: File) => {},
-        };
+      (globalThis as any).DataTransfer = class {
         files: FileList;
+        items: { add: (file: File) => void };
+
         constructor() {
-          const fileList: any = {
-            length: 0,
-            item: () => null,
+          const filesArray: any[] & { item?: (index: number) => File | null } = [];
+          filesArray.item = (index: number) => filesArray[index] ?? null;
+          this.files = filesArray as unknown as FileList;
+          this.items = {
+            add: (file: File) => {
+              filesArray.push(file);
+            }
           };
-          this.files = fileList as FileList;
         }
-      }
-      (globalThis as any).DataTransfer = DT;
+      };
     }
   });
 
@@ -117,5 +118,65 @@ describe('CursorCustomization/FileUpload/BrowseModal', () => {
     expect(onClose).not.toHaveBeenCalled();
 
     warnSpy.mockRestore();
+  });
+
+  it('handles drag events and drop processing for supported files', async () => {
+    const { BrowseModal } = await import('@/components/CursorCustomization/FileUpload/BrowseModal');
+
+    const onClose = vi.fn();
+    const onImageFileSelected = vi.fn();
+
+    render(
+      <BrowseModal
+        isOpen={true}
+        onClose={onClose}
+        onImageFileSelected={onImageFileSelected}
+        clickPointItemId="drop-id"
+      />
+    );
+
+    const dropZone = screen.getByLabelText(/File upload area/i);
+
+    const file = new File([new Uint8Array([5])], 'drop.png', { type: 'image/png' });
+    const files = {
+      length: 1,
+      item: () => file
+    };
+
+    fireEvent.drop(dropZone, {
+      dataTransfer: { files }
+    });
+
+    expect(onImageFileSelected).toHaveBeenCalledWith(file, 'drop-id');
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('supports keyboard accessibility (Enter triggers input, Escape closes)', async () => {
+    const { BrowseModal } = await import('@/components/CursorCustomization/FileUpload/BrowseModal');
+
+    const onClose = vi.fn();
+
+    render(
+      <BrowseModal
+        isOpen={true}
+        onClose={onClose}
+        handleFileSelect={vi.fn()}
+      />
+    );
+
+    const dropZone = screen.getByLabelText(/File upload area/i);
+    const input = screen.getByLabelText('Hidden file input for cursor upload');
+    const clickSpy = vi.spyOn(input, 'click');
+
+    fireEvent.keyDown(dropZone, { key: 'Enter' });
+    expect(clickSpy).toHaveBeenCalled();
+
+    fireEvent.keyDown(dropZone, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(2);
+
+    clickSpy.mockRestore();
   });
 });

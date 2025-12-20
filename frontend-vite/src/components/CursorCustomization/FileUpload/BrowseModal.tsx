@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { logger } from '../../../utils/logger';
@@ -32,13 +33,27 @@ export function BrowseModal({
   clickPointItemId
 }: BrowseModalProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   // Only render if modal should be open
   if (!isOpen) return null;
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     onClose?.();
-  };
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      handleClose();
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isOpen, handleClose]);
 
   const processFile = (file: File) => {
     const name = file.name || '';
@@ -114,6 +129,21 @@ export function BrowseModal({
     }
   };
 
+  const handleKeyboardInteract = (event: React.KeyboardEvent<HTMLLabelElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      event.stopPropagation();
+      inputRef.current?.click();
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      handleClose();
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-[2px]"
@@ -169,6 +199,7 @@ export function BrowseModal({
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            onKeyDown={handleKeyboardInteract}
           >
             <input
               type="file"
@@ -176,6 +207,7 @@ export function BrowseModal({
               accept=".cur,.ani,.svg,.png,.ico,.bmp,.jpg,.jpeg"
               onChange={handleFileChange}
               aria-label="Hidden file input for cursor upload"
+              ref={inputRef}
             />
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
               <svg
