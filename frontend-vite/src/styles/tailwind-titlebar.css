@@ -1,0 +1,90 @@
+/* ========================================
+   TITLEBAR (Theme-agnostic layout)
+   ======================================== */
+.titlebar {
+    height: var(--titlebar-height);
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border-default);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    user-select: none;
+    -webkit-app-region: drag;
+    position: relative;
+    z-index: 1000;
+    flex-shrink: 0;
+    color: var(--titlebar-icon-color);
+}
+
+.titlebar-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.titlebar-buttons {
+    display: flex;
+    gap: 0.5rem;
+    -webkit-app-region: no-drag;
+    z-index: 1001;
+}
+
+.titlebar-button {
+    width: 32px;
+    height: 32px;
+    padding: 0 !important;
+    border: none;
+    background: transparent;
+    color: inherit;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+    position: relative;
+}
+
+.titlebar-button:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.titlebar-button.close:hover {
+    background: #e81123;
+    color: #ffffff;
+}
+
+.titlebar-glyph {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.titlebar-button svg {
+    color: inherit;
+    stroke: currentColor !important;
+    fill: none !important;
+    width: 16px !important;
+    height: 16px !important;
+    display: block !important;
+}
+
+.titlebar-button svg path {
+    stroke: currentColor !important;
+    fill: none !important;
+    stroke-width: 1.5 !important;
+    vector-effect: non-scaling-stroke;
+}
+
+.titlebar-button.close:hover svg,
+.titlebar-button.close:hover {
+    color: #ffffff !important;
+}

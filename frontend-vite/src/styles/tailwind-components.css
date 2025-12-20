@@ -1,0 +1,503 @@
+/* ========================================
+   CARD COMPONENTS (Theme-agnostic with proper background containment)
+   ======================================== */
+/* Card component base styles */
+.bg-card {
+  background-color: var(--color-card) !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
+  background-clip: padding-box !important;
+  -webkit-background-clip: padding-box !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+}
+
+/* Library Card - Specific containment */
+.library-card {
+  background: var(--color-card) !important;
+  background-color: var(--color-card) !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
+  background-clip: padding-box !important;
+  -webkit-background-clip: padding-box !important;
+  position: relative !important;
+  isolation: isolate !important;
+  box-sizing: border-box !important;
+}
+
+/* Scroll area within library */
+.library-card .scroll-area {
+  overflow: auto !important;
+  background: transparent !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Library grid container */
+#library-grid {
+  padding: 8px;
+  margin: 0;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+/* Card grid layout */
+.cursor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: clamp(8px, 1.5vw, 16px);
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  /* Ensure grid content fits within scroll container */
+  height: fit-content;
+  align-items: start;
+}
+
+/* Advanced mode grid - fixed 5 columns for 15 cursors (3 rows of 5) */
+.cursor-grid.cursor-grid--advanced {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  row-gap: clamp(6px, 1vw, 10px);
+  column-gap: clamp(8px, 1.2vw, 12px);
+}
+
+/* Library scroll area */
+.library-scroll-area {
+  overflow: auto !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Section background containment */
+section[aria-label="Library"] {
+  overflow: hidden;
+  position: relative;
+}
+
+/* ========================================
+   CURSOR COMPONENTS (Theme-agnostic)
+   ======================================== */
+.cursor-section {
+  display: block;
+  width: 100%;
+}
+
+.cursor-section .cursor-section-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 16px;
+}
+
+.cursor-card--simple-group {
+  padding: 24px 16px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+}
+
+.cursor-card--simple-group .simple-group-inner {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.cursor-card--simple-group .simple-subcard {
+  flex: 1 1 0;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.cursor-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  height: fit-content;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Selected active cursor card - highlight and glow effect */
+.cursor-card.selected-for-browse {
+  opacity: 1 !important;
+  filter: none !important;
+  pointer-events: auto !important;
+  z-index: 10000;
+  transform: scale(1.1);
+}
+
+.cursor-card.selected-for-browse .cursor-preview {
+  position: relative;
+  border: 3px solid var(--brand-primary, #7c3aed);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--brand-primary, #7c3aed) 80%, transparent);
+  background: var(--bg-hover);
+}
+
+/* Library-highlighted: Active cursor card highlighted by library selection */
+.cursor-card.library-highlighted {
+  opacity: 1 !important;
+  filter: none !important;
+  pointer-events: auto !important;
+  z-index: 10000;
+  transform: scale(1.05);
+}
+
+.cursor-card.library-highlighted .cursor-preview {
+  position: relative;
+  border: 3px solid var(--brand-primary, #7c3aed);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--brand-primary, #7c3aed) 60%, transparent);
+  background: var(--bg-hover);
+}
+
+/* Target mode: Active cursor card as target for library cursor application */
+/* Note: Visual highlighting removed - only pulse animation remains for clean UX */
+
+.cursor-name {
+  font-size: 0.875rem;
+  text-align: center;
+  color: var(--text-primary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+/* Ensure separators don't cover scaled library items */
+[data-slot="separator"] {
+  position: relative;
+  z-index: 0;
+}
+
+.library-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(64px, 8vw, 96px);
+  height: clamp(64px, 8vw, 96px);
+  position: relative;
+  z-index: 100;
+  margin: 0 auto;
+}
+
+/* Override @dnd-kit library cursor styles to ensure consistent cursor behavior */
+.library-item,
+.library-item * {
+  cursor: inherit !important;
+}
+
+.library-item:not(.selection-mode) {
+  cursor: pointer !important;
+}
+
+.library-item:not(.selection-mode):hover {
+  cursor: pointer !important;
+}
+
+.library-item.selection-mode {
+  cursor: pointer !important;
+}
+
+.library-item.selection-mode:hover {
+  cursor: pointer !important;
+}
+
+.library-item.selected-library-item {
+  opacity: 1 !important;
+  filter: none !important;
+  pointer-events: auto !important;
+  z-index: 10000;
+  transform: scale(1.1);
+}
+
+.library-item.selected-library-item .cursor-preview {
+  position: relative;
+  border: 3px solid var(--brand-primary, #7c3aed);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--brand-primary, #7c3aed) 80%, transparent);
+  background: var(--bg-hover);
+}
+
+/* Active-highlighted: Library item highlighted by active cursor selection */
+.library-item.active-highlighted {
+  opacity: 1 !important;
+  filter: none !important;
+  pointer-events: auto !important;
+  z-index: 10000;
+  transform: scale(1.05);
+}
+
+.library-item.active-highlighted .cursor-preview {
+  position: relative;
+  border: 3px solid var(--brand-primary, #7c3aed);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--brand-primary, #7c3aed) 80%, transparent);
+  background: var(--bg-hover);
+}
+
+/* ========================================
+   SHARED ANIMATIONS
+   ======================================== */
+
+/* Pulse border animation for cursor highlighting */
+@keyframes pulse-border {
+  0%,
+  100% {
+    border-color: var(--brand-primary, #7c3aed);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--brand-primary, #7c3aed) 40%, transparent);
+  }
+
+  50% {
+    border-color: color-mix(in srgb, var(--brand-primary, #7c3aed) 80%, transparent);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--brand-primary, #7c3aed) 60%, transparent);
+  }
+}
+
+.library-item:hover {
+  z-index: 10000;
+}
+
+.library-item:hover .cursor-preview {
+  transform: scale(1.1);
+  border-color: var(--brand-primary, #7c3aed);
+}
+
+.cursor-preview {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-hover);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cursor-preview:has(img.cursor-preview-img:hover) {
+  transform: scale(1.1);
+  border-color: var(--brand-primary, #7c3aed);
+}
+
+.cursor-card.selecting-mode .cursor-preview:has(img.cursor-preview-img:hover) {
+  transform: scale(1.1);
+  border-color: var(--brand-primary, #7c3aed);
+}
+
+.cursor-preview img.cursor-preview-img {
+  width: 100%;
+}
+
+.cursor-card {
+  position: relative;
+  z-index: 1;
+}
+
+.library-card.focus-visible {
+  position: relative;
+  z-index: 1102;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.48);
+  border-radius: 12px;
+}
+
+/* ========================================
+   CURSOR SELECTION MODE - BLUR/DIM EFFECT
+   ======================================== */
+/* Blur the toolbar when selecting FROM library (user clicked active cursor) */
+#main-content.cursor-selection-active.selecting-from-library nav#toolbar {
+  filter: blur(4px);
+  opacity: 0.4;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+/* Blur the header of active-cursors-section when selecting FROM library */
+#main-content.cursor-selection-active.selecting-from-library #active-cursors-section>div:first-of-type {
+  filter: blur(4px);
+  opacity: 0.4;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+/* Blur and dim the Active header when a cursor is selected for customization */
+#main-content.cursor-selection-active .cursor-customization-header-blurred {
+  filter: blur(4px);
+  opacity: 0.4;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+/* Blur individual cursor cards that are NOT selected */
+#main-content.cursor-selection-active .cursor-card:not(.selected-for-browse) {
+  filter: blur(4px);
+  opacity: 0.4;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+/* Ensure the selected cursor card is completely clear */
+#main-content.cursor-selection-active .cursor-card.selected-for-browse {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+/* Ensure library section is NEVER blurred during cursor selection */
+#main-content.cursor-selection-active #library-section {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+/* ========================================
+   LIBRARY CURSOR SELECTION MODE - BLUR/DIM EFFECT
+   When user clicks on cursor in library-section:
+   - Entire library section: Blurred and dimmed (reduce visual clutter)
+   - Selected library cursor: NOT blurred (clear and focused)
+   - Active section: NOT blurred (user needs to select target)
+   - Toolbar: Blurred (reduce distractions)
+   ======================================== */
+/* Blur the toolbar when selecting a library cursor */
+#main-content.cursor-selection-active.selecting-library-cursor nav#toolbar {
+  filter: blur(4px);
+  opacity: 0.4;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+/* Blur the entire library section when selecting a library cursor */
+#main-content.cursor-selection-active.selecting-library-cursor #library-section {
+  filter: blur(4px);
+  opacity: 0.4;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+/* Also explicitly blur the header divs within the library section */
+#main-content.cursor-selection-active.selecting-library-cursor #library-section>div:first-of-type {
+  filter: blur(4px);
+  opacity: 0.4;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+/* Ensure all library cursors except the selected one are blurred */
+#main-content.cursor-selection-active.selecting-library-cursor #library-section .library-item:not(.selected-library-item) {
+  filter: blur(4px) !important;
+  opacity: 0.4 !important;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+/* Override blur for the selected library cursor */
+#main-content.cursor-selection-active.selecting-library-cursor #library-section .library-item.selected-library-item {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+/* Protect active section when selecting library cursor */
+#main-content.cursor-selection-active.selecting-library-cursor #active-cursors-section {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+/* Explicitly unblur the cursor cards within the active section */
+#main-content.cursor-selection-active.selecting-library-cursor #active-cursors-section .cursor-card {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+/* ========================================
+   LIBRARY PULSING ANIMATION
+   ======================================== */
+
+/* Subtle pulsing scale animation for library previews when the user
+   is in "selecting-from-library" mode (clicked an active cursor).
+   This visually hints that the user can select a cursor, without
+   adding any outline or border highlight. */
+@keyframes subtle-pulse-scale {
+  0% { transform: scale(1); }
+  50% { transform: scale(var(--library-pulse-scale, 1.05)); }
+  100% { transform: scale(1); }
+}
+
+/* Apply the subtle pulsing to library item previews while selecting
+   from the library. This rule intentionally uses transforms only
+   (no border/box-shadow) to avoid any outline/highlight changes. */
+#main-content.cursor-selection-active.selecting-from-library #library-section .library-item .cursor-preview {
+  animation: subtle-pulse-scale var(--library-pulse-duration, 1.5s) var(--library-pulse-easing, linear) var(--library-pulse-iterations, infinite);
+  animation-delay: var(--pulse-delay, 0s);
+  transform-origin: center center;
+  will-change: transform;
+  /* Disable transitions while animation is active to prevent interference/jank */
+  transition: none !important;
+}
+
+/* Pause the pulse while hovering or when an item is selected so
+   hover and selection transforms continue to take precedence. */
+#main-content.cursor-selection-active.selecting-from-library #library-section .library-item:hover .cursor-preview,
+#main-content.cursor-selection-active.selecting-from-library #library-section .library-item.selected-library-item .cursor-preview,
+#main-content.cursor-selection-active.selecting-from-library #library-section .library-item.active-highlighted .cursor-preview {
+  /* Animation continues on hover */
+  /* Re-enable transitions for a smooth hover/selected scale */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========================================
+   ACTIVE PULSING ANIMATION (REVERSE SELECTION)
+   ======================================== */
+
+/* Subtle pulsing scale animation for active cursor previews when the user
+   is in "reverse selection" mode (clicked a library cursor).
+   This visually hints that the user can select an active cursor to apply the library cursor to. */
+#main-content.cursor-selection-active.selecting-library-cursor #active-cursors-section .cursor-card .cursor-preview {
+  animation: subtle-pulse-scale var(--library-pulse-duration, 1.5s) var(--library-pulse-easing, linear) var(--library-pulse-iterations, infinite);
+  animation-delay: var(--pulse-delay, 0s);
+  transform-origin: center center;
+  will-change: transform;
+  /* Disable transitions while animation is active to prevent interference/jank */
+  transition: none !important;
+}
+
+/* Pause the pulse while hovering or when a cursor is targeted so
+   hover and target transforms continue to take precedence. */
+#main-content.cursor-selection-active.selecting-library-cursor #active-cursors-section .cursor-card:hover .cursor-preview,
+#main-content.cursor-selection-active.selecting-library-cursor #active-cursors-section .cursor-card.target-mode .cursor-preview {
+  /* Animation continues on hover */
+  /* Re-enable transitions for a smooth hover/target scale */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  #main-content.cursor-selection-active.selecting-from-library #library-section .library-item .cursor-preview {
+    animation: none !important;
+  }
+  #main-content.cursor-selection-active.selecting-library-cursor #active-cursors-section .cursor-card .cursor-preview {
+    animation: none !important;
+  }
+}
+
+/* ========================================
+   DIRECT ANIMATION TRIGGER FOR ACTIVE CURSORS
+   ======================================== */
+
+/* Force animation on active cursors during reverse selection */
+#main-content.cursor-selection-active.selecting-library-cursor #active-cursors-section .cursor-card .cursor-preview {
+  animation: subtle-pulse-scale 1.5s linear infinite !important;
+  animation-delay: 0s !important;
+}
+
+/* Ensure no other animations interfere */
+#main-content.cursor-selection-active.selecting-library-cursor #active-cursors-section .cursor-card .cursor-preview {
+  transition: none !important;
+}

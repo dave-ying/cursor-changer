@@ -1,0 +1,234 @@
+/* Flattened Hotspot Picker Styles */
+
+/* Info card colors - exact user specifications */
+:root {
+  --info-card-bg: #0b1f19; /* Dark green background */
+  --info-card-border: #0c4d38; /* Dark green border/outline */
+  --info-card-text: #a7f3d0; /* Light green text */
+  --info-card-icon: #2caf7f; /* Teal icon color */
+}
+
+:root[data-theme='light'] {
+  --info-card-bg: #0b1f19; /* Dark green background */
+  --info-card-border: #0c4d38; /* Dark green border/outline */
+  --info-card-text: #a7f3d0; /* Light green text */
+  --info-card-icon: #2caf7f; /* Teal icon color */
+}
+.hotspot-picker-grid {
+    position: relative;
+    max-width: 1000px;
+    width: 90vw;
+    max-height: 90vh;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 2rem;
+    overflow: visible;
+}
+
+.close-button {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    height: 2rem;
+    width: 2rem;
+    z-index: 10;
+}
+
+.preview-column {
+    width: 340px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.preview-title {
+    margin-bottom: 0.1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.controls-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+}
+
+/* Keep original styles as fallback, but they won't be used */
+.tabs-group {
+    background-color: var(--background-muted);
+    border-radius: 9999px;
+    padding: 0.25rem;
+}
+
+/* Custom styling for the cursor-modal button group to match other button groups */
+.bg-muted.rounded-full.p-1 {
+    background-color: var(--color-muted);
+    border-radius: 9999px;
+    padding: 0.25rem;
+    display: inline-flex;
+    width: auto;
+    min-width: auto;
+    gap: 0.25rem;
+}
+
+.tab-item {
+    border-radius: 9999px;
+    padding: 0.25rem 1rem;
+}
+
+.tab-item[data-state="on"] {
+    background-color: var(--accent-color, #7c3aed);
+    border-color: var(--accent-color, #7c3aed);
+    color: var(--text-primary);
+}
+
+.tab-content {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 1rem;
+    flex: 1;
+}
+
+.controls-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    background-color: transparent;
+    border: none;
+}
+
+.controls-section-row {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+/* First row aligns content to top, doesn't stretch children */
+#cursor-modal-controls-section-row1 {
+    align-content: start;
+    justify-content: start;
+}
+
+/* Second row (button row) aligns to end */
+#cursor-modal-controls-section-row2 {
+    align-self: end;
+}
+
+
+
+.instructions-card {
+    padding: 1.5rem;
+    border: 1px solid var(--border-muted);
+}
+
+/* Callout-style info card - modeled after the tip callout example */
+.info-card {
+    padding: 1rem 1rem 1rem 0.8rem;
+    border: 1px solid var(--info-card-border) !important;
+    background-color: var(--info-card-bg) !important;
+    color: var(--info-card-text) !important;
+    border-radius: 0.75rem;
+    display: flex;
+    overflow: hidden;
+    margin: 0;
+}
+
+/* Icon container style */
+.info-card-icon {
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+}
+
+/* Icon color */
+.info-card-icon svg {
+    color: var(--info-card-icon) !important;
+    width: 0.9rem;
+    height: auto;
+}
+
+/* Content container */
+.info-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Text styling */
+.info-card-content .instruction-text,
+.info-card-content .instruction-hint {
+    color: var(--info-card-text) !important;
+}
+
+/* Update all color references to use the new variables */
+.info-card {
+    color: var(--info-card-text) !important;
+}
+
+div.info-card,
+div[aria-label="Hotspot instructions card"].info-card,
+div.rounded-lg.border.bg-card.text-card-foreground.shadow-sm.info-card {
+    color: var(--info-card-text) !important;
+}
+
+/* More specific selectors to ensure override */
+div.info-card,
+div[aria-label="Hotspot instructions card"].info-card,
+div.rounded-lg.border.bg-card.text-card-foreground.shadow-sm.info-card {
+    background-color: var(--info-card-bg) !important;
+    border-color: var(--info-card-border) !important;
+    color: var(--info-card-text) !important;
+}
+
+.instruction-text {
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    line-height: 1.2;
+}
+
+.instruction-hint {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.bg-removal-button {
+    width: 100%;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: black;
+    color: white;
+    height: 2.5rem;
+    margin-top: 0.5rem;
+}
+
+.bg-removal-button:hover {
+    background-color: #1a1a1a;
+}
+
+.create-button {
+    width: 100%;
+    font-size: 1.1rem;
+    padding: 0.875rem 1.25rem;
+    font-weight: 600;
+    margin-top: auto;
+}
+
+.image-controls-card {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}

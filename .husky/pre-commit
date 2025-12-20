@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run Rust clippy on changed files
+echo "Running Rust clippy..."
+cargo clippy --all-targets --all-features -- -D warnings || exit 1
+
+# Run frontend lint-staged (lints and formats only changed files)
+echo "Running frontend lint-staged..."
+cd frontend-vite && npx lint-staged || exit 1
+
+# Run TypeScript type check
+echo "Running TypeScript type check..."
+cd frontend-vite && npm run type-check || exit 1
+
+echo "Pre-commit checks passed!"

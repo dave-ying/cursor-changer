@@ -1,0 +1,123 @@
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+@media (max-width: 1024px) {
+  #section-cursor-customization>div[style*="grid"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: clamp(48px, 4vw, 60px);
+    --sidebar-icon-size: clamp(20px, 3vw, 32px);
+    --sidebar-icon-inner: calc(var(--sidebar-icon-size) * 0.56);
+  }
+
+  .titlebar-title {
+    font-size: 0.875rem;
+  }
+
+  .titlebar-button {
+    width: clamp(24px, 3vw, 28px);
+    height: clamp(24px, 3vw, 28px);
+  }
+
+  .sidebar-header {
+    padding: clamp(0.5rem, 1vw, 0.75rem) 0;
+  }
+
+  .sidebar-nav {
+    padding: clamp(0.5rem, 1vw, 0.75rem) 0;
+  }
+
+  .sidebar-nav-item {
+    padding: clamp(0.375rem, 0.8vw, 0.5rem);
+    justify-content: center;
+    gap: 0;
+    min-height: clamp(40px, 6vw, 48px);
+  }
+}
+
+@media (max-width: 720px) {
+  .cursor-card--simple-group .simple-group-inner {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 520px) {
+  .titlebar {
+    padding: 0 0.5rem;
+  }
+
+  .sidebar {
+    width: clamp(48px, 4vw, 60px);
+    min-width: clamp(48px, 4vw, 60px);
+  }
+
+  .sidebar-nav-item {
+    padding: clamp(0.5rem, 1vw, 0.75rem);
+    min-width: clamp(36px, 6vw, 44px);
+  }
+}
+
+/* ========================================
+   RESPONSIVE GRID SIZING
+   ======================================== */
+/* Advanced mode - always 5 columns on mobile/small screens */
+@media (max-width: 639px) {
+  .cursor-grid.cursor-grid--advanced {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    row-gap: clamp(4px, 0.8vw, 8px);
+    column-gap: clamp(6px, 1vw, 10px);
+  }
+}
+
+/* Simple mode - 2 cursors get bigger and centered */
+.cursor-grid:has(.cursor-card:nth-child(2):last-child) {
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(24px, 4vw, 48px);
+  max-width: min(500px, 80vw);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 20px 0;
+}
+
+.cursor-grid:has(.cursor-card:nth-child(2):last-child) .cursor-preview {
+  width: clamp(100px, 20vw, 140px);
+  height: clamp(100px, 20vw, 140px);
+}
+
+.cursor-grid:has(.cursor-card:nth-child(2):last-child) .cursor-name {
+  font-size: clamp(1rem, 1.5vw, 1.125rem);
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+/* Advanced mode - fixed 5 columns, responsive gap and sizing */
+@media (min-width: 640px) {
+  .cursor-grid:not(.cursor-grid--advanced) {
+    grid-template-columns: repeat(auto-fit, minmax(clamp(90px, 12vw, 120px), 1fr));
+    gap: clamp(16px, 2vw, 24px);
+  }
+  
+  .cursor-grid.cursor-grid--advanced {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    row-gap: clamp(10px, 1.2vw, 16px);
+    column-gap: clamp(12px, 1.5vw, 20px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cursor-grid:not(.cursor-grid--advanced) {
+    grid-template-columns: repeat(auto-fit, minmax(clamp(100px, 14vw, 140px), 1fr));
+    gap: clamp(20px, 3vw, 32px);
+  }
+  
+  .cursor-grid.cursor-grid--advanced {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    row-gap: clamp(12px, 1.5vw, 18px);
+    column-gap: clamp(16px, 2vw, 24px);
+  }
+}
+

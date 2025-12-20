@@ -1,0 +1,426 @@
+/* ========================================
+   SETTINGS PANEL STYLES
+   ======================================== */
+.shortcut-area {
+    background: var(--bg-elevated);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-default);
+}
+
+@media (max-width: 640px) {
+    .shortcut-area {
+        padding: 1rem;
+        border-radius: 8px;
+    }
+}
+
+.shortcut-display {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: var(--bg-hover);
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* ========================================
+   EFFECTS PANEL STYLES
+   ======================================== */
+#effects-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.effect-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.effect-item:hover {
+    background: var(--bg-hover);
+}
+
+.effect-info {
+    flex: 1;
+}
+
+.effect-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.effect-description {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+/* ========================================
+   TOAST NOTIFICATIONS - Consistent with App Design
+   ======================================== */
+
+.toast-container {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: var(--text-primary);
+    padding: 16px 20px;
+    margin-bottom: 8px;
+    position: relative;
+    animation: toast-fade-in 0.2s ease-out;
+    max-width: 400px;
+    word-wrap: break-word;
+}
+
+/* Toast variants using your brand colors */
+.toast-container.toast--success {
+    border-left: 4px solid var(--brand-primary, #7c3aed);
+}
+
+.toast-container.toast--error {
+    border-left: 4px solid var(--color-destructive);
+}
+
+.toast-container.toast--warning {
+    border-left: 4px solid var(--brand-secondary, #5b21b6);
+}
+
+.toast-container.toast--info {
+    border-left: 4px solid var(--text-secondary);
+}
+
+.toast-container.closing {
+    animation: toast-fade-out 0.2s ease-in;
+}
+
+/* Toast positioning */
+.toast-wrapper {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.toast-container {
+    pointer-events: auto;
+}
+
+/* Animation keyframes - fade and scale (matching your subtle design) */
+@keyframes toast-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes toast-fade-out {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+}
+
+/* Additional animation classes for toast system */
+.animate-toast-in {
+    animation: toast-fade-in 0.2s ease-out;
+}
+
+.animate-toast-out {
+    animation: toast-fade-out 0.2s ease-in;
+}
+
+/* ========================================
+   TAILWIND UTILITY EXTENSIONS
+   ======================================== */
+.bg-primary {
+    background-color: var(--color-primary);
+}
+
+.bg-input {
+    background-color: var(--color-input);
+}
+
+.bg-background {
+    background-color: var(--color-background);
+}
+
+.bg-secondary {
+    background-color: var(--color-secondary);
+}
+
+.bg-accent {
+    background-color: var(--color-accent);
+}
+
+.bg-popover {
+    background-color: var(--color-popover);
+}
+
+.text-primary {
+    color: var(--color-primary);
+}
+
+.text-foreground {
+    color: var(--color-foreground);
+}
+
+.text-secondary {
+    color: var(--color-secondary-foreground);
+}
+
+.text-accent {
+    color: var(--color-accent-foreground);
+}
+
+.border-primary {
+    border-color: var(--color-primary);
+}
+
+.border-secondary {
+    border-color: var(--color-secondary);
+}
+
+.border-accent {
+    border-color: var(--color-accent);
+}
+
+.ring-ring {
+    --tw-ring-color: var(--color-ring);
+}
+
+.ring-offset-background {
+    --tw-ring-offset-color: var(--color-background);
+}
+
+.settings-inner-card {
+    background-color: var(--bg-elevated) !important;
+}
+
+/* ========================================
+   THEME BUTTON FIXES
+   ======================================== */
+/* Fix theme mode buttons to have white text when selected with colored background */
+[data-state="on"][data-radix-collection-item],
+button[data-state="on"] {
+    color: white !important;
+}
+
+/* Specifically target the theme mode toggle buttons in Settings */
+[aria-label="Theme Mode"] button[data-state="on"],
+[aria-label="Theme Mode"] button[aria-checked="true"] {
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Override text-accent-foreground for selected theme buttons */
+[data-state="on"] {
+    color: white !important;
+}
+
+/* Ensure white text on any selected theme button regardless of background color */
+.theme-mode-toggle button[data-state="on"],
+.rounded-md.text-sm.font-medium[data-state="on"] {
+    color: white !important;
+}
+
+/* Force white text on theme buttons when they have inline styles with background colors */
+button[style*="background-color"][data-state="on"],
+button[style*="background-color"][aria-checked="true"] {
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Light theme - inactive toggle buttons */
+:root[data-theme='light'] button[data-state="off"],
+body.light button[data-state="off"] {
+    background-color: rgba(215, 215, 219) !important;
+}
+
+/* Light theme - secondary buttons */
+:root[data-theme='light'] button.bg-\[rgba\(40\2c 40\2c 43\)\],
+body.light button.bg-\[rgba\(40\2c 40\2c 43\)\] {
+    background-color: rgba(215, 215, 219) !important;
+}
+
+/* ========================================
+   SLIDER COMPONENT STYLES (Theme-aware)
+   ======================================== */
+.slider-track {
+    height: 6px !important;
+    background-color: var(--color-muted) !important;
+    border-radius: 9999px !important;
+    position: relative !important;
+}
+
+.slider-range {
+    background-color: var(--color-primary) !important;
+    border-radius: 9999px !important;
+    opacity: 1 !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+.slider-thumb {
+    background-color: #ffffff !important;
+    border-color: transparent !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Ensure good visibility in both themes */
+:root[data-theme='light'] .slider-track,
+body.light .slider-track {
+    background-color: var(--color-border) !important;
+    opacity: 1 !important;
+}
+
+:root[data-theme='dark'] .slider-track,
+body.dark .slider-track {
+    background-color: rgb(72, 72, 74) !important;
+    opacity: 1 !important;
+}
+
+:root[data-theme='light'] .slider-thumb,
+body.light .slider-thumb {
+    background-color: #ffffff !important;
+    border-color: transparent !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+:root[data-theme='dark'] .slider-thumb,
+body.dark .slider-thumb {
+    background-color: #ffffff !important;
+    border-color: transparent !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Fallback for any remaining hardcoded styles */
+span[data-orientation="horizontal"].relative.w-full.grow.overflow-hidden.rounded-full {
+    background-color: var(--color-muted) !important;
+    height: 6px !important;
+}
+
+span[data-orientation="horizontal"].absolute.h-full.bg-primary {
+    background-color: var(--color-primary) !important;
+    height: 6px !important;
+}
+
+/* Light theme specific fallbacks */
+:root[data-theme='light'] span[data-orientation="horizontal"].relative.w-full.grow.overflow-hidden.rounded-full,
+body.light span[data-orientation="horizontal"].relative.w-full.grow.overflow-hidden.rounded-full {
+    background-color: var(--color-border) !important;
+}
+
+:root[data-theme='light'] span[data-orientation="horizontal"].absolute.h-full.bg-primary,
+body.light span[data-orientation="horizontal"].absolute.h-full.bg-primary {
+    background-color: var(--color-primary) !important;
+}
+
+/* ========================================
+   GLOBAL ICON SIZE ENHANCEMENT
+   ======================================== */
+[style*="width: calc(var(--spacing) * 4)"],
+[style*="height: calc(var(--spacing) * 4)"] {
+    width: calc(var(--spacing) * 5) !important;
+    height: calc(var(--spacing) * 5) !important;
+}
+
+svg[class*="size-4"] {
+    width: calc(var(--spacing) * 5) !important;
+    height: calc(var(--spacing) * 5) !important;
+}
+
+/* ========================================
+   SCROLLBAR STYLING (Global)
+   ======================================== */
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-muted);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(142, 142, 147, 0.5);
+    border-radius: 10px;
+    border: 2px solid var(--color-muted);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(142, 142, 147, 0.7);
+}
+
+/* Light theme scrollbar */
+:root[data-theme='light'] ::-webkit-scrollbar-thumb,
+body.light ::-webkit-scrollbar-thumb {
+    background: rgba(60, 60, 67, 0.3);
+}
+
+:root[data-theme='light'] ::-webkit-scrollbar-thumb:hover,
+body.light ::-webkit-scrollbar-thumb:hover {
+    background: rgba(60, 60, 67, 0.5);
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(142, 142, 147, 0.5) var(--color-muted);
+}
+
+/* Firefox light theme */
+:root[data-theme='light'] *,
+body.light * {
+    scrollbar-color: rgba(60, 60, 67, 0.3) var(--color-muted);
+}
+
+/* ========================================
+   COLOR PICKER CUSTOMIZATION
+   ======================================== */
+/* Reduce the size of the color picker pointer circles */
+.react-colorful__pointer {
+    width: 16px !important;
+    height: 16px !important;
+    /* Keep pointer rendering smooth during var/DOM updates */
+    will-change: transform, left, top;
+    transition: none !important;
+}
+
+/* Adjust the saturation pointer (main gradient area) */
+.react-colorful__saturation .react-colorful__pointer {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+/* Adjust the hue pointer (bottom color bar) */
+.react-colorful__hue .react-colorful__pointer {
+    width: 16px !important;
+    height: 16px !important;
+}

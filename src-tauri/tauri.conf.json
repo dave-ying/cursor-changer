@@ -1,0 +1,58 @@
+{
+  "productName": "Cursor Changer",
+  "version": "1.0.0",
+  "identifier": "com.cursorchanger.app",
+  "build": {
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../frontend-vite/dist",
+    "beforeDevCommand": "npm --prefix ./frontend-vite run dev || npm --prefix ../frontend-vite run dev",
+    "beforeBuildCommand": "npm --prefix ./frontend-vite run build || npm --prefix ../frontend-vite run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Cursor Changer",
+        "width": 1440,
+        "height": 810,
+        "resizable": true,
+        "fullscreen": false,
+        "visible": true,
+        "center": true,
+        "decorations": false
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis",
+      "msi"
+    ],
+    "icon": [
+      "icons/icon.ico"
+    ],
+    "resources": [
+      "default-cursors/windows/*",
+      "default-cursors/mac/*",
+      "default-cursors/library/*"
+    ],
+    "windows": {
+      "nsis": {
+        "installerIcon": "icons/icon.ico",
+        "installMode": "currentUser",
+        "languages": [
+          "English"
+        ],
+        "displayLanguageSelector": false
+      },
+      "wix": {
+        "language": "en-US"
+      }
+    }
+  }
+}

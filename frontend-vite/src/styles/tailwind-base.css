@@ -1,0 +1,186 @@
+@theme {
+  /* ========================================
+     COLOR PALETTE (The ONLY thing that should change with theme)
+     ======================================== */
+
+  /* Dark Theme Colors (Default) */
+  --color-background: oklch(0.145 0.006 286);
+  --color-foreground: oklch(0.98 0 0);
+  --color-card: oklch(0.217 0.006 286);
+  --color-card-foreground: oklch(0.98 0 0);
+  --color-popover: oklch(0.217 0.006 286);
+  --color-popover-foreground: oklch(0.98 0 0);
+  --color-primary: oklch(0.58 0.25 270);
+  --color-primary-foreground: oklch(1 0 0);
+  --color-secondary: oklch(0.217 0.006 286);
+  --color-secondary-foreground: oklch(0.98 0 0);
+  --color-muted: oklch(0.279 0.005 286);
+  --color-muted-foreground: oklch(0.73 0.006 286);
+  --color-accent: oklch(0.217 0.006 286);
+  --color-accent-foreground: oklch(0.98 0 0);
+  --color-destructive: oklch(0.62 0.25 25);
+  --color-destructive-foreground: oklch(1 0 0);
+  --color-border: oklch(0.470 0.006 286 / 0.25);
+  --color-input: oklch(0.279 0.005 286);
+  --color-ring: oklch(0.58 0.25 270);
+
+  /* Layout and Design Tokens (Should NOT change with theme) */
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
+
+  /* Animations */
+  --animate-spin: spin 1s linear infinite;
+  --animate-ping: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-bounce: bounce 1s infinite;
+
+  /* Library pulse (tweakable) */
+  --library-pulse-scale: 1.05; /* scale factor at pulse peak (e.g., 1.05 = +5%) */
+  --library-pulse-duration: 1.5s; /* Duration of a single pulse loop */
+  --library-pulse-easing: linear; /* Linear timing for uniform speed */
+
+  /* System-level colors (for compatibility) */
+  --bg-primary: rgb(28, 28, 30);
+  --bg-secondary: rgb(28, 28, 30);
+  --bg-elevated: #28282b;
+  --bg-hover: rgb(58, 58, 60);
+  --bg-hover-strong: rgb(68, 68, 70);
+  --text-primary: rgb(255, 255, 255);
+  --text-secondary: rgb(174, 174, 178);
+  --text-muted: rgb(142, 142, 147);
+  --border-default: rgba(99, 99, 102, 0.3);
+  --brand-primary: #7c3aed;
+  --brand-secondary: #5b21b6;
+
+  /* Layout sizing (should not change with theme) */
+  --titlebar-height: 40px;
+  --titlebar-icon-color: rgb(142, 142, 147);
+  --sidebar-width: clamp(56px, 5vw, 96px);
+  --sidebar-icon-size: clamp(24px, 2vw, 44px);
+  --sidebar-icon-inner: calc(var(--sidebar-icon-size) * 0.56);
+}
+
+/* ========================================
+   LIGHT THEME - Only change COLORS
+   ======================================== */
+:root[data-theme='light'],
+body.light,
+.light {
+  /* ONLY COLORS CHANGE - Everything else stays the same */
+  --color-background: rgb(245, 245, 247);
+  --color-foreground: rgb(29, 29, 31);
+  --color-card: rgb(255, 255, 255);
+  --color-card-foreground: rgb(29, 29, 31);
+  --color-popover: rgb(255, 255, 255);
+  --color-popover-foreground: rgb(29, 29, 31);
+  --color-secondary: rgb(233, 233, 233);
+  --color-secondary-foreground: rgb(29, 29, 31);
+  --color-muted: rgb(235, 235, 240);
+  --color-muted-foreground: rgb(100, 100, 105);
+  --color-accent: rgb(233, 233, 233);
+  --color-accent-foreground: oklch(0.98 0 0);
+  /* Force white for better contrast */
+  --color-border: rgb(215, 215, 220);
+  --color-input: rgb(235, 235, 240);
+  --color-destructive: oklch(0.55 0.22 25);
+  --color-destructive-foreground: oklch(1 0 0);
+
+  /* System-level colors for compatibility */
+  --bg-primary: rgb(245, 245, 247);
+  --bg-secondary: rgb(245, 245, 247);
+  --bg-elevated: rgb(255, 255, 255);
+  --bg-hover: rgb(225, 225, 230);
+  --bg-hover-strong: rgb(210, 210, 215);
+  --text-primary: rgb(29, 29, 31);
+  --text-secondary: rgb(107, 114, 128);
+  --text-muted: rgb(120, 120, 125);
+  --border-default: rgba(215, 215, 220, 0.7);
+  --titlebar-icon-color: rgb(120, 120, 125);
+
+  /* Override accent foreground to always be white for buttons with colored backgrounds */
+  --color-accent-foreground: oklch(0.98 0 0);
+
+  /* DO NOT change these design tokens with theme */
+  /* --radius-lg: 0.5rem; */
+  /* Keep same border radius */
+  /* --sidebar-width: clamp(64px, 6vw, 96px); */
+  /* Keep same sizing */
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: var(--animate-spin);
+}
+
+@keyframes ping {
+
+  75%,
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes bounce {
+
+  0%,
+  100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+
+  50% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+/* ========================================
+   BASE STYLES (Theme-agnostic)
+   ======================================== */
+* {
+  border-color: var(--color-border);
+  outline-color: oklch(from var(--color-ring) l c h / 0.5);
+  box-sizing: border-box;
+  /* Disable text selection to prevent highlighting */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}

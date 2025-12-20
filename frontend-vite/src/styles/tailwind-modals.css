@@ -1,0 +1,111 @@
+/* ========================================
+   BROWSE FOCUS OVERLAY
+   ======================================== */
+.browse-focus-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 24px;
+}
+
+.browse-focus-panel {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  max-width: 980px;
+  pointer-events: auto;
+}
+
+.browse-focus-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 220px;
+}
+
+.browse-focus-right {
+  flex: 1 1 0;
+  max-height: 72vh;
+  overflow: auto;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.browse-overlay-library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+/* ========================================
+   MODAL STYLES
+   ======================================== */
+.modal-backdrop {
+  position: fixed;
+  top: var(--titlebar-height);
+  left: 0;
+  width: 100%;
+  height: calc(100% - var(--titlebar-height));
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  pointer-events: auto;
+}
+
+.modal-backdrop.hidden {
+  display: none;
+}
+
+.modal-panel {
+  background: var(--bg-elevated);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: min(1000px, 90vw);
+  width: 90%;
+  max-height: 85vh;
+  border: 1px solid var(--border-default);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  overflow: visible !important;
+  position: relative;
+}
+
+@media (max-width: 640px) {
+  .modal-panel {
+    padding: 1rem 1rem 0 1rem;
+    width: 95%;
+    max-width: 95vw;
+    max-height: 90vh;
+    border-radius: 12px;
+    aspect-ratio: auto;
+  }
+}
+
+/* ========================================
+   SETTINGS PANEL STYLES
+   ======================================== */
+.shortcut-area {
+  background: var(--bg-elevated);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-default);
+}
+
+@media (max-width: 640px) {
+  .shortcut-area {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+}

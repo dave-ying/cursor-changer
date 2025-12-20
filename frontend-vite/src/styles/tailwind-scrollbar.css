@@ -1,0 +1,109 @@
+/* ========================================
+   SCROLLBAR STYLES (Theme-aware)
+   ======================================== */
+.scroll-area::-webkit-scrollbar {
+  width: 22px;
+  height: 22px;
+}
+
+.scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 8px;
+  margin: 4px 0;
+}
+
+.scroll-area::-webkit-scrollbar-thumb {
+  background: var(--color-muted);
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.2s ease;
+}
+
+.scroll-area::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+.scroll-area::-webkit-scrollbar-thumb:active {
+  background: var(--brand-primary);
+}
+
+.scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-muted) transparent;
+}
+
+/* Light theme specific scrollbar adjustments */
+:root[data-theme='light'] .scroll-area::-webkit-scrollbar-thumb,
+body.light .scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.5);
+  /* Gray-600 with 50% opacity - subtle but visible */
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+:root[data-theme='light'] .scroll-area::-webkit-scrollbar-thumb:hover,
+body.light .scroll-area::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+:root[data-theme='light'] .scroll-area,
+body.light .scroll-area {
+  scrollbar-color: rgba(75, 85, 99, 0.5) transparent;
+}
+
+/* Dark theme specific scrollbar adjustments */
+:root[data-theme='dark'] .scroll-area::-webkit-scrollbar-thumb,
+body.dark .scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  opacity: 0.8;
+}
+
+:root[data-theme='dark'] .scroll-area::-webkit-scrollbar-thumb:hover,
+body.dark .scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+:root[data-theme='dark'] .scroll-area,
+body.dark .scroll-area {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+#section-settings .scroll-area,
+.modal-panel .scroll-area {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  max-height: calc(100vh - 200px);
+  padding-right: 8px;
+  scrollbar-gutter: stable;
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+@media (max-width: 1024px) {
+  #section-cursor-customization>div[style*="grid"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: clamp(48px, 4vw, 60px);
+    --sidebar-icon-size: clamp(20px, 3vw, 32px);
+    --sidebar-icon-inner: calc(var(--sidebar-icon-size) * 0.56);
+  }
+
+  .titlebar-title {
+    font-size: 0.875rem;
+  }
+
+  .titlebar-button {
+    width: 36px;
+    height: 36px;
+  }
+}

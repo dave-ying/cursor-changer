@@ -1,0 +1,13 @@
+{
+  "name": "cursor-changer-root",
+  "private": true,
+  "scripts": {
+    "postinstall": "cd frontend-vite && npm install",
+    "test": "cd frontend-vite && npm run test:debug",
+    "test:watch": "cd frontend-vite && npm run test:watch",
+    "test:coverage": "cd frontend-vite && npm run test:coverage",
+    "test:ui": "cd frontend-vite && npm run test:ui",
+    "install-frontend": "npm --prefix ./src-tauri install",
+    "dev": "cargo tauri dev"
+  }
+}

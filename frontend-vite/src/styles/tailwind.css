@@ -1,0 +1,32 @@
+/* ========================================
+   Modular CSS Architecture
+   ======================================== */
+
+/* Tailwind CSS v4 - Must be imported first */
+@import "tailwindcss";
+
+/* Import order is important - base styles first, then components, then utilities */
+
+/* 1. Base: Theme variables, keyframes, and base styles */
+@import "./tailwind-base.css";
+
+/* 2. Titlebar: Window controls and titlebar components */
+@import "./tailwind-titlebar.css";
+
+/* 3. Layout: App structure, sidebar, and main content areas */
+@import "./tailwind-layout.css";
+
+/* 4. Components: Cursor components, cards, and interactive elements */
+@import "./tailwind-components.css";
+
+/* 5. Modals: Modal dialogs and overlays */
+@import "./tailwind-modals.css";
+
+/* 6. Scrollbar: Scrollbar styling across the application */
+@import "./tailwind-scrollbar.css";
+
+/* 7. Responsive: Media queries and responsive adjustments */
+@import "./tailwind-responsive.css";
+
+/* 8. Utilities: Helper classes, theme fixes, and overrides */
+@import "./tailwind-utilities.css";

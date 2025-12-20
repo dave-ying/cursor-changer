@@ -1,0 +1,29 @@
+[package]
+name = "cursor_changer"
+version = "1.0.0"
+edition = "2021"
+description = "Windows cursor customization library"
+license = "MIT"
+repository = "https://github.com/user/cursor-changer"
+keywords = ["cursor", "windows", "customization"]
+categories = ["os::windows-apis"]
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"
+nursery = "warn"
+cargo = "warn"
+
+[dependencies]
+windows = { version = "0.62.2", features = [
+  "Win32_Foundation",
+  "Win32_UI_WindowsAndMessaging",
+  "Win32_UI_Shell",
+  "Win32_Graphics_Gdi",
+  "Win32_System_LibraryLoader",
+  # Note: WinRT / MSIX StartupTask support is only used by the Tauri backend
+  # and is compiled in when building the Tauri binary with the `msix` feature.
+  # Keep Win32-only features here for the core library.
+  ] }
+winapi = { version = "0.3.9", features = ["winuser", "shellapi", "libloaderapi", "wincon", "consoleapi"] }
+winreg = "0.55.0"

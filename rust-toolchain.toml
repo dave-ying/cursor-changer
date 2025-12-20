@@ -1,0 +1,8 @@
+[toolchain]
+channel = "stable"
+components = [ "rustfmt", "clippy" ]
+target = "x86_64-pc-windows-msvc"
+
+# Pinning the MSVC host toolchain ensures `cargo build` and `cargo tauri` use
+# the MSVC toolchain on Windows by default. This avoids MSYS2/MinGW (gnu)
+# toolchains and the need for MSYS2 in CI or for contributors who don't want it.

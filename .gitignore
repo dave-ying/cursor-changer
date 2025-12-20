@@ -1,0 +1,137 @@
+# === Rust ===
+/target/
+/**/target/
+**/*.rs.bk
+
+# === Node / Tauri ===
+node_modules/
+dist/
+/src-tauri/dist/
+src-tauri/gen/
+tauri-docs-2/public/
+
+# === Build & packaging outputs ===
+build/
+
+/build/msix-staging/
+/builds/
+/builds/**
+/msix/
+/src-tauri/msix/
+
+# === Coverage / reports ===
+coverage/
+
+/coverage-report/
+**/coverage-report/
+*.lcov
+tarpaulin-report.html
+TEST_COVERAGE_SUMMARY.md
+
+# === Temporary / generated files ===
+temp*
+temp_*
+tmp/
+*/tmp/
+*.tmp
+temp-*.png
+temp-*.ico
+diff.txt
+*.patch
+.kiro/
+__pycache__/
+*.pyc
+*.profraw
+dep-graph.bin
+
+# === IDEs ===
+.idea/
+*.swp
+*.swo
+*~
+# Note: .vscode/ is committed for shared workspace settings
+
+# === Logs ===
+*.log
+build-log.txt
+test_output*.txt
+npm_test_output*.txt
+cargo_test_output*.txt
+test-output.txt
+test_failures.txt
+*_errors.txt
+*_errors_current.txt
+
+# === Caches / dev server artifacts ===
+*.cache
+.vite/
+.vite-temp/
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+# === Node.js specific ===
+.npm/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# === Environment & secrets ===
+.env
+.env.*
+!.env.example
+!.env.template
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# === Sample cursors / binaries ===
+/sample-cur/
+/windows-cursors/
+# Keep cursor bundles (kept in repo)
+!src-tauri/default-cursors/
+!default-cursors/
+
+# === Release / compiled artifacts ===
+/release/
+
+# === NPM/Yarn logs ===
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# === Development documentation ===
+todo.md
+
+# === Windows installers & executables ===
+*.msi
+*.exe
+setup.exe
+install.exe
+*.cab
+*.msm
+
+# === Additional debugging ===
+*.pdb
+*.dSYM/
+core
+*.core
+
+# === Package manager locks (if you want to ignore subdirectory locks) ===
+# frontend-vite/package-lock.json
+# Uncomment above if you want to ignore frontend package-lock files
+
+# === Rust analyzer ===
+.rust-analyzer/
+
+# === Certificate & keystore files ===
+*.pfx
+*.jks
+*.keystore
+
+# End of .gitignore
