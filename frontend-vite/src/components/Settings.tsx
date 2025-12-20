@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 
 import { CursorSettings } from './Settings/CursorSettings';
 import { GeneralSettings } from './Settings/GeneralSettings';
+import { InterfaceSettings } from './Settings/InterfaceSettings';
+import { LibrarySettings } from './Settings/LibrarySettings';
 import { KeyboardShortcuts } from './Settings/KeyboardShortcuts';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
-type SettingsTab = 'cursor' | 'general' | 'shortcuts' | 'interface';
+type SettingsTab = 'cursor' | 'library' | 'general' | 'shortcuts' | 'interface';
 
 interface SettingsProps {
   isModal?: boolean;
@@ -18,16 +20,13 @@ interface SettingsProps {
 const DEFAULT_TAB: SettingsTab = 'cursor';
 
 const isValidTab = (tab: string): tab is SettingsTab =>
-  ['cursor', 'general', 'shortcuts', 'interface'].includes(tab as SettingsTab);
-
-const resolveContentTab = (tab: SettingsTab): Exclude<SettingsTab, 'interface'> =>
-  tab === 'interface' ? 'general' : tab;
+  ['cursor', 'library', 'general', 'shortcuts', 'interface'].includes(tab as SettingsTab);
 
 export function Settings({ isModal = false, onClose = null, initialTab = DEFAULT_TAB }: SettingsProps): React.JSX.Element {
   const cursorState = useAppStore((s) => s.cursorState);
   const safeInitialTab = isValidTab(initialTab) ? initialTab : DEFAULT_TAB;
   const [activeTab, setActiveTab] = useState<SettingsTab>(safeInitialTab);
-  const contentTab = resolveContentTab(activeTab);
+  const contentTab = activeTab;
 
   // Guard: ensure cursorState is loaded before rendering
   if (!cursorState) {
@@ -41,7 +40,9 @@ export function Settings({ isModal = false, onClose = null, initialTab = DEFAULT
   const settingsContent = (
     <div className="space-y-6">
       {contentTab === 'cursor' && <CursorSettings />}
+      {contentTab === 'library' && <LibrarySettings />}
       {contentTab === 'general' && <GeneralSettings />}
+      {contentTab === 'interface' && <InterfaceSettings />}
       {contentTab === 'shortcuts' && <KeyboardShortcuts />}
     </div>
   );
@@ -73,6 +74,12 @@ export function Settings({ isModal = false, onClose = null, initialTab = DEFAULT
                 className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
               >
                 Cursor
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="library"
+                className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              >
+                Library
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="interface"
@@ -125,6 +132,12 @@ export function Settings({ isModal = false, onClose = null, initialTab = DEFAULT
               className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
               Cursor
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="library"
+              className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            >
+              Library
             </ToggleGroupItem>
             <ToggleGroupItem
               value="interface"
