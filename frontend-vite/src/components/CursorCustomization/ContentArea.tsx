@@ -1,5 +1,6 @@
 import React from 'react';
 import { Settings } from '../Settings';
+import { InfoSection } from './InfoSection';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 /**
@@ -17,10 +18,14 @@ export function ContentArea({
 }: ContentAreaProps) {
   return (
     <div className="flex-1 min-h-0 flex flex-col">
-      {currentView === 'settings' ? (
-        <Settings isModal={false} onClose={null} />
-      ) : (
-        <div key="draggable-content" id="cards-area" className="flex-1 flex gap-6 min-h-0 overflow-hidden flex-col lg:flex-row">
+      {currentView === 'settings' && <Settings isModal={false} onClose={null} />}
+      {currentView === 'info' && <InfoSection />}
+      {currentView !== 'settings' && currentView !== 'info' && (
+        <div
+          key="draggable-content"
+          id="cards-area"
+          className="flex-1 flex gap-6 min-h-0 overflow-hidden flex-col lg:flex-row"
+        >
           {children}
         </div>
       )}
