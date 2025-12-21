@@ -35,6 +35,9 @@ export function MainLayout(props: {
   visibleCursors: any[];
   customizationMode: 'simple' | 'advanced' | string;
   availableCursors: any[];
+  defaultCursorStyle: 'windows' | 'mac';
+  accentColor?: string;
+  onResetCursors: () => void | Promise<void>;
 
   // Actions
   setCurrentView: (view: string) => void;
@@ -71,6 +74,8 @@ export function MainLayout(props: {
   loadLibraryCursors: () => void | Promise<void>;
   loadAvailableCursors: () => void | Promise<void>;
   setPendingLibraryCursor: (cursor: any) => void;
+  onDefaultCursorStyleChange: (value: 'windows' | 'mac') => void | Promise<void>;
+  onResetCursors: () => void | Promise<void>;
 }) {
   // Destructure props for easier access
   const {
@@ -95,6 +100,8 @@ export function MainLayout(props: {
     visibleCursors,
     customizationMode,
     availableCursors,
+    defaultCursorStyle,
+    accentColor,
 
     // Actions
     setCurrentView,
@@ -127,7 +134,9 @@ export function MainLayout(props: {
     cancelPreviewSelection,
     loadLibraryCursors,
     loadAvailableCursors,
-    setPendingLibraryCursor
+    setPendingLibraryCursor,
+    onDefaultCursorStyleChange,
+    onResetCursors
   } = props;
 
   // Use safe async patterns for cleanup and event handling
@@ -177,8 +186,12 @@ export function MainLayout(props: {
                   pendingLibraryCursor={pendingLibraryCursor}
                   selectedLibraryCursor={selectedLibraryCursor}
                   selectingCursorForCustomization={selectingCursorForCustomization}
+                  defaultCursorStyle={defaultCursorStyle}
+                  accentColor={accentColor}
                   onBrowse={(cursor: any) => onBrowse(cursor)}
                   onModeChange={onModeChange}
+                  onDefaultCursorStyleChange={onDefaultCursorStyleChange}
+                  onResetCursors={onResetCursors}
                   onCancelPendingLibraryCursor={cancelBrowseMode}
                   loadAvailableCursors={loadAvailableCursors}
                   draggingLib={draggingLib}
@@ -188,7 +201,7 @@ export function MainLayout(props: {
               <ErrorBoundary name="LibrarySection" showDetails={false}>
                 <LibrarySection
                   id="library-section"
-                  className="flex-1 min-h-0 rounded-lg bg-card text-card-foreground shadow-sm flex flex-col border border-border/40"
+                  className="flex-1 min-h-0 rounded-[var(--radius-surface)] bg-card text-card-foreground shadow-sm flex flex-col border border-border/40"
                   style={{ flex: '1 1 0%', minHeight: '0px', overflow: 'hidden' }}
                   localLibrary={localLibrary}
                   selectingFromLibrary={selectingFromLibrary}

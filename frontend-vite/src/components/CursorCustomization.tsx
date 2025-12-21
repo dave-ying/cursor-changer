@@ -31,9 +31,12 @@ export function CursorCustomization({ className = '' }: { className?: string }):
   const setCustomizationMode = useAppStore((s) => s.setCustomizationMode);
   const loadAvailableCursors = useAppStore((s) => s.operations.loadAvailableCursors);
   const loadLibraryCursors = useAppStore((s) => s.operations.loadLibraryCursors);
+  const setDefaultCursorStyle = useAppStore((s) => s.operations.setDefaultCursorStyle);
+
   const cursorState = useAppStore((s) => s.cursorState);
   const selectingCursorForCustomization = useAppStore((s) => s.selectingCursorForCustomization);
   const setSelectingCursorForCustomization = useAppStore((s) => s.setSelectingCursorForCustomization);
+
 
   // Filter cursors based on mode
   const visibleCursors: CursorInfo[] = customizationMode === 'simple'
@@ -147,6 +150,33 @@ export function CursorCustomization({ className = '' }: { className?: string }):
     // useLibrary already refreshes both library and available cursors.
     await library.applyLibraryToSlot(libCursor, targetCursor);
   }, [library]);
+
+  const handleDefaultCursorStyleChange = useCallback(async (style: 'windows' | 'mac') => {
+    if (!style || style === cursorState?.defaultCursorStyle) return;
+    await safeAsync(async () => {
+      await setDefaultCursorStyle(style);
+      await invokeCommand(invoke, Commands.resetCurrentModeCursors);
+      await loadAvailableCursors();
+    }, {
+      onError: (err: unknown) => {
+        logger.error('[CursorCustomization] Failed to change default cursor style:', err);
+      },
+      errorMessage: 'Failed to change default cursor style'
+    });
+  }, [cursorState?.defaultCursorStyle, invoke, loadAvailableCursors, safeAsync, setDefaultCursorStyle]);
+
+  const handleResetCursors = useCallback(async () => {
+    await safeAsync(async () => {
+      await invokeCommand(invoke, Commands.resetCurrentModeCursors);
+      await loadAvailableCursors();
+      showMessage('Active Reset to Default', 'success');
+    }, {
+      onError: (err: unknown) => {
+        logger.error('[CursorCustomization] Failed to reset active cursors:', err);
+      },
+      errorMessage: 'Failed to reset active cursors'
+    });
+  }, [invoke, loadAvailableCursors, safeAsync, showMessage]);
 
   // Handle active cursor click
   // If we have a pending library cursor, apply it to this slot.
@@ -340,6 +370,8 @@ export function CursorCustomization({ className = '' }: { className?: string }):
         selectedPreviewLoading={preview.selectedPreviewLoading}
         visibleCursors={visibleCursors}
         customizationMode={customizationMode}
+        defaultCursorStyle={cursorState?.defaultCursorStyle ?? 'windows'}
+        accentColor={cursorState?.accentColor}
         availableCursors={availableCursors}
 
         // Actions
@@ -373,6 +405,8 @@ export function CursorCustomization({ className = '' }: { className?: string }):
         setSelectedPreviewLoading={preview.setSelectedPreviewLoading}
         onBrowse={handleActiveCursorClick}
         onModeChange={handleModeChange}
+        onDefaultCursorStyleChange={handleDefaultCursorStyleChange}
+        onResetCursors={handleResetCursors}
 
         // Pass both the new and legacy prop names for compatibility.
         onOpenClickPointEditor={openClickPointEditor}

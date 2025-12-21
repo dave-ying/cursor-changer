@@ -2,11 +2,8 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useApp } from '../../context/AppContext';
 import { useMessage } from '../../context/MessageContext';
 import { useAppStore } from '../../store/useAppStore';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { Separator } from '@/components/ui/separator';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -19,7 +16,6 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
-import { clearPreviewCache } from '../../services/cursorPreviewCache';
 import { useDebounce } from '../../hooks/safe/useDebounce';
 import { Commands, invokeCommand } from '../../tauri/commands';
 import { MAX_CURSOR_SIZE } from '@/constants/cursorConstants';
@@ -86,19 +82,6 @@ export function CursorSettings() {
         }, 50);
     }, [setCursorSize]);
 
-    const handleResetCursors = async () => {
-        try {
-            // Clear preview cache since cursors will be reset
-            clearPreviewCache();
-            await invokeCommand(invoke, Commands.resetCurrentModeCursors);
-            showMessage('Active Reset to Default', 'success');
-            await loadAvailableCursors();
-        } catch (error) {
-            logger.error('Failed to reset cursors:', error);
-            showMessage('Failed to reset cursors: ' + String(error), 'error');
-        }
-    };
-
     return (
         <>
             <section id="cursor-settings-section">
@@ -121,68 +104,6 @@ export function CursorSettings() {
                                 className="w-full"
                             />
                         </div>
-                    </div>
-
-                    <Separator className="my-4" />
-
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                        <div>
-                            <strong className="text-base">Default Cursors</strong>
-                            <p className="text-sm text-muted-foreground mt-0.5">
-                                Choose the style for default cursors
-                            </p>
-                        </div>
-                        <ToggleGroup
-                            type="single"
-                            value={cursorState?.defaultCursorStyle || 'windows'}
-                            onValueChange={async (value) => {
-                                if (value && value !== cursorState?.defaultCursorStyle) {
-                                    await setDefaultCursorStyle(value as 'windows' | 'mac');
-                                    // Reset cursors to apply the new style
-                                    await invokeCommand(invoke, Commands.resetCurrentModeCursors);
-                                    await loadAvailableCursors();
-                                }
-                            }}
-                            className="bg-muted rounded-full p-1"
-                            aria-label="Default Cursor Style"
-                        >
-                            <ToggleGroupItem
-                                value="windows"
-                                className="rounded-full px-4 py-1 data-[state=on]:text-primary-foreground"
-                                style={cursorState?.defaultCursorStyle === 'windows' ? {
-                                    backgroundColor: cursorState.accentColor || '#7c3aed',
-                                    borderColor: cursorState.accentColor || '#7c3aed'
-                                } : {}}
-                                aria-label="Windows style cursors"
-                            >
-                                Windows
-                            </ToggleGroupItem>
-                            <ToggleGroupItem
-                                value="mac"
-                                className="rounded-full px-4 py-1 data-[state=on]:text-primary-foreground"
-                                style={cursorState?.defaultCursorStyle === 'mac' ? {
-                                    backgroundColor: cursorState.accentColor || '#7c3aed',
-                                    borderColor: cursorState.accentColor || '#7c3aed'
-                                } : {}}
-                                aria-label="Mac style cursors"
-                            >
-                                Mac
-                            </ToggleGroupItem>
-                        </ToggleGroup>
-                    </div>
-
-                    <Separator className="my-4" />
-
-                    <div className="flex items-center justify-between">
-                        <strong className="text-base">Reset Active to Default</strong>
-                        <Button
-                            id="reset-cursors-btn"
-                            variant="default"
-                            className="sm:w-auto rounded-full"
-                            onClick={handleResetCursors}
-                        >
-                            Reset Cursors
-                        </Button>
                     </div>
                 </Card>
             </section>

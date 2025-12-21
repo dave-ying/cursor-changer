@@ -54,8 +54,8 @@
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
-  /* Ensure grid content fits within scroll container */
-  height: fit-content;
+  /* Fill the scrollable area so align-content can center rows vertically */
+  height: 100%;
   align-items: start;
 }
 

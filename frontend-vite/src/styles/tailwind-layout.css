@@ -77,6 +77,8 @@
 #active-cursors-section,
 #library-section {
     height: 100% !important;
+    border-radius: var(--radius-surface);
+    overflow: hidden;
 }
 
 /* Allow cursor grid to scroll within active section */
@@ -89,9 +91,9 @@
     align-content: center;
 }
 
-/* Keep Advanced mode top-aligned */
+/* Center Advanced mode vertically too */
 #active-cursors-section #cursor-grid.cursor-grid--advanced {
-    align-content: start;
+    align-content: center;
 }
 
 .content-wrapper {
@@ -163,7 +165,7 @@
     padding: 0.5rem;
     background: transparent;
     border: none;
-    border-radius: 16px;
+    border-radius: var(--radius-control);
     color: var(--text-muted);
     font-size: 1rem;
     font-weight: 500;
@@ -180,6 +182,9 @@
     --hover-surface-color: var(--bg-elevated);
     --hover-alpha-light: 0.10;
     --hover-alpha-dark: 0.18;
+    /* Apple-aligned radii: 12px for surfaces, 8px for controls */
+    --radius-surface: 12px;
+    --radius-control: 8px;
 }
 
 /* Sidebar navigation hover uses simple background change instead of color-mix */
@@ -213,7 +218,7 @@
     bottom: 6px;
     width: 6px;
     background: var(--text-primary);
-    border-radius: 16px 0 0 16px;
+    border-radius: var(--radius-control) 0 0 var(--radius-control);
 }
 
 .sidebar-nav-icon {
@@ -296,7 +301,7 @@
     justify-content: flex-start;
     flex-shrink: 0;
     height: calc(100vh - var(--titlebar-height) - (clamp(1.5rem, 3vw, 3rem) * 2));
-    border-radius: 16px;
+    border-radius: var(--radius-surface);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
@@ -314,7 +319,7 @@
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem 0.9rem;
-    border-radius: 12px;
+    border-radius: var(--radius-control);
     font-weight: 600;
     color: var(--text-muted);
     background: transparent;
@@ -344,7 +349,7 @@
 }
 
 .cursor-sidebar-text {
-    font-size: 0.95rem;
+    font-size: 1.08rem;
     letter-spacing: 0.01em;
     color: inherit;
 }

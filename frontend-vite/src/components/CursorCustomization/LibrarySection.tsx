@@ -6,6 +6,7 @@ import { useApp } from '../../context/AppContext';
 import { useAppStore } from '../../store/useAppStore';
 import { Commands, invokeCommand } from '../../tauri/commands';
 import { logger } from '../../utils/logger';
+import { Plus } from 'lucide-react';
 
 interface LibrarySectionProps {
   localLibrary: any[];
@@ -110,7 +111,6 @@ export function LibrarySection({
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="min-w-0">
               <h1 className="text-2xl font-bold text-foreground">Library</h1>
-              <p className="text-sm text-muted-foreground mt-1">Your collection of custom cursors</p>
             </div>
             <Button
               variant="default"
@@ -118,10 +118,7 @@ export function LibrarySection({
               onClick={onAddCursor}
               aria-label="Add a cursor to library"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus-icon lucide-plus">
-                <path d="M5 12h14" />
-                <path d="M12 5v14" />
-              </svg>
+              <Plus className="!w-5 !h-5" aria-hidden="true" />
               <span>Add Cursor</span>
             </Button>
           </div>
