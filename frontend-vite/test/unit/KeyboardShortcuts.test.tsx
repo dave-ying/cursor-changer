@@ -112,7 +112,8 @@ beforeEach(() => {
 
     // Reset mock context to default state
     mockAppContext.cursorState.shortcut = 'Ctrl+Shift+X';
-    mockAppContext.cursorState.shortcutEnabled = false;
+    // Keep shortcut enabled by default so recording flows don't auto-cancel
+    mockAppContext.cursorState.shortcutEnabled = true;
     mockAppContext.recording = false;
     mockAppContext.capturedShortcut = null;
     mockAppContext.originalShortcut = null;

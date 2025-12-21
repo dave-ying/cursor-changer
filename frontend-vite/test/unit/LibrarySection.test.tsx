@@ -1,5 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
+import { MessageProvider } from '@/context/MessageContext';
 
 // Mock AppContext before importing components that call useApp
 const mockApp = {
@@ -13,11 +15,14 @@ vi.mock('@/context/AppContext', () => ({
 
 import { LibrarySection } from '@/components/CursorCustomization/LibrarySection';
 
-// The AppContext is mocked above
+// Helper to wrap with MessageProvider to satisfy useMessage
+function renderWithProviders(ui: React.ReactNode) {
+  return render(<MessageProvider>{ui}</MessageProvider>);
+}
 
 describe('LibrarySection', () => {
   it('renders Add Cursor button with pill (rounded-full) class', () => {
-    render(
+    renderWithProviders(
       <LibrarySection
         localLibrary={[]}
         selectingFromLibrary={false}
@@ -40,7 +45,7 @@ describe('LibrarySection', () => {
   });
 
   it('renders Cancel button with pill (rounded-full) class when selectingFromLibrary is true and selectedCursor provided', () => {
-    render(
+    renderWithProviders(
       <LibrarySection
         localLibrary={[]}
         selectingFromLibrary={true}

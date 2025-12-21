@@ -14,7 +14,8 @@ export function CursorSettings() {
     const { invoke } = useApp();
     const { showMessage } = useMessage();
     const cursorState = useAppStore((s) => s.cursorState);
-    const availableCursors = useAppStore((s) => s.availableCursors);
+    // Default to empty array so tests and initial renders don't throw before cursors load
+    const availableCursors = useAppStore((s) => s.availableCursors) ?? [];
     const setCursorSize = useAppStore((s) => s.operations.setCursorSize);
     const loadAvailableCursors = useAppStore((s) => s.operations.loadAvailableCursors);
     const [localCursorSize, setLocalCursorSize] = useState<number>(cursorState?.cursorSize || 32);
@@ -178,7 +179,8 @@ export function CursorSettings() {
                                             left: `calc(${sliderPercent}% + 9px)` // half of 18px thumb to center label with knob
                                         }}
                                     >
-                                        {localCursorSize}px
+                                        <span>{localCursorSize}</span>
+                                        <span className="ml-0.5">px</span>
                                     </span>
                                     <Slider
                                         id="cursor-size-slider"

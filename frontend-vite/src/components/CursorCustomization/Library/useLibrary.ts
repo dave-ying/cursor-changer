@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
+import { arrayMove } from '@dnd-kit/sortable';
+
 import { useApp } from '../../../context/AppContext';
 import { useMessage } from '../../../context/MessageContext';
 import { useAppStore } from '../../../store/useAppStore';
@@ -119,18 +121,22 @@ export function useLibrary() {
         const activeId = active.id;
         const overId = over.id;
         if (activeId && overId && activeId !== overId) {
-          const oldIndex = localLibrary.findIndex(l => l.id === activeId);
-          const newIndex = localLibrary.findIndex(l => l.id === overId);
+          const displayOrder = Array.isArray(activeData.displayOrderIds) ? activeData.displayOrderIds as string[] : null;
+          const sourceOrder: string[] = displayOrder?.length ? displayOrder : localLibrary.map(l => l.id as string);
+          const oldIndex = sourceOrder.findIndex((id: string) => id === activeId);
+          const newIndex = sourceOrder.findIndex((id: string) => id === overId);
           if (oldIndex !== -1 && newIndex !== -1) {
-            const newList = [...localLibrary];
-            const [movedItem] = newList.splice(oldIndex, 1);
-            newList.splice(newIndex, 0, movedItem);
+            const newOrderIds = arrayMove(sourceOrder, oldIndex, newIndex);
+
+            const newList = newOrderIds
+              .map((id) => localLibrary.find((item) => item.id === id))
+              .filter(Boolean) as any[];
             setLocalLibrary(newList);
 
             // Persist the new order to backend
             try {
               await invokeCommand(invoke, Commands.reorderLibraryCursors, {
-                order: newList.map(item => item.id)
+                order: newOrderIds
               });
             } catch (err) {
               logger.warn('Failed to persist library order:', err);

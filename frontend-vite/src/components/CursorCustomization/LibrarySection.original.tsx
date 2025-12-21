@@ -5,12 +5,11 @@ import { LibraryCursor } from './LibraryCursor';
 import { useApp } from '../../context/AppContext';
 import { useAppStore } from '../../store/useAppStore';
 import { useMessage } from '../../context/MessageContext';
-
 import { Commands, invokeCommand } from '../../tauri/commands';
 import { logger } from '../../utils/logger';
-import { Plus, SlidersHorizontal, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, SlidersHorizontal } from 'lucide-react';
 import { ActionPillButton } from './ActionPillButton';
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -22,8 +21,6 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
-import { ButtonGroup } from '@/components/ui/button-group';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface LibrarySectionProps {
   localLibrary: any[];
@@ -66,33 +63,6 @@ export function LibrarySection({
   const { showMessage } = useMessage();
   const [showCustomizePanel, setShowCustomizePanel] = React.useState(false);
   const [resetLibraryDialogOpen, setResetLibraryDialogOpen] = React.useState(false);
-  const [sortBy, setSortBy] = React.useState<'custom' | 'name' | 'date'>('date');
-  const [sortDirections, setSortDirections] = React.useState<{ name: 'asc' | 'desc'; date: 'asc' | 'desc' }>({
-    name: 'asc',
-    date: 'desc'
-  });
-  const previousOrderRef = React.useRef<string>('');
-  const suppressAutoCustomRef = React.useRef<boolean>(false);
-
-  const switchToCustomSort = React.useCallback(() => setSortBy('custom'), []);
-
-  const displayLibrary = React.useMemo(() => {
-    if (!Array.isArray(localLibrary)) return [];
-    if (sortBy === 'name') {
-      const dir = sortDirections.name === 'asc' ? 1 : -1;
-      const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
-      return [...localLibrary].sort((a, b) => collator.compare(a.name ?? '', b.name ?? '') * dir);
-    }
-    if (sortBy === 'date') {
-      const dir = sortDirections.date === 'asc' ? 1 : -1;
-      return [...localLibrary].sort((a, b) => {
-        const aTime = new Date(a.created_at ?? '').getTime();
-        const bTime = new Date(b.created_at ?? '').getTime();
-        return (aTime - bTime) * dir;
-      });
-    }
-    return localLibrary;
-  }, [localLibrary, sortBy, sortDirections]);
 
   const handleOpenFolder = async () => {
     try {
@@ -107,13 +77,6 @@ export function LibrarySection({
     try {
       await invokeCommand(invoke, Commands.resetLibrary);
       await invokeCommand(invoke, Commands.syncLibraryWithFolder);
-      // Reset sort state to default (Date created, newest -> oldest)
-      setSortBy('date');
-      setSortDirections((prev) => ({ ...prev, date: 'desc' }));
-      // Prevent the next library change detection from flipping to custom
-      suppressAutoCustomRef.current = true;
-      previousOrderRef.current = '';
-      await loadLibraryCursors();
       showMessage('Library reset to defaults', 'success');
     } catch (error) {
       logger.error('Failed to reset library:', error);
@@ -126,12 +89,10 @@ export function LibrarySection({
   // Handle library reordering
   const handleLibraryReorder = async (activeId: string, overId: string) => {
     if (activeId && overId && activeId !== overId) {
-      const sourceList = sortBy === 'custom' ? localLibrary : displayLibrary;
-      const oldIndex = sourceList.findIndex(l => l.id === activeId);
-      const newIndex = sourceList.findIndex(l => l.id === overId);
+      const oldIndex = localLibrary.findIndex(l => l.id === activeId);
+      const newIndex = localLibrary.findIndex(l => l.id === overId);
       if (oldIndex !== -1 && newIndex !== -1) {
-        const newList = arrayMove(sourceList, oldIndex, newIndex);
-        switchToCustomSort();
+        const newList = arrayMove(localLibrary, oldIndex, newIndex);
         onLibraryOrderChange(newList);
         try {
           await invokeCommand(invoke, Commands.reorderLibraryCursors, { order: newList.map(i => i.id) });
@@ -145,35 +106,6 @@ export function LibrarySection({
       }
     }
   };
-
-  const handleSortSelection = (mode: 'custom' | 'name' | 'date') => {
-    if (mode === 'custom') {
-      switchToCustomSort();
-      return;
-    }
-
-    if (sortBy === mode) {
-      setSortDirections((prev) => ({
-        ...prev,
-        [mode]: prev[mode] === 'asc' ? 'desc' : 'asc'
-      }));
-    } else {
-      setSortBy(mode);
-    }
-  };
-
-  React.useEffect(() => {
-    if (!Array.isArray(localLibrary)) return;
-    const currentOrder = localLibrary.map((item) => item.id).join('|');
-    // If the order changed while not already on custom, switch to custom
-    // to reflect the user-driven arrangement.
-    if (suppressAutoCustomRef.current) {
-      suppressAutoCustomRef.current = false;
-    } else if (previousOrderRef.current && previousOrderRef.current !== currentOrder && sortBy !== 'custom') {
-      switchToCustomSort();
-    }
-    previousOrderRef.current = currentOrder;
-  }, [localLibrary, sortBy, switchToCustomSort]);
 
   return (
     <section
@@ -244,7 +176,7 @@ export function LibrarySection({
         <div
           className={`px-6 pb-4 border-b border-border/50 overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${showCustomizePanel ? 'opacity-100' : 'opacity-0'}`}
           style={{
-            maxHeight: showCustomizePanel ? '280px' : '0px',
+            maxHeight: showCustomizePanel ? '240px' : '0px',
             overflowY: 'auto'
           }}
           aria-expanded={showCustomizePanel}
@@ -308,55 +240,6 @@ export function LibrarySection({
                 </AlertDialogContent>
               </AlertDialog>
             </div>
-            <Separator />
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">Sort by</p>
-              </div>
-              <ToggleGroup
-                type="single"
-                value={sortBy}
-                onValueChange={(v) => v && handleSortSelection(v as 'custom' | 'name' | 'date')}
-                className="bg-muted rounded-full p-1 shadow-sm"
-                aria-label="Library sort order"
-              >
-                <ToggleGroupItem
-                  value="date"
-                  className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                  onClick={() => handleSortSelection('date')}
-                >
-                  <span className="inline-flex items-center gap-1">
-                    Date Created
-                    {sortBy === 'date'
-                      ? (sortDirections.date === 'asc'
-                        ? <ArrowUp className="h-3.5 w-3.5" />
-                        : <ArrowDown className="h-3.5 w-3.5" />)
-                      : <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </span>
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="name"
-                  className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                  onClick={() => handleSortSelection('name')}
-                >
-                  <span className="inline-flex items-center gap-1">
-                    Name
-                    {sortBy === 'name'
-                      ? (sortDirections.name === 'asc'
-                        ? <ArrowUp className="h-3.5 w-3.5" />
-                        : <ArrowDown className="h-3.5 w-3.5" />)
-                      : <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </span>
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="custom"
-                  className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                  onClick={() => handleSortSelection('custom')}
-                >
-                  Custom
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </div>
           </div>
         </div>
       )}
@@ -370,12 +253,11 @@ export function LibrarySection({
           flex: 1
         }}>
           <div id="library-grid" className={`cursor-grid ${pendingLibraryCursor ? 'dimmed' : ''}`}>
-            {displayLibrary && displayLibrary.length > 0 ? (
-              <SortableContext items={displayLibrary.map(l => l.id)} strategy={rectSortingStrategy}>
-                {displayLibrary.map((lib, index) => (
+            {localLibrary && localLibrary.length > 0 ? (
+              <SortableContext items={localLibrary.map(l => l.id)} strategy={rectSortingStrategy}>
+                {localLibrary.map((lib, index) => (
                   <LibraryCursor
                     key={lib.id}
-                    displayOrderIds={displayLibrary.map(item => item.id)}
                     item={lib}
                     selectionMode={selectingFromLibrary && selectedCursor}
                     isSelected={pendingLibraryCursor?.id === lib.id}

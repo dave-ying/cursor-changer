@@ -36,11 +36,13 @@ import {
 
 interface LibraryCursorProps {
   item: any;
+  displayOrderIds?: string[];
   onSelect?: () => void;
   suppressTestId?: boolean;
   selectionMode?: boolean;
   isSelected?: boolean;
   isHighlighted?: boolean;
+
   onClickPointEdit?: (filePath: string, id: string) => void;
   onApply?: (item: any) => void;
   onEdit?: (item: any) => void;
@@ -52,11 +54,13 @@ interface LibraryCursorProps {
 
 export function LibraryCursor({
   item,
+  displayOrderIds,
   onSelect,
   suppressTestId = false,
   selectionMode = false,
   isSelected = false,
   isHighlighted = false,
+
   onClickPointEdit,
   onApply,
   onEdit,
@@ -83,7 +87,7 @@ export function LibraryCursor({
   // useSortable provides drag behavior and sorting metadata
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
-    data: { type: 'library', lib: { ...item, preview } },
+    data: { type: 'library', lib: { ...item, preview }, displayOrderIds },
     options: {
       // Disable accessibility features that create DndDescribedBy and DndLiveRegion elements
       accessibility: {

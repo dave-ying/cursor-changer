@@ -151,7 +151,23 @@ pub fn initialize_library_with_defaults(app: &AppHandle) -> Result<LibraryData, 
     // Sort by filename for consistent ordering
     cursor_files.sort_by(|a, b| a.file_name().cmp(&b.file_name()));
     
-    for entry in cursor_files {
+    // Sort cursor files in reverse numerical order (1.cur first, 12.cur last)
+    cursor_files.sort_by(|a, b| {
+        let a_name = a.file_name().to_string_lossy().to_string();
+        let b_name = b.file_name().to_string_lossy().to_string();
+        
+        // Extract numbers from filenames (e.g., "1.cur" -> 1, "10.cur" -> 10)
+        let a_num = a_name.split('.').next().and_then(|s| s.parse::<u32>().ok()).unwrap_or(u32::MAX);
+        let b_num = b_name.split('.').next().and_then(|s| s.parse::<u32>().ok()).unwrap_or(u32::MAX);
+        
+        a_num.cmp(&b_num)
+    });
+    
+    // Get the current time for timestamp calculation
+    let now = chrono::Utc::now();
+    let total_cursors = cursor_files.len();
+    
+    for (i, entry) in cursor_files.into_iter().enumerate() {
         let source_path = entry.path();
         let file_name = source_path.file_name()
             .and_then(|s| s.to_str())
@@ -181,13 +197,18 @@ pub fn initialize_library_with_defaults(app: &AppHandle) -> Result<LibraryData, 
         // Read click point from the cursor file
         let (click_x, click_y) = read_cursor_click_point(&dest_path).unwrap_or((0, 0));
         
+        // Calculate timestamp - newer cursors (lower numbers) get more recent timestamps
+        // This makes 1.cur the newest and 12.cur the oldest when sorted by date
+        let days_ago = (total_cursors - i - 1) as i64;
+        let created_at = (now - chrono::Duration::days(days_ago)).to_rfc3339();
+        
         let cursor = LibraryCursor {
             id: crate::utils::library_meta::new_library_cursor_id(),
             name,
             file_path: dest_path.to_string_lossy().to_string(),
             click_point_x: click_x,
             click_point_y: click_y,
-            created_at: crate::utils::library_meta::now_iso8601_utc(),
+            created_at,
         };
         
         library.cursors.push(cursor);
