@@ -121,8 +121,8 @@ export function useLibrary() {
         const activeId = active.id;
         const overId = over.id;
         if (activeId && overId && activeId !== overId) {
-          const displayOrder = Array.isArray(activeData.displayOrderIds) ? activeData.displayOrderIds as string[] : null;
-          const sourceOrder: string[] = displayOrder?.length ? displayOrder : localLibrary.map(l => l.id as string);
+          const displayOrder = Array.isArray(activeData.displayOrderIds) ? (activeData.displayOrderIds as string[]) : null;
+          const sourceOrder: string[] = displayOrder?.length ? displayOrder : localLibrary.map((l) => l.id as string);
           const oldIndex = sourceOrder.findIndex((id: string) => id === activeId);
           const newIndex = sourceOrder.findIndex((id: string) => id === overId);
           if (oldIndex !== -1 && newIndex !== -1) {
@@ -138,8 +138,10 @@ export function useLibrary() {
               await invokeCommand(invoke, Commands.reorderLibraryCursors, {
                 order: newOrderIds
               });
+              await loadLibraryCursors();
             } catch (err) {
               logger.warn('Failed to persist library order:', err);
+              await loadLibraryCursors();
             }
           }
         }
@@ -147,7 +149,7 @@ export function useLibrary() {
     } finally {
       setDraggingLib(null);
     }
-  }, [localLibrary, applyLibraryToSlot, invoke]);
+  }, [applyLibraryToSlot, invoke, localLibrary, loadLibraryCursors]);
 
   // Library order change handler
   const handleLibraryOrderChange = useCallback((newList: any[]) => {

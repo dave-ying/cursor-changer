@@ -23,11 +23,11 @@ export function ActionPillButton({
   return (
     <Button
       variant={variant}
-      className={cn('inline-flex items-center gap-1 rounded-full', className)}
+      className={cn('inline-flex items-center gap-4 rounded-full px-4', className)}
       {...props}
     >
       {iconWithSizing}
-      <span className="text-sm font-medium">{children}</span>
+      <span className="text-base font-medium">{children}</span>
     </Button>
   );
 }

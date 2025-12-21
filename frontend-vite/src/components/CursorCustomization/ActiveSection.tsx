@@ -4,8 +4,9 @@ import { ModeToggle } from './ModeToggle';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Button } from '@/components/ui/button';
 import { logger } from '../../utils/logger';
-import { SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { ActionPillButton } from './ActionPillButton';
+import { CollapsibleSection } from './CollapsibleSection';
 
 interface ActiveSectionProps {
   visibleCursors: any[];
@@ -47,6 +48,7 @@ export function ActiveSection({
   const safeVisibleCursors = Array.isArray(visibleCursors) ? visibleCursors : [];
 
   const [showModeToggle, setShowModeToggle] = React.useState(false);
+  const [showMoreOptions, setShowMoreOptions] = React.useState(false);
 
   if (!Array.isArray(visibleCursors)) {
     logger.warn(
@@ -87,7 +89,7 @@ export function ActiveSection({
           ) : (
             <div className="min-w-0">
               <h1 className="text-2xl font-bold text-foreground">
-                Your Active Cursors
+                Active Cursors
               </h1>
             </div>
           )}
@@ -179,18 +181,31 @@ export function ActiveSection({
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">Reset All Active Cursors to Default</p>
+            <CollapsibleSection
+              id="active-cursors-more-options"
+              open={showMoreOptions}
+              onToggle={() => setShowMoreOptions((prev) => !prev)}
+              closedLabel="Show more"
+              openLabel="Hide options"
+              maxHeight={300}
+              className="space-y-2 mt-4"
+              contentClassName="pt-1 pb-1 space-y-2"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-1">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground">
+                    Reset All Active Cursors to Default
+                  </p>
+                </div>
+                <Button
+                  variant="destructive"
+                  className="sm:w-auto rounded-full"
+                  onClick={onResetCursors}
+                >
+                  Reset Cursors
+                </Button>
               </div>
-              <Button
-                variant="destructive"
-                className="sm:w-auto rounded-full"
-                onClick={onResetCursors}
-              >
-                Reset Cursors
-              </Button>
-            </div>
+            </CollapsibleSection>
           </div>
         </div>
       )}

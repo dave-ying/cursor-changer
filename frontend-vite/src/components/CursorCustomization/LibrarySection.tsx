@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { SortableContext, rectSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import { LibraryCursor } from './LibraryCursor';
 import { useApp } from '../../context/AppContext';
 import { useAppStore } from '../../store/useAppStore';
@@ -24,6 +24,8 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { ButtonGroup } from '@/components/ui/button-group';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { useLibrarySorting } from './Library/useLibrarySorting';
+import { CollapsibleSection } from './CollapsibleSection';
 
 interface LibrarySectionProps {
   localLibrary: any[];
@@ -65,34 +67,19 @@ export function LibrarySection({
   const loadLibraryCursors = useAppStore((s) => s.operations.loadLibraryCursors);
   const { showMessage } = useMessage();
   const [showCustomizePanel, setShowCustomizePanel] = React.useState(false);
+  const [showMoreOptions, setShowMoreOptions] = React.useState(false);
   const [resetLibraryDialogOpen, setResetLibraryDialogOpen] = React.useState(false);
-  const [sortBy, setSortBy] = React.useState<'custom' | 'name' | 'date'>('date');
-  const [sortDirections, setSortDirections] = React.useState<{ name: 'asc' | 'desc'; date: 'asc' | 'desc' }>({
-    name: 'asc',
-    date: 'desc'
+  const {
+    displayLibrary,
+    sortBy,
+    sortDirections,
+    handleSortSelection,
+    handleLibraryReorder,
+    resetSortState
+  } = useLibrarySorting({
+    localLibrary,
+    onLibraryOrderChange
   });
-  const previousOrderRef = React.useRef<string>('');
-  const suppressAutoCustomRef = React.useRef<boolean>(false);
-
-  const switchToCustomSort = React.useCallback(() => setSortBy('custom'), []);
-
-  const displayLibrary = React.useMemo(() => {
-    if (!Array.isArray(localLibrary)) return [];
-    if (sortBy === 'name') {
-      const dir = sortDirections.name === 'asc' ? 1 : -1;
-      const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
-      return [...localLibrary].sort((a, b) => collator.compare(a.name ?? '', b.name ?? '') * dir);
-    }
-    if (sortBy === 'date') {
-      const dir = sortDirections.date === 'asc' ? 1 : -1;
-      return [...localLibrary].sort((a, b) => {
-        const aTime = new Date(a.created_at ?? '').getTime();
-        const bTime = new Date(b.created_at ?? '').getTime();
-        return (aTime - bTime) * dir;
-      });
-    }
-    return localLibrary;
-  }, [localLibrary, sortBy, sortDirections]);
 
   const handleOpenFolder = async () => {
     try {
@@ -107,12 +94,7 @@ export function LibrarySection({
     try {
       await invokeCommand(invoke, Commands.resetLibrary);
       await invokeCommand(invoke, Commands.syncLibraryWithFolder);
-      // Reset sort state to default (Date created, newest -> oldest)
-      setSortBy('date');
-      setSortDirections((prev) => ({ ...prev, date: 'desc' }));
-      // Prevent the next library change detection from flipping to custom
-      suppressAutoCustomRef.current = true;
-      previousOrderRef.current = '';
+      resetSortState();
       await loadLibraryCursors();
       showMessage('Library reset to defaults', 'success');
     } catch (error) {
@@ -122,58 +104,6 @@ export function LibrarySection({
       setResetLibraryDialogOpen(false);
     }
   };
-
-  // Handle library reordering
-  const handleLibraryReorder = async (activeId: string, overId: string) => {
-    if (activeId && overId && activeId !== overId) {
-      const sourceList = sortBy === 'custom' ? localLibrary : displayLibrary;
-      const oldIndex = sourceList.findIndex(l => l.id === activeId);
-      const newIndex = sourceList.findIndex(l => l.id === overId);
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newList = arrayMove(sourceList, oldIndex, newIndex);
-        switchToCustomSort();
-        onLibraryOrderChange(newList);
-        try {
-          await invokeCommand(invoke, Commands.reorderLibraryCursors, { order: newList.map(i => i.id) });
-          // Refresh library from backend to ensure canonical order
-          await loadLibraryCursors();
-        } catch (err) {
-          logger.warn('Failed to persist library order:', err);
-          // Revert to server state
-          await loadLibraryCursors();
-        }
-      }
-    }
-  };
-
-  const handleSortSelection = (mode: 'custom' | 'name' | 'date') => {
-    if (mode === 'custom') {
-      switchToCustomSort();
-      return;
-    }
-
-    if (sortBy === mode) {
-      setSortDirections((prev) => ({
-        ...prev,
-        [mode]: prev[mode] === 'asc' ? 'desc' : 'asc'
-      }));
-    } else {
-      setSortBy(mode);
-    }
-  };
-
-  React.useEffect(() => {
-    if (!Array.isArray(localLibrary)) return;
-    const currentOrder = localLibrary.map((item) => item.id).join('|');
-    // If the order changed while not already on custom, switch to custom
-    // to reflect the user-driven arrangement.
-    if (suppressAutoCustomRef.current) {
-      suppressAutoCustomRef.current = false;
-    } else if (previousOrderRef.current && previousOrderRef.current !== currentOrder && sortBy !== 'custom') {
-      switchToCustomSort();
-    }
-    previousOrderRef.current = currentOrder;
-  }, [localLibrary, sortBy, switchToCustomSort]);
 
   return (
     <section
@@ -192,7 +122,7 @@ export function LibrarySection({
                 Choose a cursor to replace
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Select a cursor from the library below
+                Select a cursor below
               </p>
             </div>
             <Button
@@ -219,7 +149,7 @@ export function LibrarySection({
             <div className="flex items-center gap-3 min-w-0">
               <h1 className="text-2xl font-bold text-foreground">Library</h1>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-3 sm:gap-4">
               <ActionPillButton
                 icon={<Plus />}
                 onClick={onAddCursor}
@@ -245,71 +175,12 @@ export function LibrarySection({
           className={`px-6 pb-4 border-b border-border/50 overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${showCustomizePanel ? 'opacity-100' : 'opacity-0'}`}
           style={{
             maxHeight: showCustomizePanel ? '280px' : '0px',
-            overflowY: 'auto'
+            overflowY: showCustomizePanel ? 'auto' : 'hidden'
           }}
           aria-expanded={showCustomizePanel}
         >
           <div className="pt-4 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">Library Cursors Folder</p>
-                <p className="text-sm text-muted-foreground">
-                  Open the folder where your custom cursors are stored
-                </p>
-              </div>
-              <Button
-                id="show-library-folder-btn"
-                className="rounded-full"
-                onClick={handleOpenFolder}
-              >
-                Open Folder
-              </Button>
-            </div>
-            <Separator />
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">Reset All Cursors in Library</p>
-              </div>
-              <AlertDialog open={resetLibraryDialogOpen} onOpenChange={setResetLibraryDialogOpen}>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    id="reset-library-btn"
-                    variant="destructive"
-                    className="rounded-full"
-                  >
-                    Reset Library
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Reset Library</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to reset your library?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <div className="py-4 space-y-4">
-                    <div>
-                      <p className="text-sm font-medium text-foreground mb-2">Warning: This action cannot be undone.</p>
-                      <ul className="list-disc list-inside space-y-1 text-sm text-red-600 dark:text-red-400">
-                        <li>All cursors you created and added to the Library will be deleted.</li>
-                        <li>Your library will be reset back to default cursors only.</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      onClick={handleResetLibrary}
-                    >
-                      Reset Library
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-            <Separator />
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-foreground">Sort by</p>
               </div>
@@ -357,6 +228,72 @@ export function LibrarySection({
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
+            <CollapsibleSection
+              id="library-more-options"
+              open={showMoreOptions}
+              onToggle={() => setShowMoreOptions((prev) => !prev)}
+              closedLabel="Show more"
+              openLabel="Hide options"
+              maxHeight={300}
+              className="space-y-2 mt-4"
+              contentClassName="pt-1 pb-1 space-y-2"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-1">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground">Library Cursors Folder</p>
+                </div>
+                <Button
+                  id="show-library-folder-btn"
+                  className="rounded-full"
+                  onClick={handleOpenFolder}
+                >
+                  Open Folder
+                </Button>
+              </div>
+              <Separator className="my-1" />
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-1">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground">Reset All Cursors in Library</p>
+                </div>
+                <AlertDialog open={resetLibraryDialogOpen} onOpenChange={setResetLibraryDialogOpen}>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      id="reset-library-btn"
+                      variant="destructive"
+                      className="sm:w-auto rounded-full"
+                    >
+                      Reset Library
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Reset Library</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to reset your library?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="py-4 space-y-4">
+                      <div>
+                        <p className="text-sm font-medium text-foreground mb-2">Warning: This action cannot be undone.</p>
+                        <ul className="list-disc list-inside space-y-1 text-sm text-red-600 dark:text-red-400">
+                          <li>All cursors you created and added to the Library will be deleted.</li>
+                          <li>Your library will be reset back to default cursors only.</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={handleResetLibrary}
+                      >
+                        Reset Library
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </CollapsibleSection>
           </div>
         </div>
       )}

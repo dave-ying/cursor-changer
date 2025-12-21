@@ -105,9 +105,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# === Development documentation ===
-todo.md
-
 # === Windows installers & executables ===
 *.msi
 *.exe

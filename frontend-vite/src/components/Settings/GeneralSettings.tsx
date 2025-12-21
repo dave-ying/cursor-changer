@@ -62,7 +62,7 @@ export function GeneralSettings() {
           <Separator className="my-4" />
 
           <div className="flex items-center justify-between gap-3">
-            <strong className="text-base break-words">Run cursor changer when my computer starts</strong>
+            <strong className="text-base break-words">Run Cursor Changer when my computer starts</strong>
             <Switch
               id="run-on-startup"
               checked={cursorState.runOnStartup}
