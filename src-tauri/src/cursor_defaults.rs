@@ -29,11 +29,14 @@ fn default_cursors_dir_candidates(app: &AppHandle, cursor_style: &str) -> Vec<Pa
     }
 
     if let Ok(cwd) = std::env::current_dir() {
+        // If the current dir is the repo root, expect default-cursors under src-tauri/
         candidates.push(
             cwd.join("src-tauri")
                 .join("default-cursors")
                 .join(cursor_style),
         );
+        // If running from src-tauri (cargo tauri dev default), default-cursors sits directly under cwd
+        candidates.push(cwd.join("default-cursors").join(cursor_style));
     }
 
     if let Ok(app_data_dir) = std::env::var("APPDATA") {

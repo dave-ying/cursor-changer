@@ -76,12 +76,6 @@ export function Settings({ isModal = false, onClose = null, initialTab = DEFAULT
                 Cursor
               </ToggleGroupItem>
               <ToggleGroupItem
-                value="library"
-                className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-              >
-                Library
-              </ToggleGroupItem>
-              <ToggleGroupItem
                 value="interface"
                 className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
               >
@@ -92,12 +86,6 @@ export function Settings({ isModal = false, onClose = null, initialTab = DEFAULT
                 className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
               >
                 Keyboard Shortcuts
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="general"
-                className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-              >
-                General
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
@@ -132,12 +120,6 @@ export function Settings({ isModal = false, onClose = null, initialTab = DEFAULT
               className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
               Cursor
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="library"
-              className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-            >
-              Library
             </ToggleGroupItem>
             <ToggleGroupItem
               value="interface"

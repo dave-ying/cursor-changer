@@ -108,6 +108,7 @@ export function ActiveSection({
             <div className="flex-shrink-0">
               <ActionPillButton
                 icon={<SlidersHorizontal />}
+                variant="secondary"
                 onClick={() => setShowModeToggle((prev) => !prev)}
                 aria-label="Toggle customization mode options"
               >

@@ -4,10 +4,23 @@ import { SortableContext, rectSortingStrategy, arrayMove } from '@dnd-kit/sortab
 import { LibraryCursor } from './LibraryCursor';
 import { useApp } from '../../context/AppContext';
 import { useAppStore } from '../../store/useAppStore';
+import { useMessage } from '../../context/MessageContext';
 import { Commands, invokeCommand } from '../../tauri/commands';
 import { logger } from '../../utils/logger';
-import { Plus } from 'lucide-react';
+import { Plus, SlidersHorizontal } from 'lucide-react';
 import { ActionPillButton } from './ActionPillButton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
+import { Separator } from '@/components/ui/separator';
 
 interface LibrarySectionProps {
   localLibrary: any[];
@@ -47,6 +60,31 @@ export function LibrarySection({
 }: LibrarySectionProps) {
   const { invoke } = useApp();
   const loadLibraryCursors = useAppStore((s) => s.operations.loadLibraryCursors);
+  const { showMessage } = useMessage();
+  const [showCustomizePanel, setShowCustomizePanel] = React.useState(false);
+  const [resetLibraryDialogOpen, setResetLibraryDialogOpen] = React.useState(false);
+
+  const handleOpenFolder = async () => {
+    try {
+      await invokeCommand(invoke, Commands.showLibraryCursorsFolder);
+    } catch (error) {
+      logger.error('Failed to open library folder:', error);
+      showMessage('Failed to open library folder: ' + String(error), 'error');
+    }
+  };
+
+  const handleResetLibrary = async () => {
+    try {
+      await invokeCommand(invoke, Commands.resetLibrary);
+      await invokeCommand(invoke, Commands.syncLibraryWithFolder);
+      showMessage('Library reset to defaults', 'success');
+    } catch (error) {
+      logger.error('Failed to reset library:', error);
+      showMessage('Failed to reset library: ' + String(error), 'error');
+    } finally {
+      setResetLibraryDialogOpen(false);
+    }
+  };
 
   // Handle library reordering
   const handleLibraryReorder = async (activeId: string, overId: string) => {
@@ -110,16 +148,98 @@ export function LibrarySection({
           flexShrink: 0
         }}>
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="min-w-0">
+            <div className="flex items-center gap-3 min-w-0">
               <h1 className="text-2xl font-bold text-foreground">Library</h1>
             </div>
-            <ActionPillButton
-              icon={<Plus />}
-              onClick={onAddCursor}
-              aria-label="Add a cursor to library"
-            >
-              Add Cursor
-            </ActionPillButton>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <ActionPillButton
+                icon={<Plus />}
+                onClick={onAddCursor}
+                aria-label="Add a cursor to library"
+              >
+                Add Cursor
+              </ActionPillButton>
+              <ActionPillButton
+                icon={<SlidersHorizontal />}
+                variant="secondary"
+                onClick={() => setShowCustomizePanel((prev) => !prev)}
+                aria-label="Toggle library options"
+              >
+                Customize
+              </ActionPillButton>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!selectingFromLibrary && !pendingLibraryCursor && (
+        <div
+          className={`px-6 pb-4 border-b border-border/50 overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${showCustomizePanel ? 'opacity-100' : 'opacity-0'}`}
+          style={{
+            maxHeight: showCustomizePanel ? '240px' : '0px',
+            overflowY: 'auto'
+          }}
+          aria-expanded={showCustomizePanel}
+        >
+          <div className="pt-4 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">Library Cursors Folder</p>
+                <p className="text-sm text-muted-foreground">
+                  Open the folder where your custom cursors are stored
+                </p>
+              </div>
+              <Button
+                id="show-library-folder-btn"
+                className="rounded-full"
+                onClick={handleOpenFolder}
+              >
+                Open Folder
+              </Button>
+            </div>
+            <Separator />
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">Reset All Cursors in Library</p>
+              </div>
+              <AlertDialog open={resetLibraryDialogOpen} onOpenChange={setResetLibraryDialogOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    id="reset-library-btn"
+                    variant="destructive"
+                    className="rounded-full"
+                  >
+                    Reset Library
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reset Library</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to reset your library?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <div className="py-4 space-y-4">
+                    <div>
+                      <p className="text-sm font-medium text-foreground mb-2">Warning: This action cannot be undone.</p>
+                      <ul className="list-disc list-inside space-y-1 text-sm text-red-600 dark:text-red-400">
+                        <li>All cursors you created and added to the Library will be deleted.</li>
+                        <li>Your library will be reset back to default cursors only.</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={handleResetLibrary}
+                    >
+                      Reset Library
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
         </div>
       )}

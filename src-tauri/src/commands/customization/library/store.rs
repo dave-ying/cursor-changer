@@ -103,6 +103,8 @@ fn default_library_cursors_dir_candidates(app: &AppHandle) -> Vec<std::path::Pat
                 .join("default-cursors")
                 .join("library"),
         );
+        // If running from src-tauri (cargo tauri dev default), default-cursors sits directly under cwd
+        candidates.push(cwd.join("default-cursors").join("library"));
     }
 
     candidates

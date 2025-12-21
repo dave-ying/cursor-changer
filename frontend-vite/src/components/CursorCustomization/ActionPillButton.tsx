@@ -12,6 +12,7 @@ export function ActionPillButton({
   icon,
   children,
   className,
+  variant = 'default',
   ...props
 }: ActionPillButtonProps) {
   const iconWithSizing = React.cloneElement(icon, {
@@ -21,7 +22,7 @@ export function ActionPillButton({
 
   return (
     <Button
-      variant="default"
+      variant={variant}
       className={cn('inline-flex items-center gap-1 rounded-full', className)}
       {...props}
     >
