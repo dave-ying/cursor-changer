@@ -55,36 +55,41 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
           <circle cx="12" cy="12" r="3" />
         </svg>
       )
-    },
-    {
-      id: 'info',
-      label: 'About',
-      icon: <Info className="!w-5 !h-5" />
     }
   ];
+
+  const infoItem = {
+    id: 'info',
+    label: 'About',
+    icon: <Info className="!w-5 !h-5" />
+  };
+
+  const renderButton = (item: (typeof navItems)[number] | typeof infoItem) => (
+    <Button
+      key={item.id}
+      variant={currentView === item.id ? 'default' : 'ghost'}
+      aria-label={item.label}
+      title={item.label}
+      className="cursor-sidebar-button"
+      onClick={() => {
+        try {
+          setCurrentView(item.id);
+        } catch (error) {
+          logger.warn(`[Navigation] Error changing view to ${item.id}:`, error);
+        }
+      }}
+    >
+      <span className="cursor-sidebar-icon">{item.icon}</span>
+      <span className="cursor-sidebar-text">{item.label}</span>
+    </Button>
+  );
 
   return (
     <nav id="toolbar" className="cursor-sidebar" aria-label="Cursor Customization">
       <div className="cursor-sidebar-nav">
-        {navItems.map((item) => (
-          <Button
-            key={item.id}
-            variant={currentView === item.id ? 'default' : 'ghost'}
-            aria-label={item.label}
-            title={item.label}
-            className="cursor-sidebar-button"
-            onClick={() => {
-              try {
-                setCurrentView(item.id);
-              } catch (error) {
-                logger.warn(`[Navigation] Error changing view to ${item.id}:`, error);
-              }
-            }}
-          >
-            <span className="cursor-sidebar-icon">{item.icon}</span>
-            <span className="cursor-sidebar-text">{item.label}</span>
-          </Button>
-        ))}
+        {navItems.map(renderButton)}
+        <div className="flex-1" />
+        {renderButton(infoItem)}
       </div>
     </nav>
   );

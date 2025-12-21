@@ -210,6 +210,11 @@
     box-shadow: none;
 }
 
+:root[data-theme='light'] .sidebar-nav-item.active,
+.light .sidebar-nav-item.active {
+    color: #ffffff;
+}
+
 .sidebar-nav-item.active::before {
     content: '';
     position: absolute;
