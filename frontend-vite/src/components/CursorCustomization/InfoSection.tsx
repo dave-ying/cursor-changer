@@ -39,12 +39,12 @@ export function InfoSection() {
     setUpdateMessage(null);
 
     try {
-      const { checkUpdate } = await import('@tauri-apps/api/updater');
-      const { shouldUpdate, manifest } = await checkUpdate();
+      const { check } = await import('@tauri-apps/plugin-updater');
+      const update = await check();
 
-      if (shouldUpdate) {
+      if (update?.available) {
         setUpdateStatus('available');
-        setUpdateMessage(`Update available: ${manifest?.version ?? ''}`.trim());
+        setUpdateMessage(`Update available: ${update.version ?? ''}`.trim());
       } else {
         setUpdateStatus('up-to-date');
         setUpdateMessage('You are on the latest version.');
@@ -60,9 +60,16 @@ export function InfoSection() {
     if (!isTauri) return;
     setUpdateStatus('installing');
     try {
-      const { installUpdate } = await import('@tauri-apps/api/updater');
-      await installUpdate();
-      // Tauri will restart the app after installUpdate resolves.
+      const { check } = await import('@tauri-apps/plugin-updater');
+      const update = await check();
+
+      if (update?.available) {
+        await update.downloadAndInstall();
+        // Tauri will restart the app after install completes.
+      } else {
+        setUpdateStatus('up-to-date');
+        setUpdateMessage('You are on the latest version.');
+      }
     } catch (error: any) {
       console.error('Update install failed', error);
       setUpdateStatus('error');

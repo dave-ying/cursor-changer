@@ -106,8 +106,7 @@ export function ActiveSection({
             <div className="flex-shrink-0">
               <Button
                 variant="ghost"
-                size="icon"
-                className="h-11 w-11 rounded-full"
+                className="!h-11 !w-11 !p-0 rounded-full [&>svg]:!h-6 [&>svg]:!w-6"
                 onClick={() => setShowModeToggle((prev) => !prev)}
                 aria-label="Toggle customization mode options"
               >
@@ -184,7 +183,7 @@ export function ActiveSection({
                   <p className="text-xs text-muted-foreground">Restore the active cursors</p>
                 </div>
                 <Button
-                  variant="default"
+                  variant="destructive"
                   className="sm:w-auto rounded-full"
                   onClick={onResetCursors}
                 >

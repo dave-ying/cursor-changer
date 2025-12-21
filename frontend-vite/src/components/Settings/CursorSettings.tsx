@@ -4,9 +4,6 @@ import { useMessage } from '../../context/MessageContext';
 import { useAppStore } from '../../store/useAppStore';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { Button } from '@/components/ui/button';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Separator } from '@/components/ui/separator';
 
 import { useDebounce } from '../../hooks/safe/useDebounce';
 import { Commands, invokeCommand } from '../../tauri/commands';
@@ -18,22 +15,10 @@ export function CursorSettings() {
     const { showMessage } = useMessage();
     const cursorState = useAppStore((s) => s.cursorState);
     const setCursorSize = useAppStore((s) => s.operations.setCursorSize);
-    const setDefaultCursorStyle = useAppStore((s) => s.operations.setDefaultCursorStyle);
     const loadAvailableCursors = useAppStore((s) => s.operations.loadAvailableCursors);
     const [localCursorSize, setLocalCursorSize] = useState<number>(cursorState?.cursorSize || 32);
     const lastCommittedSize = useRef<number>(cursorState?.cursorSize || 32);
     const isDragging = useRef<boolean>(false);
-
-    const handleDefaultStyleChange = useCallback(async (value: 'windows' | 'mac') => {
-        try {
-            setDefaultCursorStyle(value);
-            await invokeCommand(invoke, Commands.resetCurrentModeCursors);
-            await loadAvailableCursors();
-        } catch (error) {
-            logger.error('Failed to change default cursor style', error);
-            showMessage('Failed to change default cursor style', 'error');
-        }
-    }, [invoke, loadAvailableCursors, setDefaultCursorStyle, showMessage]);
 
     const handleResetCursors = useCallback(async () => {
         try {
@@ -45,15 +30,6 @@ export function CursorSettings() {
             showMessage('Failed to reset cursors', 'error');
         }
     }, [invoke, loadAvailableCursors, showMessage]);
-
-    const handleOpenFolder = useCallback(async () => {
-        try {
-            await invokeCommand(invoke, Commands.showLibraryCursorsFolder);
-        } catch (error) {
-            logger.error('Failed to open library folder:', error);
-            showMessage('Failed to open library folder', 'error');
-        }
-    }, [invoke, showMessage]);
 
     // Debounce utility function
     const { debounce, cleanup } = useDebounce();
@@ -125,71 +101,6 @@ export function CursorSettings() {
                                 onValueCommit={handleValueCommit}
                                 className="w-full"
                             />
-                        </div>
-                    </div>
-
-                    <Separator className="my-4" />
-
-                    <div className="flex flex-col gap-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                            <div className="min-w-0">
-                                <p className="text-base font-semibold text-foreground">Default Cursors</p>
-                                <p className="text-sm text-muted-foreground">Choose the style for defaults</p>
-                            </div>
-                            <ToggleGroup
-                                type="single"
-                                value={cursorState?.defaultCursorStyle || 'windows'}
-                                onValueChange={(value) => {
-                                    if (value && value !== cursorState?.defaultCursorStyle) {
-                                        handleDefaultStyleChange(value as 'windows' | 'mac');
-                                    }
-                                }}
-                                className="bg-muted rounded-full p-1"
-                                aria-label="Default Cursor Style"
-                            >
-                                <ToggleGroupItem
-                                    value="windows"
-                                    className="rounded-full px-4 py-1 data-[state=on]:text-primary-foreground"
-                                    aria-label="Windows style cursors"
-                                >
-                                    Windows
-                                </ToggleGroupItem>
-                                <ToggleGroupItem
-                                    value="mac"
-                                    className="rounded-full px-4 py-1 data-[state=on]:text-primary-foreground"
-                                    aria-label="Mac style cursors"
-                                >
-                                    Mac
-                                </ToggleGroupItem>
-                            </ToggleGroup>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                            <div className="min-w-0">
-                                <p className="text-base font-semibold text-foreground">Reset Active to Default</p>
-                                <p className="text-sm text-muted-foreground">Restore the active cursors</p>
-                            </div>
-                            <Button
-                                variant="default"
-                                className="sm:w-auto rounded-full"
-                                onClick={handleResetCursors}
-                            >
-                                Reset Cursors
-                            </Button>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                            <div className="min-w-0">
-                                <p className="text-base font-semibold text-foreground">Library Cursors Folder</p>
-                                <p className="text-sm text-muted-foreground">Open the folder where your custom cursors are stored</p>
-                            </div>
-                            <Button
-                                id="show-library-folder-btn"
-                                className="sm:w-auto rounded-full"
-                                onClick={handleOpenFolder}
-                            >
-                                Open Folder
-                            </Button>
                         </div>
                     </div>
                 </Card>

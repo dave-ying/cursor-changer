@@ -87,33 +87,6 @@ describe('CursorSettings Component', () => {
       });
     });
 
-    it('renders default cursors toggle group', async () => {
-      renderCursorSettings();
-
-      await waitFor(() => {
-        expect(screen.getByText('Default Cursors')).toBeInTheDocument();
-        expect(screen.getByLabelText('Windows style cursors')).toBeInTheDocument();
-        expect(screen.getByLabelText('Mac style cursors')).toBeInTheDocument();
-      });
-    });
-
-    it('renders reset cursors button', async () => {
-      renderCursorSettings();
-
-      await waitFor(() => {
-        expect(screen.getByText('Reset Active to Default')).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /reset cursors/i })).toBeInTheDocument();
-      });
-    });
-
-    it('renders library folder button', async () => {
-      renderCursorSettings();
-
-      await waitFor(() => {
-        expect(screen.getByText('Library Cursors Folder')).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /open folder/i })).toBeInTheDocument();
-      });
-    });
   });
 
   describe('Cursor Size', () => {
@@ -134,76 +107,6 @@ describe('CursorSettings Component', () => {
         expect(slider).toHaveAttribute('aria-valuemin', '32');
         expect(slider).toHaveAttribute('aria-valuemax', String(MAX_CURSOR_SIZE));
       });
-    });
-  });
-
-  describe('Default Cursor Style', () => {
-    it('Windows style is selected by default', async () => {
-      renderCursorSettings();
-
-      await waitFor(() => {
-        const windowsBtn = screen.getByLabelText('Windows style cursors');
-        expect(windowsBtn).toHaveAttribute('data-state', 'on');
-      });
-    });
-
-    it('calls setDefaultCursorStyle when Mac is selected', async () => {
-      renderCursorSettings();
-
-      await waitFor(() => {
-        expect(screen.getByLabelText('Mac style cursors')).toBeInTheDocument();
-      });
-
-      const macBtn = screen.getByLabelText('Mac style cursors');
-      fireEvent.click(macBtn);
-
-      await waitFor(() => {
-        expect(mockSetDefaultCursorStyle).toHaveBeenCalledWith('mac');
-        expect(mockInvoke).toHaveBeenCalledWith('reset_current_mode_cursors');
-        expect(mockLoadAvailableCursors).toHaveBeenCalled();
-      });
-    });
-  });
-
-  describe('Reset Cursors', () => {
-    it('renders reset cursors button', async () => {
-      renderCursorSettings();
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /reset cursors/i })).toBeInTheDocument();
-      });
-    });
-
-    it('reset button is clickable', async () => {
-      renderCursorSettings();
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /reset cursors/i })).toBeInTheDocument();
-      });
-
-      const resetBtn = screen.getByRole('button', { name: /reset cursors/i });
-      expect(() => fireEvent.click(resetBtn)).not.toThrow();
-    });
-  });
-
-  describe('Library Folder', () => {
-    it('renders open folder button', async () => {
-      renderCursorSettings();
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /open folder/i })).toBeInTheDocument();
-      });
-    });
-
-    it('open folder button is clickable', async () => {
-      renderCursorSettings();
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /open folder/i })).toBeInTheDocument();
-      });
-
-      const openFolderBtn = screen.getByRole('button', { name: /open folder/i });
-      expect(() => fireEvent.click(openFolderBtn)).not.toThrow();
     });
   });
 });
