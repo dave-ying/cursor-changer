@@ -28,7 +28,7 @@ const mockResetAllSettings = vi.fn(async () => {
   useAppStore.getState().setCursorState({
     hidden: false,
     shortcut: 'Ctrl+Shift+X',
-    shortcutEnabled: true,
+    shortcutEnabled: false,
     cursorSize: 32,
     minimizeToTray: true,
     runOnStartup: false,

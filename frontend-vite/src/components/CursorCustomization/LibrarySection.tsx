@@ -7,6 +7,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { Commands, invokeCommand } from '../../tauri/commands';
 import { logger } from '../../utils/logger';
 import { Plus } from 'lucide-react';
+import { ActionPillButton } from './ActionPillButton';
 
 interface LibrarySectionProps {
   localLibrary: any[];
@@ -112,15 +113,13 @@ export function LibrarySection({
             <div className="min-w-0">
               <h1 className="text-2xl font-bold text-foreground">Library</h1>
             </div>
-            <Button
-              variant="default"
-              className="inline-flex items-center gap-1 rounded-full"
+            <ActionPillButton
+              icon={<Plus />}
               onClick={onAddCursor}
               aria-label="Add a cursor to library"
             >
-              <Plus className="!w-5 !h-5" aria-hidden="true" />
-              <span>Add Cursor</span>
-            </Button>
+              Add Cursor
+            </ActionPillButton>
           </div>
         </div>
       )}

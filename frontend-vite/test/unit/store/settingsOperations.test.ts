@@ -252,7 +252,7 @@ describe('Settings Operations', () => {
       const defaultStatus = {
         hidden: false,
         shortcut: 'Ctrl+Shift+X',
-        shortcut_enabled: true,
+        shortcut_enabled: false,
         cursor_size: 32,
         minimize_to_tray: true,
         run_on_startup: false,
@@ -269,7 +269,7 @@ describe('Settings Operations', () => {
       expect(mockSetCursorState).toHaveBeenCalledWith({
         hidden: false,
         shortcut: 'Ctrl+Shift+X',
-        shortcutEnabled: true,
+        shortcutEnabled: false,
         cursorSize: 32,
         minimizeToTray: true,
         runOnStartup: false,

@@ -94,7 +94,7 @@ describe('Data Loading Operations', () => {
       expect(mockUpdateCursorState).toHaveBeenCalledWith({
         hidden: false,
         shortcut: 'Ctrl+Shift+X',
-        shortcutEnabled: true,
+        shortcutEnabled: false,
         cursorSize: 32,
         minimizeToTray: true,
         runOnStartup: false,

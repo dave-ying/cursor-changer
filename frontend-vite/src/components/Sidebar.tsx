@@ -45,6 +45,7 @@ export function Sidebar() {
         {sections.map(section => (
           <Button
             key={section.id}
+            variant="ghost"
             className={`sidebar-nav-item ${activeSection === section.id ? 'active' : ''}`}
             data-section={section.id}
             title={section.title}

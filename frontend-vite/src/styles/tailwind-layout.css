@@ -87,11 +87,11 @@
     overflow-x: hidden;
     flex: 1;
     min-height: 0;
-    /* Vertically center grid content in Simple Mode */
+    /* Default: center vertically when toolbar is closed */
     align-content: center;
 }
 
-/* Center Advanced mode vertically too */
+/* Keep advanced mode centered by default too */
 #active-cursors-section #cursor-grid.cursor-grid--advanced {
     align-content: center;
 }
@@ -188,11 +188,16 @@
 }
 
 /* Sidebar navigation hover uses simple background change instead of color-mix */
-.sidebar-nav-item:hover {
+.sidebar-nav-item:not(.active):hover {
     background: var(--bg-hover);
     color: var(--text-primary);
     transform: none;
     box-shadow: none;
+}
+
+.sidebar-nav-item.active:hover {
+    background: var(--brand-secondary) !important;
+    color: #ffffff !important;
 }
 
 .sidebar-nav-item:active,
@@ -203,8 +208,8 @@
 }
 
 .sidebar-nav-item.active {
-    background: var(--brand-secondary);
-    color: var(--text-primary);
+    background: var(--brand-secondary) !important;
+    color: #ffffff !important;
     font-weight: 600;
     outline: none;
     box-shadow: none;
@@ -212,7 +217,23 @@
 
 :root[data-theme='light'] .sidebar-nav-item.active,
 .light .sidebar-nav-item.active {
-    color: #ffffff;
+    background: var(--brand-secondary) !important;
+    color: #ffffff !important;
+}
+
+:root[data-theme='light'] .sidebar-nav-item.active,
+.light .sidebar-nav-item.active {
+    color: #ffffff !important;
+}
+
+:root[data-theme='light'] .sidebar-nav-item.active:hover,
+.light .sidebar-nav-item.active:hover {
+    color: #ffffff !important;
+}
+
+.sidebar-nav-item.active .sidebar-nav-icon,
+.sidebar-nav-item.active .sidebar-nav-text {
+    color: #ffffff !important;
 }
 
 .sidebar-nav-item.active::before {
@@ -330,7 +351,7 @@
     background: transparent;
 }
 
-.cursor-sidebar-button:hover {
+.cursor-sidebar-button:not([data-variant="default"]):hover {
     background: var(--bg-hover);
     color: var(--text-primary);
 }
@@ -338,9 +359,24 @@
 .cursor-sidebar-button[data-variant="default"],
 .cursor-sidebar-button.variant-default,
 .cursor-sidebar-button:where(.bg-primary) {
-    background: var(--brand-secondary);
-    color: var(--text-primary);
+    background: var(--brand-secondary) !important;
+    color: #ffffff !important;
     box-shadow: none;
+}
+
+.cursor-sidebar-button[data-variant="default"]:hover,
+.cursor-sidebar-button.variant-default:hover,
+.cursor-sidebar-button:where(.bg-primary):hover {
+    background: var(--brand-secondary) !important;
+    color: #ffffff !important;
+}
+
+.cursor-sidebar-button.bg-primary,
+.cursor-sidebar-button.bg-primary:hover,
+.cursor-sidebar-button.text-primary-foreground,
+.cursor-sidebar-button.text-primary-foreground:hover {
+    background: var(--brand-secondary) !important;
+    color: #ffffff !important;
 }
 
 .cursor-sidebar-icon {

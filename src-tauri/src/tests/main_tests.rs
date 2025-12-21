@@ -26,7 +26,7 @@ mod tests {
         let normalized = normalize_persisted_config(cfg);
         assert_eq!(normalized.minimize_to_tray, Some(true));
         assert_eq!(normalized.cursor_size, Some(32));
-        assert_eq!(normalized.shortcut_enabled, Some(true));
+        assert_eq!(normalized.shortcut_enabled, Some(false));
         assert_eq!(normalized.shortcut, Some(DEFAULT_SHORTCUT.to_string()));
     }
 

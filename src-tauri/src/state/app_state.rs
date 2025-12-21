@@ -75,7 +75,7 @@ impl Default for PreferencesState {
     fn default() -> Self {
         Self {
             shortcut: Some(DEFAULT_SHORTCUT.to_string()),
-            shortcut_enabled: true,
+            shortcut_enabled: false,
             run_on_startup: false,
             minimize_to_tray: true,
             cursor_size: 32,

@@ -5,6 +5,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Button } from '@/components/ui/button';
 import { logger } from '../../utils/logger';
 import { SlidersHorizontal } from 'lucide-react';
+import { ActionPillButton } from './ActionPillButton';
 
 interface ActiveSectionProps {
   visibleCursors: any[];
@@ -57,7 +58,8 @@ export function ActiveSection({
   return (
     <section
       id="active-cursors-section"
-      className="rounded-[var(--radius-surface)] border bg-card text-card-foreground shadow-sm"
+      className={`rounded-[var(--radius-surface)] border bg-card text-card-foreground shadow-sm active-section ${showModeToggle ? 'active-section--toolbar-open' : ''
+        }`}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -69,7 +71,7 @@ export function ActiveSection({
       {/* Header - Conditional based on selection mode */}
       <div
         className={`px-6 pt-4 pb-4 border-b border-border/50 ${selectingCursorForCustomization ? 'cursor-customization-header-blurred' : ''
-          }`}
+          } active-cursors-header`}
         style={{ flexShrink: 0, position: 'relative', zIndex: 1 }}
       >
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -104,96 +106,93 @@ export function ActiveSection({
             </div>
           ) : (
             <div className="flex-shrink-0">
-              <Button
-                variant="ghost"
-                className="!h-11 !w-11 !p-0 rounded-full [&>svg]:!h-6 [&>svg]:!w-6"
+              <ActionPillButton
+                icon={<SlidersHorizontal />}
                 onClick={() => setShowModeToggle((prev) => !prev)}
                 aria-label="Toggle customization mode options"
               >
-                <SlidersHorizontal className="h-6 w-6" />
-              </Button>
+                Customize
+              </ActionPillButton>
             </div>
           )}
         </div>
 
-        {!pendingLibraryCursor && (
-          <div
-            className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${showModeToggle ? 'opacity-100' : 'opacity-0'}`}
-            style={{ maxHeight: showModeToggle ? '220px' : '0px' }}
-            aria-expanded={showModeToggle}
-          >
-            <div className="pt-3 space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">Customization Mode</p>
-                  <p className="text-xs text-muted-foreground">Toggle between Simple and Advanced</p>
-                </div>
-                <ModeToggle
-                  value={customizationMode}
-                  onValueChange={onModeChange}
-                />
+      </div>
+
+      {!pendingLibraryCursor && (
+        <div
+          className={`px-6 pb-4 border-b border-border/50 overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${showModeToggle ? 'opacity-100' : 'opacity-0'}`}
+          style={{ maxHeight: showModeToggle ? '240px' : '0px' }}
+          aria-expanded={showModeToggle}
+        >
+          <div className="pt-4 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">Customization Mode</p>
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">Default Cursor Style</p>
-                  <p className="text-xs text-muted-foreground">Choose the style for defaults</p>
-                </div>
-                <ToggleGroup
-                  type="single"
-                  value={defaultCursorStyle}
-                  onValueChange={(value) => {
-                    if (value && value !== defaultCursorStyle) {
-                      onDefaultCursorStyleChange(value as 'windows' | 'mac');
+              <ModeToggle
+                value={customizationMode}
+                onValueChange={onModeChange}
+              />
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">Default Cursor Style</p>
+              </div>
+              <ToggleGroup
+                type="single"
+                value={defaultCursorStyle}
+                onValueChange={(value) => {
+                  if (value && value !== defaultCursorStyle) {
+                    onDefaultCursorStyleChange(value as 'windows' | 'mac');
+                  }
+                }}
+                className="bg-muted rounded-full p-1"
+                aria-label="Default Cursor Style"
+              >
+                <ToggleGroupItem
+                  value="windows"
+                  className="rounded-full px-4 py-1 data-[state=on]:text-primary-foreground"
+                  style={defaultCursorStyle === 'windows'
+                    ? {
+                      backgroundColor: accentColor || '#7c3aed',
+                      borderColor: accentColor || '#7c3aed'
                     }
-                  }}
-                  className="bg-muted rounded-full p-1"
-                  aria-label="Default Cursor Style"
+                    : {}}
+                  aria-label="Windows style cursors"
                 >
-                  <ToggleGroupItem
-                    value="windows"
-                    className="rounded-full px-4 py-1 data-[state=on]:text-primary-foreground"
-                    style={defaultCursorStyle === 'windows'
-                      ? {
-                        backgroundColor: accentColor || '#7c3aed',
-                        borderColor: accentColor || '#7c3aed'
-                      }
-                      : {}}
-                    aria-label="Windows style cursors"
-                  >
-                    Windows
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    value="mac"
-                    className="rounded-full px-4 py-1 data-[state=on]:text-primary-foreground"
-                    style={defaultCursorStyle === 'mac'
-                      ? {
-                        backgroundColor: accentColor || '#7c3aed',
-                        borderColor: accentColor || '#7c3aed'
-                      }
-                      : {}}
-                    aria-label="Mac style cursors"
-                  >
-                    Mac
-                  </ToggleGroupItem>
-                </ToggleGroup>
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">Reset Active to Default</p>
-                  <p className="text-xs text-muted-foreground">Restore the active cursors</p>
-                </div>
-                <Button
-                  variant="destructive"
-                  className="sm:w-auto rounded-full"
-                  onClick={onResetCursors}
+                  Windows
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="mac"
+                  className="rounded-full px-4 py-1 data-[state=on]:text-primary-foreground"
+                  style={defaultCursorStyle === 'mac'
+                    ? {
+                      backgroundColor: accentColor || '#7c3aed',
+                      borderColor: accentColor || '#7c3aed'
+                    }
+                    : {}}
+                  aria-label="Mac style cursors"
                 >
-                  Reset Cursors
-                </Button>
+                  Mac
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">Reset All Active Cursors to Default</p>
               </div>
+              <Button
+                variant="destructive"
+                className="sm:w-auto rounded-full"
+                onClick={onResetCursors}
+              >
+                Reset Cursors
+              </Button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Cursor Grid */}
       <div
@@ -202,6 +201,7 @@ export function ActiveSection({
         // If we are applying a pending cursor, we want the grid to be active/highlighted
         className={`cursor-grid px-6 py-6 ${selectingFromLibrary && selectedCursor ? 'dimmed' : ''} ${customizationMode === 'advanced' ? 'cursor-grid--advanced' : ''}`}
         data-testid="cursor-grid"
+        style={{ flex: '1 1 0%', minHeight: 0 }}
       >
         {safeVisibleCursors.map((cursor, index) => (
           <ActiveCursor

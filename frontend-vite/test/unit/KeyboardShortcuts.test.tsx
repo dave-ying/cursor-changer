@@ -31,7 +31,7 @@ const mockInvoke = vi.fn();
 let mockAppContext = {
     cursorState: {
         shortcut: 'Ctrl+Shift+X',
-        shortcutEnabled: true,
+        shortcutEnabled: false,
     },
     operations: {
         setHotkey: mockSetHotkey,
@@ -112,7 +112,7 @@ beforeEach(() => {
 
     // Reset mock context to default state
     mockAppContext.cursorState.shortcut = 'Ctrl+Shift+X';
-    mockAppContext.cursorState.shortcutEnabled = true;
+    mockAppContext.cursorState.shortcutEnabled = false;
     mockAppContext.recording = false;
     mockAppContext.capturedShortcut = null;
     mockAppContext.originalShortcut = null;
