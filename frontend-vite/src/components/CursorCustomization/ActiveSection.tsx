@@ -95,7 +95,7 @@ export function ActiveSection({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-11 w-11 rounded-lg"
+                className="h-11 w-11 rounded-full"
                 onClick={onCancelPendingLibraryCursor}
                 aria-label="Cancel cursor selection"
               >
@@ -107,7 +107,7 @@ export function ActiveSection({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-11 w-11 rounded-lg"
+                className="h-11 w-11 rounded-full"
                 onClick={() => setShowModeToggle((prev) => !prev)}
                 aria-label="Toggle customization mode options"
               >

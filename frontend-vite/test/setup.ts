@@ -1,6 +1,6 @@
 // Minimal setup file for Vitest
 import '@testing-library/jest-dom/vitest';
-import { afterEach } from 'vitest';
+import { afterEach, vi } from 'vitest';
 
 // Mock ResizeObserver
 (globalThis as any).ResizeObserver = class ResizeObserver {
@@ -110,6 +110,27 @@ if (typeof window !== 'undefined') {
     invoke: defaultInvokeHandler,
   };
 }
+
+// Mock Tauri API modules used via dynamic import in InfoSection
+vi.mock('@tauri-apps/api/app', () => {
+  const getVersion = vi.fn().mockResolvedValue('1.0.0');
+  return {
+    __esModule: true,
+    getVersion,
+    default: { getVersion },
+  };
+});
+
+vi.mock('@tauri-apps/api/updater', () => {
+  const checkUpdate = vi.fn().mockResolvedValue({ shouldUpdate: false, manifest: { version: '1.0.0' } });
+  const installUpdate = vi.fn().mockResolvedValue(undefined);
+  return {
+    __esModule: true,
+    checkUpdate,
+    installUpdate,
+    default: { checkUpdate, installUpdate },
+  };
+});
 
 // Suppress console.error for expected Tauri-related warnings during tests
 const originalConsoleError = console.error;

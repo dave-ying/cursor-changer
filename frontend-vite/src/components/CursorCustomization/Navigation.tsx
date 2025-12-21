@@ -64,7 +64,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
   ];
 
   return (
-    <nav id="toolbar" className="cursor-sidebar">
+    <nav id="toolbar" className="cursor-sidebar" aria-label="Cursor Customization">
       <div className="cursor-sidebar-nav">
         {navItems.map((item) => (
           <Button

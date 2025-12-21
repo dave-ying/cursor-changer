@@ -4,6 +4,14 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@tauri-apps/api/updater': path.resolve(__dirname, 'test/mocks/tauri-updater.ts'),
+      '@tauri-apps/api/app': path.resolve(__dirname, 'test/mocks/tauri-app.ts')
+    }
+  },
+
   server: {
     fs: {
       allow: ['..']
@@ -98,11 +106,6 @@ export default defineConfig({
     deps: {
       inline: ['vitest']
     }
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
   },
   // Add esbuild configuration for TypeScript
   esbuild: {
