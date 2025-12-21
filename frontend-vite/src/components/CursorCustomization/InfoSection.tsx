@@ -1,10 +1,75 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 /**
  * Placeholder Info section
  * Mirrors the non-modal Settings layout styling for future content.
  */
 export function InfoSection() {
+  const [version, setVersion] = useState<string>('1.0.0');
+  const [updateStatus, setUpdateStatus] = useState<
+    'idle' | 'checking' | 'available' | 'up-to-date' | 'installing' | 'error' | 'unsupported'
+  >('idle');
+  const [updateMessage, setUpdateMessage] = useState<string | null>(null);
+  const showInstall = updateStatus === 'available' || updateStatus === 'installing';
+
+  const isTauri = typeof window !== 'undefined' && '__TAURI__' in window;
+  const updaterEnabled = isTauri && import.meta.env['VITE_ENABLE_TAURI_UPDATER'] === '1';
+
+  useEffect(() => {
+    if (!isTauri) return;
+    (async () => {
+      try {
+        const { getVersion } = await import('@tauri-apps/api/app');
+        const v = await getVersion();
+        setVersion(v);
+      } catch (error) {
+        console.error('Failed to load app version', error);
+      }
+    })();
+  }, [isTauri]);
+
+  const handleCheckUpdate = async () => {
+    if (!isTauri) {
+      setUpdateStatus('unsupported');
+      setUpdateMessage('Updater works in the packaged app.');
+      return;
+    }
+
+    setUpdateStatus('checking');
+    setUpdateMessage(null);
+
+    try {
+      const { checkUpdate } = await import('@tauri-apps/api/updater');
+      const { shouldUpdate, manifest } = await checkUpdate();
+
+      if (shouldUpdate) {
+        setUpdateStatus('available');
+        setUpdateMessage(`Update available: ${manifest?.version ?? ''}`.trim());
+      } else {
+        setUpdateStatus('up-to-date');
+        setUpdateMessage('You are on the latest version.');
+      }
+    } catch (error: any) {
+      console.error('Update check failed', error);
+      setUpdateStatus('error');
+      setUpdateMessage(error?.message ?? 'Update check failed.');
+    }
+  };
+
+  const handleInstallUpdate = async () => {
+    if (!isTauri) return;
+    setUpdateStatus('installing');
+    try {
+      const { installUpdate } = await import('@tauri-apps/api/updater');
+      await installUpdate();
+      // Tauri will restart the app after installUpdate resolves.
+    } catch (error: any) {
+      console.error('Update install failed', error);
+      setUpdateStatus('error');
+      setUpdateMessage(error?.message ?? 'Update install failed.');
+    }
+  };
+
   const openLink = async (url: string) => {
     // Web-safe default; Tauri will also handle this with the app browser
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -25,12 +90,52 @@ export function InfoSection() {
       <div className="flex-1 overflow-auto px-6 py-6 pb-8">
         <div className="max-w-[900px] mx-auto space-y-6">
           <div className="rounded-lg border border-border/60 bg-muted/40 p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold rounded-full bg-primary/10 text-primary px-2.5 py-1 border border-primary/30">
-                Version 1.0.0
-              </span>
-              <span className="text-xs text-muted-foreground">Current release</span>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold rounded-full bg-primary/10 text-primary px-2.5 py-1 border border-primary/30">
+                  Version {version}
+                </span>
+                <span className="text-xs text-muted-foreground">Current release</span>
+              </div>
+              {updaterEnabled ? (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCheckUpdate}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+                    disabled={updateStatus === 'checking' || updateStatus === 'installing'}
+                  >
+                    {updateStatus === 'checking' ? 'Checking…' : 'Check for updates'}
+                  </button>
+                  {showInstall && (
+                    <button
+                      type="button"
+                      onClick={handleInstallUpdate}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border border-primary text-primary hover:bg-primary/10 disabled:opacity-60"
+                      disabled={updateStatus === 'installing'}
+                    >
+                      {updateStatus === 'installing' ? 'Installing…' : 'Install update'}
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Updates are managed by the store build; manual checks are not needed here.
+                </p>
+              )}
             </div>
+            {updaterEnabled && updateStatus !== 'idle' && (
+              <p className="text-xs text-muted-foreground">
+                {updateMessage ??
+                  (updateStatus === 'installing'
+                    ? 'Downloading and applying the update…'
+                    : updateStatus === 'up-to-date'
+                      ? 'You are on the latest version.'
+                      : updateStatus === 'unsupported'
+                        ? 'Updater is only available in the packaged app.'
+                        : null)}
+              </p>
+            )}
             <p className="text-muted-foreground">
               Refer to the{' '}
               <a
