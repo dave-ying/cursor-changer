@@ -25,6 +25,17 @@ export function CollapsibleSection({
   contentClassName = 'pb-4'
 }: CollapsibleSectionProps) {
   const label = open ? openLabel : closedLabel;
+  const contentRef = React.useRef<HTMLDivElement | null>(null);
+  const [measuredHeight, setMeasuredHeight] = React.useState<number>(maxHeight);
+
+  // Measure once when content changes or opens to avoid layout thrash during animation
+  React.useLayoutEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const next = el.scrollHeight;
+    // Clamp to provided maxHeight to preserve original look
+    setMeasuredHeight(Math.min(next, maxHeight));
+  }, [children, maxHeight, open]);
 
   return (
     <div className={className}>
@@ -38,11 +49,17 @@ export function CollapsibleSection({
         {label}
       </Button>
       <div
+        ref={contentRef}
         id={id}
-        className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${!open ? '-mt-1' : contentClassName}`}
+        className={`overflow-hidden ${!open ? '-mt-1' : contentClassName}`}
         style={{
-          maxHeight: open ? `${maxHeight}px` : '0px',
-          opacity: open ? 1 : 0
+          // Animate only height/opacity to avoid repeated full reflow of siblings
+          height: open ? `${measuredHeight}px` : '0px',
+          maxHeight: `${maxHeight}px`,
+          opacity: open ? 1 : 0,
+          transition: 'height 240ms ease, opacity 200ms ease',
+          willChange: 'height, opacity',
+          contain: 'layout paint'
         }}
         aria-hidden={!open}
       >

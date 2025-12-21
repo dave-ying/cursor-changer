@@ -113,7 +113,7 @@ export function LibrarySection({
     >
       {/* Selection Mode Header - Only show when selecting FROM library, not when library cursor is selected */}
       {(selectingFromLibrary && selectedCursor) && !pendingLibraryCursor ? (
-        <div className="px-6 pt-4 pb-4 border-b border-border/50 flex-shrink-0" style={{
+        <div className="px-6 pt-5 pb-5 border-b border-border/50 flex-shrink-0 bg-muted/60" style={{
           flexShrink: 0
         }}>
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -142,7 +142,7 @@ export function LibrarySection({
         </div>
       ) : (
         /* Normal Mode Header with Add Button */
-        <div className="px-6 pt-4 pb-4 border-b border-border/50 flex-shrink-0" style={{
+        <div className="px-6 pt-5 pb-5 border-b border-border/50 flex-shrink-0 bg-muted/60" style={{
           flexShrink: 0
         }}>
           <div className="flex flex-wrap items-center justify-between gap-4">

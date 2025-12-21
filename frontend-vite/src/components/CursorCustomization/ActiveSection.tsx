@@ -72,8 +72,8 @@ export function ActiveSection({
     >
       {/* Header - Conditional based on selection mode */}
       <div
-        className={`px-6 pt-4 pb-4 border-b border-border/50 ${selectingCursorForCustomization ? 'cursor-customization-header-blurred' : ''
-          } active-cursors-header`}
+        className={`px-6 pt-5 pb-5 border-b border-border/50 ${selectingCursorForCustomization ? 'cursor-customization-header-blurred' : ''
+          } active-cursors-header bg-muted/60`}
         style={{ flexShrink: 0, position: 'relative', zIndex: 1 }}
       >
         <div className="flex flex-wrap items-center justify-between gap-4">
