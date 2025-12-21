@@ -4,6 +4,8 @@
 
 Instead of navigating through complex system settings, use Cursor Changer to personalize your desktop experience in seconds.
 
+> 📄 See the full [Changelog](CHANGELOG.md).
+
 ## ✨ Features
 
 -   **🖼️ Instant Conversion**: Automatically turn any image (PNG or JPG) into a functional cursor. No external tools needed.
