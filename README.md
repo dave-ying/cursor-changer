@@ -29,7 +29,7 @@ This section is for developers interested in the technology behind Cursor Change
 
 This project is built using a modern, high-performance stack:
 
-*   **Core**: [Rust](https://www.rust-lang.org/) (Tauri) - Provides native performance and system integration.
+*   **Core**: [Rust](https://www.rust-lang.org/) ([Tauri framework](https://github.com/tauri-apps/tauri)) - Provides native performance and system integration.
 *   **Frontend**: [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) - Handles the UI and logic.
 *   **Build Tool**: [Vite](https://vitejs.dev/) - fast build tool for the frontend.
 *   **Styling**: [TailwindCSS](https://tailwindcss.com/) - Utility-first CSS framework.
