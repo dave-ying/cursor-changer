@@ -50,3 +50,9 @@ Compiles the application and enables optimizations. This creates the installer (
 ```bash
 cargo tauri build
 ```
+
+### Updater toggle by build target
+- NSIS installer (self-update): leave default behavior. Updater plugin is enabled unless `CC_ENABLE_TAURI_UPDATER=0`.
+- MSI → MSIX for Microsoft Store: disable updater so the store handles updates:
+  - Set environment variable `CC_ENABLE_TAURI_UPDATER=0` (also ensure frontend env `VITE_ENABLE_TAURI_UPDATER=0` so the “Check for updates” UI stays hidden).
+  - Build MSI/MSIX with that env set; updater plugin and UI will be off in the packaged app.

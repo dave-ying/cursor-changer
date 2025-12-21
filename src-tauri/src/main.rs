@@ -26,6 +26,12 @@ use state::{AppState, MinimizePreference};
 
 use std::sync::Mutex;
 
+fn updater_enabled() -> bool {
+    option_env!("CC_ENABLE_TAURI_UPDATER")
+        .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+        .unwrap_or(true)
+}
+
 fn main() {
     let builder = tauri::Builder::default()
         .manage(AppState::default())
@@ -33,8 +39,15 @@ fn main() {
         .manage(Mutex::new(FolderWatcherState::default()))
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_shell::init());
+
+    let builder = if updater_enabled() {
+        builder.plugin(tauri_plugin_updater::Builder::new().build())
+    } else {
+        builder
+    };
+
+    let builder = builder
         .setup(|app| Ok(startup::setup_app(app)?))
         .on_window_event(|window, event| window_events::on_window_event(window, event));
 
