@@ -1,5 +1,7 @@
 use tauri::{AppHandle, Manager};
 
+use crate::window_setup::apply_optimal_window_size;
+
 fn is_window_visibility_debug_enabled() -> bool {
     std::env::var("HCT_DEBUG_WINDOW_VISIBILITY")
         .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
@@ -178,6 +180,30 @@ pub fn show_main_window(app: &AppHandle) {
             "[CursorChanger] show_main_window called"
         );
 
+        // First ensure window is not minimized and recover from minimized tiny size
+        if let Ok(is_minimized) = window.is_minimized() {
+            if is_minimized {
+                cc_debug_if!(
+                    is_window_visibility_debug_enabled(),
+                    "[CursorChanger] Window is minimized, restoring"
+                );
+                let _ = window.unminimize();
+            }
+        }
+
+        // If the window size collapsed due to Win+D/minimize events, reapply a sane size
+        if let Ok(size) = window.outer_size() {
+            if size.width <= 300 || size.height <= 200 {
+                cc_debug_if!(
+                    is_window_visibility_debug_enabled(),
+                    "[CursorChanger] Window size {}x{} too small; reapplying optimal size",
+                    size.width,
+                    size.height
+                );
+                apply_optimal_window_size(app, &window);
+            }
+        }
+
         // CRITICAL FIX: Check if window is on screen before showing
         // This prevents the window from being stuck off-screen on multi-monitor setups
         if !is_window_on_screen(app, &window) {
@@ -188,17 +214,6 @@ pub fn show_main_window(app: &AppHandle) {
             if let Err(e) = center_window_on_primary_monitor(app, &window) {
                 cc_error!("[CursorChanger] Failed to center window: {}", e);
                 // Continue anyway - the window might still be recoverable
-            }
-        }
-
-        // First ensure window is not minimized
-        if let Ok(is_minimized) = window.is_minimized() {
-            if is_minimized {
-                cc_debug_if!(
-                    is_window_visibility_debug_enabled(),
-                    "[CursorChanger] Window is minimized, restoring"
-                );
-                let _ = window.unminimize();
             }
         }
 

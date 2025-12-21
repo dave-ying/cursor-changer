@@ -10,22 +10,20 @@ use std::thread;
 #[cfg(debug_assertions)]
 use std::time::Duration;
 #[cfg(debug_assertions)]
-use tauri::Manager;
-
-#[cfg(debug_assertions)]
 /// Global flag to prevent multiple cleanup attempts
 static CLEANUP_EXECUTED: AtomicBool = AtomicBool::new(false);
 
 #[cfg(debug_assertions)]
+use std::sync::OnceLock;
+
+#[cfg(debug_assertions)]
 /// Global app handle for cleanup access (debug-only; used by emergency cleanup tooling)
-static mut APP_HANDLE: Option<tauri::AppHandle> = None;
+static APP_HANDLE: OnceLock<tauri::AppHandle> = OnceLock::new();
 
 #[cfg(debug_assertions)]
 /// Initialize cleanup hooks during app startup (debug-only to avoid noisy logs/timeouts in release)
 pub fn initialize_cleanup_hooks(app: &tauri::AppHandle) {
-    unsafe {
-        APP_HANDLE = Some(app.clone());
-    }
+    let _ = APP_HANDLE.set(app.clone());
 
     // Start monitoring thread to handle force-closes (debug diagnostics)
     start_cleanup_monitor_thread();
@@ -51,7 +49,7 @@ fn perform_emergency_cleanup(context: impl std::fmt::Display) {
         context
     );
 
-    let app_handle = unsafe { APP_HANDLE.as_ref().cloned() };
+    let app_handle = APP_HANDLE.get().cloned();
 
     match app_handle {
         Some(app) => {
