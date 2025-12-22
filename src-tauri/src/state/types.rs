@@ -24,11 +24,13 @@ pub struct CursorStatePayload {
     pub default_cursor_style: DefaultCursorStyle,
 }
 
-impl From<&AppState> for CursorStatePayload {
-    fn from(state: &AppState) -> Self {
-        let guard = state.read_all().expect("Application state poisoned");
+impl TryFrom<&AppState> for CursorStatePayload {
+    type Error = String;
 
-        Self {
+    fn try_from(state: &AppState) -> Result<Self, Self::Error> {
+        let guard = state.read_all()?;
+
+        Ok(Self {
             hidden: guard.cursor.hidden,
             shortcut: guard.prefs.shortcut.clone(),
             shortcut_enabled: guard.prefs.shortcut_enabled,
@@ -40,7 +42,14 @@ impl From<&AppState> for CursorStatePayload {
             accent_color: guard.prefs.accent_color.clone(),
             theme_mode: guard.prefs.theme_mode,
             default_cursor_style: guard.prefs.default_cursor_style,
-        }
+        })
+    }
+}
+
+impl From<&AppState> for CursorStatePayload {
+    fn from(state: &AppState) -> Self {
+        // Safe for tests and non-error-aware callers; production should prefer TryFrom.
+        CursorStatePayload::try_from(state).expect("Application state poisoned")
     }
 }
 

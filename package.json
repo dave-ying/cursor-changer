@@ -1,13 +1,16 @@
 {
   "name": "cursor-changer-root",
   "private": true,
+  "workspaces": [
+    "frontend-vite",
+    "src-tauri"
+  ],
   "scripts": {
-    "postinstall": "cd frontend-vite && npm install",
-    "test": "cd frontend-vite && npm run test:debug",
-    "test:watch": "cd frontend-vite && npm run test:watch",
-    "test:coverage": "cd frontend-vite && npm run test:coverage",
-    "test:ui": "cd frontend-vite && npm run test:ui",
-    "install-frontend": "npm --prefix ./src-tauri install",
+    "test": "npm run test:debug --workspace frontend-vite",
+    "test:watch": "npm run test:watch --workspace frontend-vite",
+    "test:coverage": "npm run test:coverage --workspace frontend-vite",
+    "test:ui": "npm run test:ui --workspace frontend-vite",
+    "install-frontend": "npm install --workspace src-tauri",
     "dev": "cargo tauri dev"
   }
 }

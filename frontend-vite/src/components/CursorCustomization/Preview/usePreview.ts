@@ -121,6 +121,11 @@ export function usePreview() {
     }
   }, [invoke]);
 
+  const resetPreview = useCallback(() => {
+    setSelectedPreviewUrl(null);
+    setSelectedPreviewLoading(false);
+  }, []);
+
   // Clear all selection state
   const clearSelection = useCallback(() => {
     setSelectedCursor(null);
@@ -142,6 +147,7 @@ export function usePreview() {
     setSelectingFromLibrary,
     setSelectedPreviewUrl,
     setSelectedPreviewLoading,
+    resetPreview,
     cancelSelection,
     applyLibraryCursor,
     getPreviewForFile,

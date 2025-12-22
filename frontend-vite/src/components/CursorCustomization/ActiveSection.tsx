@@ -7,25 +7,11 @@ import { logger } from '../../utils/logger';
 import { ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { ActionPillButton } from './ActionPillButton';
 import { CollapsibleSection } from './CollapsibleSection';
+import { cn } from '@/lib/utils';
 
-interface ActiveSectionProps {
-  visibleCursors: any[];
-  customizationMode: string;
-  selectingFromLibrary: boolean;
-  selectedCursor: any;
-  pendingLibraryCursor: any;
-  selectedLibraryCursor: any;
-  selectingCursorForCustomization: boolean;
-  defaultCursorStyle: 'windows' | 'mac';
-  accentColor?: string;
-  onBrowse: (cursor: any) => void;
-  onModeChange: (value: string) => void;
-  onDefaultCursorStyleChange: (value: 'windows' | 'mac') => void | Promise<void>;
-  onResetCursors: () => void | Promise<void>;
-  onCancelPendingLibraryCursor: () => void;
-  loadAvailableCursors: () => void;
-  draggingLib?: any;
-}
+import type { ActiveSectionProps } from './types';
+
+// Interface is now imported from ./types
 
 export function ActiveSection({
   visibleCursors,
@@ -60,8 +46,10 @@ export function ActiveSection({
   return (
     <section
       id="active-cursors-section"
-      className={`rounded-[var(--radius-surface)] border bg-card text-card-foreground shadow-sm active-section ${showModeToggle ? 'active-section--toolbar-open' : ''
-        }`}
+      className={cn(
+        'rounded-[var(--radius-surface)] border bg-card text-card-foreground shadow-sm active-section',
+        showModeToggle && 'active-section--toolbar-open'
+      )}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -72,8 +60,10 @@ export function ActiveSection({
     >
       {/* Header - Conditional based on selection mode */}
       <div
-        className={`px-6 pt-5 pb-5 border-b border-border/50 ${selectingCursorForCustomization ? 'cursor-customization-header-blurred' : ''
-          } active-cursors-header bg-muted/60`}
+        className={cn(
+          'px-6 pt-5 pb-5 border-b border-border/50 active-cursors-header bg-muted/60',
+          selectingCursorForCustomization && 'cursor-customization-header-blurred'
+        )}
         style={{ flexShrink: 0, position: 'relative', zIndex: 1 }}
       >
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -124,7 +114,10 @@ export function ActiveSection({
 
       {!pendingLibraryCursor && (
         <div
-          className={`px-6 pb-4 border-b border-border/50 overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${showModeToggle ? 'opacity-100' : 'opacity-0'}`}
+          className={cn(
+            'px-6 pb-4 border-b border-border/50 overflow-hidden transition-[max-height,opacity] duration-300 ease-out',
+            showModeToggle ? 'opacity-100' : 'opacity-0'
+          )}
           style={{ maxHeight: showModeToggle ? '240px' : '0px' }}
           aria-expanded={showModeToggle}
         >
@@ -215,7 +208,11 @@ export function ActiveSection({
         id="cursor-grid"
         // Dim the grid only if we are selecting FROM the library (focus is on library panel)
         // If we are applying a pending cursor, we want the grid to be active/highlighted
-        className={`cursor-grid px-6 py-6 ${selectingFromLibrary && selectedCursor ? 'dimmed' : ''} ${customizationMode === 'advanced' ? 'cursor-grid--advanced' : ''}`}
+        className={cn(
+          'cursor-grid px-6 py-6',
+          selectingFromLibrary && selectedCursor && 'dimmed',
+          customizationMode === 'advanced' && 'cursor-grid--advanced'
+        )}
         data-testid="cursor-grid"
         style={{ flex: '1 1 0%', minHeight: 0 }}
       >

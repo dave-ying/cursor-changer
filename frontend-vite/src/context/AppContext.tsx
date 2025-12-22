@@ -4,7 +4,6 @@ import { TauriProvider, useTauriContext } from './TauriContext';
 import { AppBootstrapProvider } from './AppBootstrapProvider';
 import { CursorEventsProvider } from './CursorEventsProvider';
 import { LibraryWatcherProvider } from './LibraryWatcherProvider';
-import { MessageProvider } from './MessageContext';
 
 interface AppContextValue {
   invoke: <T = any>(cmd: string, args?: Record<string, any>) => Promise<T>;
@@ -23,15 +22,13 @@ interface AppProviderProps {
 export function AppProvider({ children }: AppProviderProps) {
   return (
     <TauriProvider>
-      <MessageProvider>
-        <AppBootstrapProvider>
-          <CursorEventsProvider>
-            <LibraryWatcherProvider>
-              <AppContextBridge>{children}</AppContextBridge>
-            </LibraryWatcherProvider>
-          </CursorEventsProvider>
-        </AppBootstrapProvider>
-      </MessageProvider>
+      <AppBootstrapProvider>
+        <CursorEventsProvider>
+          <LibraryWatcherProvider>
+            <AppContextBridge>{children}</AppContextBridge>
+          </LibraryWatcherProvider>
+        </CursorEventsProvider>
+      </AppBootstrapProvider>
     </TauriProvider>
   );
 }

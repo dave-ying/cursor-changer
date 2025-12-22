@@ -9,7 +9,6 @@ import * as React from 'react';
 import App from '@/App';
 import { AppProvider } from '@/context/AppContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import { MessageProvider } from '@/context/MessageContext';
 
 // Mock invoke function with tracking
 const mockInvoke = vi.fn((cmd: string, args?: any) => {
@@ -90,7 +89,7 @@ beforeEach(() => {
   };
   
   (window as any).__TAURI__ = tauriMock;
-  (global as any).__TAURI__ = tauriMock;
+  (globalThis as any).__TAURI__ = tauriMock;
   (window as any).__TAURI_INTERNALS__ = { invoke: mockInvoke };
 });
 
@@ -102,9 +101,7 @@ function renderApp() {
   return render(
     <AppProvider>
       <ThemeProvider>
-        <MessageProvider>
-          <App />
-        </MessageProvider>
+        <App />
       </ThemeProvider>
     </AppProvider>
   );

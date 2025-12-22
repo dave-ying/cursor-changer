@@ -1,16 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { create } from 'zustand';
 
-vi.mock('@/services/toastService', () => ({
-  toastService: {
-    show: vi.fn(),
-    remove: vi.fn(),
-    clear: vi.fn(),
-  },
-}));
-
 import { createUIStateSlice, type UIStateSlice } from '@/store/slices/uiStateStore';
 import { toastService } from '@/services/toastService';
+
+
 
 describe('uiStateStore slice', () => {
   const createTestStore = () =>
@@ -20,6 +14,9 @@ describe('uiStateStore slice', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(toastService, 'show').mockImplementation(() => 'mock-id');
+    vi.spyOn(toastService, 'remove').mockImplementation(() => true);
+    vi.spyOn(toastService, 'clear').mockImplementation(() => { });
   });
 
   it('updates message state via showMessage and resets via clearMessage', () => {
@@ -35,7 +32,7 @@ describe('uiStateStore slice', () => {
     expect(useStore.getState().message).toEqual({ text: '', type: '' });
   });
 
-  it('updates customizationMode, activeSection, and selectingCursorForCustomization flags', () => {
+  it('updates customizationMode and activeSection', () => {
     const useStore = createTestStore();
 
     expect(useStore.getState().customizationMode).toBe('simple');
@@ -45,10 +42,6 @@ describe('uiStateStore slice', () => {
     expect(useStore.getState().activeSection).toBe('cursor-customization');
     useStore.getState().setActiveSection('library');
     expect(useStore.getState().activeSection).toBe('library');
-
-    expect(useStore.getState().selectingCursorForCustomization).toBe(false);
-    useStore.getState().setSelectingCursorForCustomization(true);
-    expect(useStore.getState().selectingCursorForCustomization).toBe(true);
   });
 
   it('delegates toast operations to toastService (safeType + duration)', () => {

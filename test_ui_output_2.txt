@@ -1,0 +1,71 @@
+
+> test
+> npm run test:debug --workspace frontend-vite test/unit/store/uiStateStore.test.ts --workspace frontend-vite
+
+
+> cursor-changer-frontend@1.0.0 test:debug
+> vitest run --reporter=verbose --no-coverage test/unit/store/uiStateStore.test.ts
+
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90mC:/Files/GitHub/cursor-changer/frontend-vite[39m
+
+ [32mΓ£ô[39m test/unit/store/uiStateStore.test.ts[2m > [22muiStateStore slice[2m > [22mupdates message state via showMessage and resets via clearMessage[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m test/unit/store/uiStateStore.test.ts[2m > [22muiStateStore slice[2m > [22mupdates customizationMode and activeSection[32m 0[2mms[22m[39m
+ [31m├ù[39m test/unit/store/uiStateStore.test.ts[2m > [22muiStateStore slice[2m > [22mdelegates toast operations to toastService (safeType + duration)[32m 4[2mms[22m[39m
+[31m   ΓåÆ expected "vi.fn()" to be called with arguments: [ 'A', 'info', { duration: 1234 } ][90m
+
+Number of calls: [1m0[22m
+[31m[39m
+ [32mΓ£ô[39m test/unit/store/uiStateStore.test.ts[2m > [22muiStateStore slice[2m > [22mupdates recording and shortcut capture state[32m 0[2mms[22m[39m
+ [31m├ù[39m test/unit/store/uiStateStore.test.ts[2m > [22muiStateStore slice[2m > [22mhandles toast removal/clear operations gracefully when service throws[32m 2[2mms[22m[39m
+[31m   ΓåÆ expected [Function] to throw an error[39m
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 2 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  test/unit/store/uiStateStore.test.ts > uiStateStore slice > delegates toast operations to toastService (safeType + duration)
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'A', 'info', { duration: 1234 } ]
+
+Number of calls: 0
+
+ Γ¥» test/unit/store/uiStateStore.test.ts:58:31
+     56| 
+     57|     useStore.getState().addToast('A', '', 1234);
+     58|     expect(toastService.show).toHaveBeenCalledWith('A', 'info', { duraΓÇª
+       |                               ^
+     59| 
+     60|     useStore.getState().addToast('B', 'success', 2500);
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/2]ΓÄ»
+
+ FAIL  test/unit/store/uiStateStore.test.ts > uiStateStore slice > handles toast removal/clear operations gracefully when service throws
+AssertionError: expected [Function] to throw an error
+
+- Expected: 
+null
+
++ Received: 
+undefined
+
+ Γ¥» test/unit/store/uiStateStore.test.ts:98:58
+     96|     });
+     97| 
+     98|     expect(() => useStore.getState().removeToast('abc')).toThrow('remoΓÇª
+       |                                                          ^
+     99|     expect(() => useStore.getState().clearAllToasts()).toThrow('clear ΓÇª
+    100| 
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[2/2]ΓÄ»
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 02:29:59
+[2m   Duration [22m 1.18s[2m (transform 180ms, setup 325ms, import 13ms, tests 9ms, environment 672ms)[22m
+
+npm error Lifecycle script `test:debug` failed with error:
+npm error code 1
+npm error path C:\Files\GitHub\cursor-changer\frontend-vite
+npm error workspace cursor-changer-frontend@1.0.0
+npm error location C:\Files\GitHub\cursor-changer\frontend-vite
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c vitest run --reporter=verbose --no-coverage test/unit/store/uiStateStore.test.ts

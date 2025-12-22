@@ -4,6 +4,42 @@ use crate::events;
 use crate::state::config::{persist_config, PersistedConfig};
 use crate::state::{AppState, CursorStatePayload};
 
+fn build_payload_and_config(
+    guard: &crate::state::app_state::AppStateWriteGuard<'_>,
+    persist: bool,
+) -> (CursorStatePayload, Option<PersistedConfig>) {
+    let config = if persist {
+        Some(PersistedConfig {
+            shortcut: guard.prefs.shortcut.clone(),
+            shortcut_enabled: Some(guard.prefs.shortcut_enabled),
+            minimize_to_tray: Some(guard.prefs.minimize_to_tray),
+            run_on_startup: Some(guard.prefs.run_on_startup),
+            cursor_size: Some(guard.prefs.cursor_size),
+            accent_color: Some(guard.prefs.accent_color.clone()),
+            theme_mode: Some(guard.prefs.theme_mode),
+            default_cursor_style: Some(guard.prefs.default_cursor_style),
+        })
+    } else {
+        None
+    };
+
+    let payload = CursorStatePayload {
+        hidden: guard.cursor.hidden,
+        shortcut: guard.prefs.shortcut.clone(),
+        shortcut_enabled: guard.prefs.shortcut_enabled,
+        minimize_to_tray: guard.prefs.minimize_to_tray,
+        run_on_startup: guard.prefs.run_on_startup,
+        cursor_size: guard.prefs.cursor_size,
+        last_loaded_cursor_path: guard.cursor.last_loaded_cursor_path.clone(),
+        cursor_paths: guard.cursor.cursor_paths.clone(),
+        accent_color: guard.prefs.accent_color.clone(),
+        theme_mode: guard.prefs.theme_mode,
+        default_cursor_style: guard.prefs.default_cursor_style,
+    };
+
+    (payload, config)
+}
+
 pub fn update_state<F>(
     app: &AppHandle,
     state: &State<AppState>,
@@ -17,36 +53,7 @@ where
         let mut guard = state.write_all()?;
         f(&mut guard)?;
 
-        let config = if persist {
-            Some(PersistedConfig {
-                shortcut: guard.prefs.shortcut.clone(),
-                shortcut_enabled: Some(guard.prefs.shortcut_enabled),
-                minimize_to_tray: Some(guard.prefs.minimize_to_tray),
-                run_on_startup: Some(guard.prefs.run_on_startup),
-                cursor_size: Some(guard.prefs.cursor_size),
-                accent_color: Some(guard.prefs.accent_color.clone()),
-                theme_mode: Some(guard.prefs.theme_mode),
-                default_cursor_style: Some(guard.prefs.default_cursor_style),
-            })
-        } else {
-            None
-        };
-
-        let payload = CursorStatePayload {
-            hidden: guard.cursor.hidden,
-            shortcut: guard.prefs.shortcut.clone(),
-            shortcut_enabled: guard.prefs.shortcut_enabled,
-            minimize_to_tray: guard.prefs.minimize_to_tray,
-            run_on_startup: guard.prefs.run_on_startup,
-            cursor_size: guard.prefs.cursor_size,
-            last_loaded_cursor_path: guard.cursor.last_loaded_cursor_path.clone(),
-            cursor_paths: guard.cursor.cursor_paths.clone(),
-            accent_color: guard.prefs.accent_color.clone(),
-            theme_mode: guard.prefs.theme_mode,
-            default_cursor_style: guard.prefs.default_cursor_style,
-        };
-
-        (payload, config)
+        build_payload_and_config(&guard, persist)
     };
 
     if let Some(config) = config {
@@ -85,34 +92,7 @@ where
         let mut guard = state.write_all()?;
         let result = f(&mut guard)?;
 
-        let config = if persist {
-            Some(PersistedConfig {
-                shortcut: guard.prefs.shortcut.clone(),
-                shortcut_enabled: Some(guard.prefs.shortcut_enabled),
-                minimize_to_tray: Some(guard.prefs.minimize_to_tray),
-                run_on_startup: Some(guard.prefs.run_on_startup),
-                cursor_size: Some(guard.prefs.cursor_size),
-                accent_color: Some(guard.prefs.accent_color.clone()),
-                theme_mode: Some(guard.prefs.theme_mode),
-                default_cursor_style: Some(guard.prefs.default_cursor_style),
-            })
-        } else {
-            None
-        };
-
-        let payload = CursorStatePayload {
-            hidden: guard.cursor.hidden,
-            shortcut: guard.prefs.shortcut.clone(),
-            shortcut_enabled: guard.prefs.shortcut_enabled,
-            minimize_to_tray: guard.prefs.minimize_to_tray,
-            run_on_startup: guard.prefs.run_on_startup,
-            cursor_size: guard.prefs.cursor_size,
-            last_loaded_cursor_path: guard.cursor.last_loaded_cursor_path.clone(),
-            cursor_paths: guard.cursor.cursor_paths.clone(),
-            accent_color: guard.prefs.accent_color.clone(),
-            theme_mode: guard.prefs.theme_mode,
-            default_cursor_style: guard.prefs.default_cursor_style,
-        };
+        let (payload, config) = build_payload_and_config(&guard, persist);
 
         ((payload, result), config)
     };
@@ -141,7 +121,7 @@ where
 }
 
 pub fn emit_state(app: &AppHandle, state: &State<AppState>) -> Result<CursorStatePayload, String> {
-    let payload = CursorStatePayload::from(&**state);
+    let payload = CursorStatePayload::try_from(&**state)?;
 
     let _ = app.emit(events::CURSOR_STATE, payload.clone());
     Ok(payload)

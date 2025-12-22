@@ -81,7 +81,7 @@ pub fn update_shortcut(
     }
 
     let config = PersistedConfig::from(&**state);
-    let payload = CursorStatePayload::from(&**state);
+    let payload = CursorStatePayload::try_from(&**state)?;
 
     // Persist the chosen shortcut and preferences to disk
     if let Err(e) = persist_config(app, &config) {

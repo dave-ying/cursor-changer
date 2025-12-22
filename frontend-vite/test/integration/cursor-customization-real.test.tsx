@@ -3,7 +3,6 @@ import { render, screen, waitFor, fireEvent, cleanup } from '@testing-library/re
 import * as React from 'react';
 import { AppProvider } from '@/context/AppContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import { MessageProvider } from '@/context/MessageContext';
 import { CursorCustomization } from '@/components/CursorCustomization';
 
 // Note: We intentionally test the real CursorCustomization module (not a mock component).
@@ -118,9 +117,7 @@ describe('CursorCustomization (real) integration', () => {
     return render(
       <AppProvider>
         <ThemeProvider>
-          <MessageProvider>
-            <CursorCustomization />
-          </MessageProvider>
+          <CursorCustomization />
         </ThemeProvider>
       </AppProvider>
     );

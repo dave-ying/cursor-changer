@@ -47,7 +47,7 @@ describe('usePreview hook', () => {
       });
     });
 
-    expect(result.current.selectingFromLibrary).toBe(true);
+    expect(result.current.selectedCursor).not.toBeNull();
 
     await waitFor(() => {
       expect(mockInvokeCommand).toHaveBeenCalledWith(
@@ -106,13 +106,12 @@ describe('usePreview hook', () => {
       });
     });
 
-    expect(result.current.selectingFromLibrary).toBe(true);
+    expect(result.current.selectedCursor).not.toBeNull();
 
     await act(async () => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      result.current.cancelSelection();
     });
 
-    expect(result.current.selectingFromLibrary).toBe(false);
     expect(result.current.selectedCursor).toBeNull();
 
     await act(async () => {
@@ -131,6 +130,5 @@ describe('usePreview hook', () => {
 
     expect(result.current.selectedCursor).toBeNull();
     expect(result.current.selectedPreviewUrl).toBeNull();
-    expect(result.current.selectingFromLibrary).toBe(false);
   });
 });

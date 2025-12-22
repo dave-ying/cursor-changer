@@ -44,56 +44,56 @@ enum CursorVisibilityIntent {
     ShowIfHidden,
 }
 
-fn apply_cursor_visibility_intent_system(
-    intent: CursorVisibilityIntent,
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+enum CursorAction {
+    Hide,
+    Show,
+    Noop,
+}
+
+fn decide_cursor_action(intent: CursorVisibilityIntent, currently_hidden: bool) -> CursorAction {
+    match intent {
+        CursorVisibilityIntent::Hide => CursorAction::Hide,
+        CursorVisibilityIntent::Show => CursorAction::Show,
+        CursorVisibilityIntent::Toggle => {
+            if currently_hidden {
+                CursorAction::Show
+            } else {
+                CursorAction::Hide
+            }
+        }
+        CursorVisibilityIntent::ShowIfHidden => {
+            if currently_hidden {
+                CursorAction::Show
+            } else {
+                CursorAction::Noop
+            }
+        }
+    }
+}
+
+fn apply_cursor_action_system(
+    action: CursorAction,
     currently_hidden: bool,
     cursor_paths: &HashMap<String, String>,
     cursor_size: i32,
 ) -> Result<bool, String> {
-    match intent {
-        CursorVisibilityIntent::Hide => {
+    match action {
+        CursorAction::Hide => {
             if hide_cursor_system() {
                 Ok(true)
             } else {
                 Err("Failed to hide system cursors".into())
             }
         }
-        CursorVisibilityIntent::Show => {
+        CursorAction::Show => {
             if show_cursor_system(cursor_paths, cursor_size) {
                 Ok(false)
             } else {
                 Err("Failed to restore cursors".into())
             }
         }
-        CursorVisibilityIntent::Toggle => {
-            if currently_hidden {
-                apply_cursor_visibility_intent_system(
-                    CursorVisibilityIntent::Show,
-                    currently_hidden,
-                    cursor_paths,
-                    cursor_size,
-                )
-            } else {
-                apply_cursor_visibility_intent_system(
-                    CursorVisibilityIntent::Hide,
-                    currently_hidden,
-                    cursor_paths,
-                    cursor_size,
-                )
-            }
-        }
-        CursorVisibilityIntent::ShowIfHidden => {
-            if currently_hidden {
-                apply_cursor_visibility_intent_system(
-                    CursorVisibilityIntent::Show,
-                    currently_hidden,
-                    cursor_paths,
-                    cursor_size,
-                )
-            } else {
-                Ok(false)
-            }
-        }
+        CursorAction::Noop => Ok(currently_hidden),
     }
 }
 
@@ -107,16 +107,13 @@ fn apply_cursor_visibility_intent_with_shared_state(
             .read()
             .map_err(|_| "Application state poisoned".to_string())?;
 
-        if matches!(intent, CursorVisibilityIntent::ShowIfHidden) && !cursor_guard.hidden {
-            return Ok(CursorStatePayload::from(shared));
+        let action = decide_cursor_action(intent, cursor_guard.hidden);
+
+        if matches!(action, CursorAction::Noop) {
+            return CursorStatePayload::try_from(shared);
         }
 
-        let needs_show_snapshot = match intent {
-            CursorVisibilityIntent::Show => true,
-            CursorVisibilityIntent::Toggle => cursor_guard.hidden,
-            CursorVisibilityIntent::ShowIfHidden => cursor_guard.hidden,
-            CursorVisibilityIntent::Hide => false,
-        };
+        let needs_show_snapshot = matches!(action, CursorAction::Show);
 
         let cursor_paths = if needs_show_snapshot {
             cursor_guard.cursor_paths.clone()
@@ -135,12 +132,8 @@ fn apply_cursor_visibility_intent_with_shared_state(
         (currently_hidden, cursor_paths, prefs_guard.cursor_size)
     };
 
-    let new_hidden = apply_cursor_visibility_intent_system(
-        intent,
-        currently_hidden,
-        &cursor_paths,
-        cursor_size,
-    )?;
+    let action = decide_cursor_action(intent, currently_hidden);
+    let new_hidden = apply_cursor_action_system(action, currently_hidden, &cursor_paths, cursor_size)?;
 
     {
         let mut cursor_guard = shared
@@ -150,7 +143,7 @@ fn apply_cursor_visibility_intent_with_shared_state(
         cursor_guard.hidden = new_hidden;
     }
 
-    Ok(CursorStatePayload::from(shared))
+    CursorStatePayload::try_from(shared)
 }
 
 pub fn hide_cursor(state: &AppState) -> Result<(), String> {
@@ -181,7 +174,7 @@ pub fn toggle_cursor_internal(state: &AppState) -> Result<bool, String> {
 
 #[tauri::command]
 pub fn get_status(state: State<AppState>) -> Result<CursorStatePayload, String> {
-    Ok(CursorStatePayload::from(&*state))
+    CursorStatePayload::try_from(&*state)
 }
 
 #[tauri::command]
@@ -218,6 +211,45 @@ mod tests {
         set_apply_blank_mock_guard, set_apply_cursor_from_file_with_size_mock_guard,
         set_restore_mock_guard,
     };
+
+    #[test]
+    fn decide_cursor_action_covers_all_intents() {
+        assert_eq!(
+            decide_cursor_action(CursorVisibilityIntent::Hide, false),
+            CursorAction::Hide
+        );
+        assert_eq!(
+            decide_cursor_action(CursorVisibilityIntent::Hide, true),
+            CursorAction::Hide
+        );
+
+        assert_eq!(
+            decide_cursor_action(CursorVisibilityIntent::Show, false),
+            CursorAction::Show
+        );
+        assert_eq!(
+            decide_cursor_action(CursorVisibilityIntent::Show, true),
+            CursorAction::Show
+        );
+
+        assert_eq!(
+            decide_cursor_action(CursorVisibilityIntent::Toggle, false),
+            CursorAction::Hide
+        );
+        assert_eq!(
+            decide_cursor_action(CursorVisibilityIntent::Toggle, true),
+            CursorAction::Show
+        );
+
+        assert_eq!(
+            decide_cursor_action(CursorVisibilityIntent::ShowIfHidden, false),
+            CursorAction::Noop
+        );
+        assert_eq!(
+            decide_cursor_action(CursorVisibilityIntent::ShowIfHidden, true),
+            CursorAction::Show
+        );
+    }
 
     #[test]
     fn test_cursor_commands_scenarios() {

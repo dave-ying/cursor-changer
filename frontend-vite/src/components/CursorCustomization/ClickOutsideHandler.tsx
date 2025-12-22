@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import type { LibraryCursor } from '@/types/generated/LibraryCursor';
 
 /**
  * ClickOutsideHandler component - handles click outside detection for selection cancellation
@@ -6,7 +7,7 @@ import React, { useEffect } from 'react';
  */
 interface ClickOutsideHandlerProps {
   selectingFromLibrary: boolean;
-  pendingLibraryCursor: any;
+  pendingLibraryCursor: LibraryCursor | null;
   selectingCursorForCustomization: boolean;
   cancelBrowseMode: () => void;
   cancelPreviewSelection?: () => void;
@@ -16,8 +17,8 @@ export function ClickOutsideHandler({
   selectingFromLibrary,
   pendingLibraryCursor,
   selectingCursorForCustomization,
-  cancelBrowseMode
-  , cancelPreviewSelection
+  cancelBrowseMode,
+  cancelPreviewSelection
 }: ClickOutsideHandlerProps) {
   // Handle click outside to cancel selection mode
   useEffect(() => {

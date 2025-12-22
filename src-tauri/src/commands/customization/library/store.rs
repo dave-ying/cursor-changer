@@ -1,5 +1,9 @@
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 use tauri::{AppHandle, Manager};
 
 use super::{LibraryCursor, LibraryData};
@@ -123,85 +127,122 @@ fn resolve_default_library_cursors_dir(app: &AppHandle) -> Result<std::path::Pat
     Err("Failed to resolve default library cursors directory".to_string())
 }
 
-/// Initialize the library with default cursors by copying from bundled resources
-pub fn initialize_library_with_defaults(app: &AppHandle) -> Result<LibraryData, String> {
-    let default_dir = resolve_default_library_cursors_dir(app)?;
-    let cursors_dir = crate::paths::cursors_dir()?;
-    
-    cc_debug!(
-        "[CursorChanger] Initializing library with defaults from: {}",
-        default_dir.display()
-    );
-    
-    let mut library = LibraryData::default();
-    
-    // Read all .cur and .ani files from the default library directory
-    let entries = fs::read_dir(&default_dir)
-        .map_err(|e| format!("Failed to read default library directory: {}", e))?;
-    
-    let mut cursor_files: Vec<_> = entries
+/// Enumerate cursor files in a directory (.cur/.ani only)
+fn list_default_library_cursor_files(dir: &Path) -> Result<Vec<PathBuf>, String> {
+    let entries =
+        fs::read_dir(dir).map_err(|e| format!("Failed to read default library directory: {}", e))?;
+
+    let cursor_files: Vec<PathBuf> = entries
         .filter_map(|e| e.ok())
-        .filter(|e| {
-            let path = e.path();
+        .map(|e| e.path())
+        .filter(|path| {
             let ext = path.extension().and_then(|s| s.to_str()).unwrap_or("");
             ext.eq_ignore_ascii_case("cur") || ext.eq_ignore_ascii_case("ani")
         })
         .collect();
-    
-    // Sort by filename for consistent ordering
-    cursor_files.sort_by(|a, b| a.file_name().cmp(&b.file_name()));
-    
-    // Sort cursor files in reverse numerical order (1.cur first, 12.cur last)
-    cursor_files.sort_by(|a, b| {
-        let a_name = a.file_name().to_string_lossy().to_string();
-        let b_name = b.file_name().to_string_lossy().to_string();
-        
-        // Extract numbers from filenames (e.g., "1.cur" -> 1, "10.cur" -> 10)
-        let a_num = a_name.split('.').next().and_then(|s| s.parse::<u32>().ok()).unwrap_or(u32::MAX);
-        let b_num = b_name.split('.').next().and_then(|s| s.parse::<u32>().ok()).unwrap_or(u32::MAX);
-        
-        a_num.cmp(&b_num)
-    });
-    
-    // Get the current time for timestamp calculation
-    let now = chrono::Utc::now();
+
+    Ok(cursor_files)
+}
+
+fn cursor_numeric_prefix(path: &Path) -> Option<u32> {
+    path.file_stem()
+        .and_then(|s| s.to_str())
+        .and_then(|stem| stem.parse::<u32>().ok())
+}
+
+fn cursor_sort_key(path: &Path) -> (u32, String) {
+    let file_name = path
+        .file_name()
+        .and_then(|s| s.to_str())
+        .unwrap_or_default()
+        .to_ascii_lowercase();
+    let number = cursor_numeric_prefix(path).unwrap_or(u32::MAX);
+    (number, file_name)
+}
+
+/// Friendly name + created_at for a library entry based on filename and position
+fn derive_library_entry_metadata(
+    file_name: &str,
+    now: DateTime<Utc>,
+    total: usize,
+    position: usize,
+) -> (String, String) {
+    let name = file_name
+        .trim_end_matches(".cur")
+        .trim_end_matches(".CUR")
+        .trim_end_matches(".ani")
+        .trim_end_matches(".ANI")
+        .to_string();
+
+    let days_ago = (total.saturating_sub(position + 1)) as i64;
+    let created_at = (now - Duration::days(days_ago)).to_rfc3339();
+
+    (name, created_at)
+}
+
+/// Copy a default cursor into the user cursors directory and return the destination path
+fn copy_default_cursor_to_user_dir(
+    source_path: &Path,
+    cursors_dir: &Path,
+) -> Result<PathBuf, String> {
+    if let Some(parent) = cursors_dir.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("Failed to create cursors directory: {}", e))?;
+    }
+
+    let file_name = source_path
+        .file_name()
+        .ok_or_else(|| "Source cursor missing filename".to_string())?;
+    let dest_path = cursors_dir.join(file_name);
+
+    fs::copy(source_path, &dest_path)
+        .map_err(|e| format!("Failed to copy default cursor {}: {}", file_name.to_string_lossy(), e))?;
+
+    Ok(dest_path)
+}
+
+/// Initialize the library with default cursors by copying from bundled resources
+pub fn initialize_library_with_defaults(app: &AppHandle) -> Result<LibraryData, String> {
+    let default_dir = resolve_default_library_cursors_dir(app)?;
+    let cursors_dir = crate::paths::cursors_dir()?;
+
+    cc_debug!(
+        "[CursorChanger] Initializing library with defaults from: {}",
+        default_dir.display()
+    );
+
+    // Deterministic ordering: numeric filename prefixes first (ascending), then case-insensitive name
+    let mut cursor_files = list_default_library_cursor_files(&default_dir)?;
+    cursor_files.sort_by_key(|path| cursor_sort_key(path));
+
+    let now = Utc::now();
     let total_cursors = cursor_files.len();
-    
-    for (i, entry) in cursor_files.into_iter().enumerate() {
-        let source_path = entry.path();
-        let file_name = source_path.file_name()
-            .and_then(|s| s.to_str())
-            .unwrap_or("cursor")
-            .to_string();
-        
-        // Generate a friendly name from the filename (remove extension and number prefix)
-        let name = file_name
-            .trim_end_matches(".cur")
-            .trim_end_matches(".CUR")
-            .trim_end_matches(".ani")
-            .trim_end_matches(".ANI")
-            .to_string();
-        
-        // Copy to user's cursors directory
-        let dest_path = cursors_dir.join(&file_name);
-        
-        if let Err(e) = fs::copy(&source_path, &dest_path) {
-            cc_warn!(
-                "[CursorChanger] Failed to copy default cursor {}: {}",
-                file_name,
-                e
-            );
-            continue;
-        }
-        
-        // Read click point from the cursor file
+    let mut library = LibraryData::default();
+
+    for (position, source_path) in cursor_files.into_iter().enumerate() {
+        let file_name = match source_path.file_name().and_then(|s| s.to_str()) {
+            Some(name) => name.to_string(),
+            None => {
+                cc_warn!(
+                    "[CursorChanger] Skipping default cursor with invalid filename: {}",
+                    source_path.display()
+                );
+                continue;
+            }
+        };
+
+        let dest_path = match copy_default_cursor_to_user_dir(&source_path, &cursors_dir) {
+            Ok(dest) => dest,
+            Err(err) => {
+                cc_warn!("[CursorChanger] {err}");
+                continue;
+            }
+        };
+
         let (click_x, click_y) = read_cursor_click_point(&dest_path).unwrap_or((0, 0));
-        
-        // Calculate timestamp - newer cursors (lower numbers) get more recent timestamps
-        // This makes 1.cur the newest and 12.cur the oldest when sorted by date
-        let days_ago = (total_cursors - i - 1) as i64;
-        let created_at = (now - chrono::Duration::days(days_ago)).to_rfc3339();
-        
+        let (name, created_at) =
+            derive_library_entry_metadata(&file_name, now, total_cursors, position);
+
         let cursor = LibraryCursor {
             id: crate::utils::library_meta::new_library_cursor_id(),
             name,
@@ -210,28 +251,45 @@ pub fn initialize_library_with_defaults(app: &AppHandle) -> Result<LibraryData, 
             click_point_y: click_y,
             created_at,
         };
-        
+
         library.cursors.push(cursor);
     }
-    
+
     cc_debug!(
         "[CursorChanger] Initialized library with {} default cursors",
         library.cursors.len()
     );
-    
+
     save_library(app, &library)?;
     Ok(library)
+}
+
+/// .CUR file format constants
+mod cursor_format {
+    /// Size of the ICONDIR header in bytes
+    pub const ICONDIR_SIZE: usize = 6;
+    /// Offset to hotspot X coordinate in ICONDIRENTRY (after ICONDIR header)
+    pub const HOTSPOT_X_OFFSET: usize = 10;
+    /// Offset to hotspot Y coordinate in ICONDIRENTRY
+    pub const HOTSPOT_Y_OFFSET: usize = 12;
+    /// Minimum bytes needed to read hotspot from cursor file
+    pub const MIN_HEADER_SIZE: usize = 14;
 }
 
 /// Read click point (hotspot) from a cursor file
 fn read_cursor_click_point(path: &std::path::Path) -> Option<(u16, u16)> {
     let data = fs::read(path).ok()?;
     
-    // .CUR file format: hotspot is at bytes 10-11 (x) and 12-13 (y) in the directory entry
-    // This is after the ICONDIR header (6 bytes) + first 4 bytes of ICONDIRENTRY
-    if data.len() >= 14 {
-        let hotspot_x = u16::from_le_bytes([data[10], data[11]]);
-        let hotspot_y = u16::from_le_bytes([data[12], data[13]]);
+    // .CUR file format: hotspot is stored in the ICONDIRENTRY after the ICONDIR header
+    if data.len() >= cursor_format::MIN_HEADER_SIZE {
+        let hotspot_x = u16::from_le_bytes([
+            data[cursor_format::HOTSPOT_X_OFFSET],
+            data[cursor_format::HOTSPOT_X_OFFSET + 1]
+        ]);
+        let hotspot_y = u16::from_le_bytes([
+            data[cursor_format::HOTSPOT_Y_OFFSET],
+            data[cursor_format::HOTSPOT_Y_OFFSET + 1]
+        ]);
         return Some((hotspot_x, hotspot_y));
     }
     
@@ -241,6 +299,7 @@ fn read_cursor_click_point(path: &std::path::Path) -> Option<(u16, u16)> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tempfile::tempdir;
 
     #[test]
     fn test_library_data_default() {
@@ -318,5 +377,42 @@ mod tests {
                 assert_eq!(legacy_library.cursors[0].click_point_y, 8);
             }
         }
+    }
+
+    #[test]
+    fn test_cursor_sorting_numeric_then_alpha() {
+        let tmp_dir = tempdir().expect("tmp");
+        let dir_path = tmp_dir.path();
+
+        let files = ["10.cur", "2.cur", "alpha.ani", "beta.cur"];
+        for file in &files {
+            let path = dir_path.join(file);
+            fs::write(&path, []).expect("write cursor");
+        }
+
+        let mut cursor_files = list_default_library_cursor_files(dir_path).expect("list");
+        cursor_files.sort_by_key(|p| cursor_sort_key(p));
+
+        let ordered: Vec<String> = cursor_files
+            .iter()
+            .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
+            .collect();
+
+        assert_eq!(ordered, vec!["2.cur", "10.cur", "alpha.ani", "beta.cur"]);
+    }
+
+    #[test]
+    fn test_metadata_derivation_trims_extension_and_assigns_dates() {
+        let now = Utc.with_ymd_and_hms(2025, 1, 10, 0, 0, 0).unwrap();
+        let total = 3;
+
+        let (name_first, created_first) =
+            derive_library_entry_metadata("1.cur", now, total, 0);
+        let (name_last, created_last) =
+            derive_library_entry_metadata("arrow.ANI", now, total, 2);
+
+        assert_eq!(name_first, "1");
+        assert!(created_first < created_last, "earlier entries should be older");
+        assert_eq!(name_last, "arrow");
     }
 }

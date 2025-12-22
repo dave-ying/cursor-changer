@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { useMessage } from '../../context/MessageContext';
+import { useMessage } from '../../hooks/useMessage';
 import { useAppStore } from '../../store/useAppStore';
 import { logger } from '../../utils/logger';
 import { Commands, invokeCommand } from '../../tauri/commands';

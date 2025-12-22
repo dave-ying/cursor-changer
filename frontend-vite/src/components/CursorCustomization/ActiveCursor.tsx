@@ -6,8 +6,14 @@ import { toastService } from '../../services/toastService';
 import { useLibraryAnimation, useAnimationCSSProperties } from '../../hooks/useLibraryAnimation';
 import { AniPreview, useAniPreview } from './AniPreview';
 import { LoaderCircle } from 'lucide-react';
-import { Commands, invokeCommand } from '../../tauri/commands';
+import { Commands } from '../../tauri/commands';
 import { logger } from '../../utils/logger';
+import type { CursorInfo } from '../../types/generated/CursorInfo';
+
+import type { DraggedLibraryCursor } from './types';
+import { invokeWithFeedback } from '../../store/operations/invokeWithFeedback';
+import type { Message } from '../../store/slices/uiStateStore';
+
 import { 
   getCachedPreview, 
   setCachedPreview, 
@@ -28,20 +34,30 @@ export function ActiveCursor({
   loadAvailableCursors,
   draggingLib
 }: {
-  cursor: any;
-  onBrowse: (cursor: any) => void;
+  cursor: CursorInfo;
+  onBrowse: (cursor: CursorInfo) => void;
   isSelected?: boolean;
   isTarget?: boolean;
   isHighlighted?: boolean;
   animationIndex?: number;
   enablePulseAnimation?: boolean;
-  loadAvailableCursors?: () => void;
-  draggingLib?: any;
+  loadAvailableCursors?: () => void | Promise<void>;
+  draggingLib?: DraggedLibraryCursor | null;
 }) {
   const { invoke } = useApp();
+  const showMessageTyped = useCallback(
+    (text: string, type?: Message['type']) => {
+      const normalizedType: Message['type'] | undefined =
+        type === '' || type === undefined ? undefined : type;
+      toastService.show(text, (normalizedType ?? 'info') as any);
+    },
+    []
+  );
+
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [resetKey, setResetKey] = useState<number>(0);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
 
   // Check if this is an ANI file for optimized animated preview
   const isAniFile = cursor.image_path?.toLowerCase().endsWith('.ani');
@@ -103,9 +119,16 @@ export function ActiveCursor({
     setPreviewUrl(null);
 
     // Create the load promise
-    const loadPromise = filePath
-      ? invokeCommand(invoke, Commands.getLibraryCursorPreview, { file_path: filePath })
-      : invokeCommand(invoke, Commands.getSystemCursorPreview, { cursor_name: cursor.name });
+    const loadPromise = (async () => {
+      const result = await invokeWithFeedback(invoke, filePath ? Commands.getLibraryCursorPreview : Commands.getSystemCursorPreview, {
+        args: filePath ? { file_path: filePath } : { cursor_name: cursor.name },
+        logLabel: `[ActiveCursor] Failed to load preview for ${cursor.name}:`
+      });
+      if (result.status === 'success') {
+        return result.value as string;
+      }
+      throw new Error('Preview load failed');
+    })();
 
     // Wrap and register as pending to prevent duplicate requests
     const wrappedPromise = loadPromise
@@ -117,7 +140,7 @@ export function ActiveCursor({
         }
         return dataUrl;
       })
-      .catch(err => {
+      .catch((err: unknown) => {
         logger.warn(`Failed to load cursor preview for ${cursor.name}:`, err);
         if (mounted) {
           setPreviewUrl(null);
@@ -131,8 +154,12 @@ export function ActiveCursor({
     return () => { mounted = false; };
   }, [cursor.image_path, cursor.name, cursor.display_name, invoke, resetKey, isAniFile, aniLoading]);
 
-  const hasCustom = Boolean(cursor.image_path);
+  const hasCustom = Boolean(cursor.image_path) || Boolean((cursor as any).is_custom);
+
   const filename = cursor.image_path ? (cursor.image_path.split('\\').pop() || cursor.image_path.split('/').pop() || 'custom') : '';
+  const displayName = cursor.display_name ?? cursor.name;
+  const hotspotX = (cursor as any).hotspot_x;
+  const hotspotY = (cursor as any).hotspot_y;
 
   // Select Cursor Mode:
   // Card is both:
@@ -166,7 +193,17 @@ export function ActiveCursor({
       setPreviewUrl(null);
       setLoading(true);
 
-      await invokeCommand(invoke, Commands.resetCursorToDefault, { cursor_name: cursor.name });
+      const resetResult = await invokeWithFeedback(invoke, Commands.resetCursorToDefault, {
+        args: { cursor_name: cursor.name },
+        logLabel: '[ActiveCursor] Failed to reset cursor:',
+        errorMessage: (err) => `Failed to reset ${cursor.display_name || cursor.name}: ${String(err)}`,
+        errorType: 'error'
+      });
+
+      if (resetResult.status !== 'success') {
+        setLoading(false);
+        return;
+      }
       logger.debug('[ActiveCursor] Backend reset complete');
 
       // Reload cursors to get the updated cursor data (image_path will be null)
@@ -179,7 +216,12 @@ export function ActiveCursor({
       // Don't wait for the cursor prop to update - load it now
       logger.debug('[ActiveCursor] Loading system cursor preview for:', cursor.name);
       try {
-        const dataUrl = await invokeCommand(invoke, Commands.getSystemCursorPreview, { cursor_name: cursor.name });
+        const previewResult = await invokeWithFeedback(invoke, Commands.getSystemCursorPreview, {
+          args: { cursor_name: cursor.name },
+          logLabel: '[ActiveCursor] Failed to load system cursor preview after reset:'
+        });
+        const dataUrl = previewResult.status === 'success' ? (previewResult.value as string) : null;
+
         logger.debug('[ActiveCursor] System cursor preview result:', dataUrl ? dataUrl.substring(0, 100) + '...' : 'null');
         if (dataUrl) {
           setPreviewUrl(dataUrl);
@@ -225,11 +267,13 @@ export function ActiveCursor({
     <>
       <div
         ref={setNodeRef}
-        className={`cursor-card ${isOver ? 'drop-target' : ''} ${isSelected ? 'selected-for-browse select-cursor-mode-active' : ''} ${isTarget ? 'target-mode' : ''} ${isHighlighted ? 'library-highlighted' : ''}`}
+        className={`cursor-card ${isOver ? 'drop-target' : ''} ${isSelected ? 'selected-for-browse select-cursor-mode-active' : ''} ${isTarget ? 'target-mode' : ''} ${isHighlighted ? 'library-highlighted' : ''} ${isHovered ? 'hover' : ''}`}
         role="button"
         tabIndex={0}
         onClick={handleAction}
         onContextMenu={handleContextMenu}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         onKeyDown={(e: React.KeyboardEvent) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -239,7 +283,6 @@ export function ActiveCursor({
         data-dnd-droppable-id={`slot-${cursor.name}`}
         data-dnd-droppable-type="slot"
         data-testid={`cursor-card-${cursor.name}`}
-        style={{ cursor: 'pointer' }}
       >
         <div
           className={`cursor-preview ${hasCustom ? 'has-custom-cursor' : ''}`}
@@ -271,10 +314,25 @@ export function ActiveCursor({
               style={{ display: 'block' }}
             />
           ) : (
-            <span className="cursor-preview-emoji" style={{ color: '#ffffff' }}>✓</span>
+            <span className="cursor-preview-emoji" style={{ color: '#ffffff' }}>
+              ✓
+            </span>
           )}
         </div>
-        <div className="cursor-name">{cursor.display_name}</div>
+        <div className="cursor-name">
+          <span>{displayName}</span>
+          {hasCustom && (
+            <span
+              className="cursor-custom-indicator"
+              data-testid={`cursor-custom-indicator-${cursor.name}`}
+            >
+              Custom
+            </span>
+          )}
+          {typeof hotspotX === 'number' && typeof hotspotY === 'number' && (
+            <div className="cursor-hotspot">Hotspot: ({hotspotX}, {hotspotY})</div>
+          )}
+        </div>
       </div>
 
       <ActiveCursorContextMenu

@@ -8,7 +8,6 @@ import * as React from 'react';
 import App from '@/App';
 import { AppProvider } from '@/context/AppContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import { MessageProvider } from '@/context/MessageContext';
 
 let currentTheme = 'dark';
 let currentAccent = '#7c3aed';
@@ -96,9 +95,7 @@ function renderApp() {
   return render(
     <AppProvider>
       <ThemeProvider>
-        <MessageProvider>
-          <App />
-        </MessageProvider>
+        <App />
       </ThemeProvider>
     </AppProvider>
   );

@@ -1,6 +1,7 @@
 // Zustand store for cursor changer application
 // Refactored: combines focused slices and operations
-import { create, StateCreator, StoreApi } from 'zustand';
+import { create, StateCreator } from 'zustand';
+
 import { devtools } from 'zustand/middleware';
 
 // Import slices
@@ -26,27 +27,16 @@ type AppState = CursorStateSlice &
     DataLoadingOperations;
   };
 
-// Helper to invoke slice creators without requiring the third store API argument.
-// This is type-safe because our slices don't use the store API parameter.
-type SliceCreator<T> = StateCreator<T, [], [], T>;
-function createSlice<T>(
-  creator: SliceCreator<T>,
-  set: StoreApi<AppState>['setState'],
-  get: StoreApi<AppState>['getState']
-): T {
-  // Slices only use set/get; the store API is unused, so we pass a minimal stub.
-  const stubApi = { setState: set, getState: get, subscribe: () => () => {}, destroy: () => {} };
-  return creator(set as never, get as never, stubApi as never);
-}
+type SliceForAppState<T> = StateCreator<AppState, [], [], T>;
 
 export const useAppStore = create<AppState>()(
   devtools(
-    (set, get) => {
-      // Create all slices first
-      const cursorStateSlice = createSlice(createCursorStateSlice, set, get);
-      const uiStateSlice = createSlice(createUIStateSlice, set, get);
-      const libraryStateSlice = createSlice(createLibraryStateSlice, set, get);
-      const windowStateSlice = createSlice(createWindowStateSlice, set, get);
+    (set, get, api) => {
+      // Bind slices to the real store API (set/get/api) instead of a stubbed API
+      const cursorStateSlice = (createCursorStateSlice as SliceForAppState<CursorStateSlice>)(set, get, api);
+      const uiStateSlice = (createUIStateSlice as SliceForAppState<UIStateSlice>)(set, get, api);
+      const libraryStateSlice = (createLibraryStateSlice as SliceForAppState<LibraryStateSlice>)(set, get, api);
+      const windowStateSlice = (createWindowStateSlice as SliceForAppState<WindowStateSlice>)(set, get, api);
 
       // Create a combined state object that includes all slices first
       const stateWithSlices = {

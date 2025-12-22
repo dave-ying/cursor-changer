@@ -5,6 +5,8 @@ import { logger } from '../utils/logger';
 export class ToastService {
   private static instance: ToastService;
   private toasts: Toast[] = [];
+  private timeouts: Map<string | number, ReturnType<typeof setTimeout>> = new Map();
+  private expirations: Map<string | number, number> = new Map();
   private listeners: Set<() => void> = new Set();
 
   private constructor() {}
@@ -29,6 +31,7 @@ export class ToastService {
 
   // Get current toasts
   getToasts(): Toast[] {
+    this.pruneExpiredToasts();
     return [...this.toasts];
   }
 
@@ -46,17 +49,30 @@ export class ToastService {
 
       // Add toast to the beginning of the array
       this.toasts = [toast, ...this.toasts];
+      if (toast.duration && toast.duration > 0) {
+        this.expirations.set(id, Date.now() + toast.duration);
+      }
 
-      // Limit number of toasts
+      // Limit number of toasts and clear any orphaned timers for removed toasts
       if (this.toasts.length > TOAST_DEFAULTS.MAX_TOASTS) {
+        const removed = this.toasts.slice(TOAST_DEFAULTS.MAX_TOASTS);
+        removed.forEach(t => {
+          const timeout = this.timeouts.get(t.id);
+          if (timeout) {
+            clearTimeout(timeout);
+            this.timeouts.delete(t.id);
+          }
+          this.expirations.delete(t.id);
+        });
         this.toasts = this.toasts.slice(0, TOAST_DEFAULTS.MAX_TOASTS);
       }
 
       // Set up auto-dismiss if duration > 0
       if (toast.duration && toast.duration > 0) {
-        setTimeout(() => {
+        const timeout = setTimeout(() => {
           this.remove(id);
         }, toast.duration);
+        this.timeouts.set(id, timeout);
       }
 
       this.notifyListeners();
@@ -70,14 +86,21 @@ export class ToastService {
   // Remove a specific toast
   remove(id: string | number): boolean {
     try {
-      const initialLength = this.toasts.length;
-      this.toasts = this.toasts.filter(toast => toast.id !== id);
-      
-      if (this.toasts.length !== initialLength) {
-        this.notifyListeners();
-        return true;
+      const exists = this.toasts.some(toast => toast.id === id);
+      if (!exists) {
+        return false;
       }
-      return false;
+
+      const timeout = this.timeouts.get(id);
+      if (timeout) {
+        clearTimeout(timeout);
+        this.timeouts.delete(id);
+      }
+      this.expirations.delete(id);
+
+      this.toasts = this.toasts.filter(toast => toast.id !== id);
+      this.notifyListeners();
+      return true;
     } catch (error) {
       logger.error('ToastService: Failed to remove toast:', error);
       return false;
@@ -87,10 +110,40 @@ export class ToastService {
   // Clear all toasts
   clear(): void {
     try {
+      this.timeouts.forEach(timeout => clearTimeout(timeout));
+      this.timeouts.clear();
+      this.expirations.clear();
       this.toasts = [];
       this.notifyListeners();
     } catch (error) {
       logger.error('ToastService: Failed to clear toasts:', error);
+    }
+  }
+
+  private pruneExpiredToasts(): void {
+    if (!this.expirations.size || !this.toasts.length) return;
+
+    const now = Date.now();
+    const initialLength = this.toasts.length;
+
+    this.toasts = this.toasts.filter(toast => {
+      const expiry = this.expirations.get(toast.id);
+      const expired = expiry !== undefined && expiry <= now;
+
+      if (expired) {
+        const timeout = this.timeouts.get(toast.id);
+        if (timeout) {
+          clearTimeout(timeout);
+          this.timeouts.delete(toast.id);
+        }
+        this.expirations.delete(toast.id);
+      }
+
+      return !expired;
+    });
+
+    if (this.toasts.length !== initialLength) {
+      this.notifyListeners();
     }
   }
 

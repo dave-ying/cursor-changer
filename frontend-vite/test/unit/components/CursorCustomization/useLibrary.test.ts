@@ -3,14 +3,14 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useLibrary } from '@/components/CursorCustomization/Library/useLibrary';
 import { useApp } from '@/context/AppContext';
 import { useAppStore } from '@/store/useAppStore';
-import { useMessage } from '@/context/MessageContext';
+import { useMessage } from '@/hooks/useMessage';
 import { Commands } from '@/tauri/commands';
 
 vi.mock('@/context/AppContext', () => ({
   useApp: vi.fn(),
 }));
 
-vi.mock('@/context/MessageContext', () => ({
+vi.mock('@/hooks/useMessage', () => ({
   useMessage: vi.fn(),
 }));
 
@@ -37,7 +37,11 @@ describe('useLibrary', () => {
     loadAvailableCursors = vi.fn().mockResolvedValue(undefined);
     showMessage = vi.fn();
 
-    vi.mocked(useMessage).mockReturnValue({ showMessage } as any);
+    vi.mocked(useMessage).mockReturnValue({
+      showMessage,
+      addToast: vi.fn(),
+      message: { text: '', type: '' }
+    } as any);
   });
 
   afterEach(() => {
@@ -48,18 +52,16 @@ describe('useLibrary', () => {
   it('applyLibraryToSelected shows error when no target cursor name is provided', async () => {
     vi.mocked(useApp).mockReturnValue({ invoke } as any);
 
-    useAppStore.setState(
-      (state) => ({
-        ...state,
+    useAppStore.setState((state) =>
+      ({
         libraryCursors: [],
         cursorState: { ...state.cursorState, cursorSize: 32 },
         operations: {
           ...state.operations,
           loadLibraryCursors,
           loadAvailableCursors,
-        }
-      }),
-      true
+        } as any
+      }) as any
     );
 
     const { result } = renderHook(() => useLibrary());
@@ -78,18 +80,16 @@ describe('useLibrary', () => {
   it('handleDragEnd reorders library locally and persists new order', async () => {
     vi.mocked(useApp).mockReturnValue({ invoke } as any);
 
-    useAppStore.setState(
-      (state) => ({
-        ...state,
+    useAppStore.setState((state) =>
+      ({
         libraryCursors: [{ id: 'a' }, { id: 'b' }, { id: 'c' }] as any,
         cursorState: { ...state.cursorState, cursorSize: 32 },
         operations: {
           ...state.operations,
           loadLibraryCursors,
           loadAvailableCursors,
-        }
-      }),
-      true
+        } as any
+      }) as any
     );
 
     const { result } = renderHook(() => useLibrary());
@@ -119,18 +119,16 @@ describe('useLibrary', () => {
   it('handleDragEnd applies library cursor when dropped onto a slot and refreshes data', async () => {
     vi.mocked(useApp).mockReturnValue({ invoke } as any);
 
-    useAppStore.setState(
-      (state) => ({
-        ...state,
+    useAppStore.setState((state) =>
+      ({
         libraryCursors: [{ id: 'lib_1', name: 'Lib Cursor', file_path: 'C:\\lib.cur' }] as any,
         cursorState: { ...state.cursorState, cursorSize: 48 },
         operations: {
           ...state.operations,
           loadLibraryCursors,
           loadAvailableCursors,
-        }
-      }),
-      true
+        } as any
+      }) as any
     );
 
     const { result } = renderHook(() => useLibrary());

@@ -23,8 +23,12 @@ vi.mock('@/store/useAppStore', () => ({
     })
 }));
 
-vi.mock('@/context/MessageContext', () => ({
-  useMessage: () => ({ showMessage: mockShowMessage })
+vi.mock('@/hooks/useMessage', () => ({
+  useMessage: () => ({
+    showMessage: mockShowMessage,
+    addToast: vi.fn(),
+    message: { text: '', type: '' }
+  })
 }));
 
 vi.mock('@/hooks/useLibraryAnimation', () => ({

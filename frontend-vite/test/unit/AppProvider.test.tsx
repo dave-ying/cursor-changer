@@ -1,19 +1,6 @@
-import * as React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import { AppProvider } from '@/context/AppContext';
-import { MessageProvider, useMessage } from '@/context/MessageContext';
-
-function TestConsumer() {
-  const { message, showMessage } = useMessage();
-  return (
-    <div>
-      <button onClick={() => showMessage('hello', 'success')}>Show</button>
-      <div data-testid="message">
-        {message?.text || ''}-{message?.type || ''}
-      </div>
-    </div>
-  );
-}
+import { act, renderHook } from '@testing-library/react';
+import { useAppStore } from '@/store/useAppStore';
+import { useMessage } from '@/hooks/useMessage';
 
 describe('AppProvider', () => {
   beforeEach(() => {
@@ -25,25 +12,18 @@ describe('AppProvider', () => {
   });
 
   it('showMessage sets a message and auto-clears after 5 seconds', async () => {
-    render(
-      <AppProvider>
-        <MessageProvider>
-          <TestConsumer />
-        </MessageProvider>
-      </AppProvider>
-    );
+    const { result } = renderHook(() => useMessage());
 
-    fireEvent.click(screen.getByText('Show'));
+    act(() => {
+      result.current.showMessage('hello', 'success');
+    });
 
-    // Immediately after click, message should be visible
-    expect(screen.getByTestId('message')).toHaveTextContent('hello-success');
+    expect(useAppStore.getState().message).toEqual({ text: 'hello', type: 'success' });
 
     await act(async () => {
       vi.advanceTimersByTime(5000);
     });
 
-    // MessageProvider schedules a timeout to clear message after 5s.
-    // With fake timers we can assert synchronously once timers have advanced.
-    expect(screen.getByTestId('message')).toHaveTextContent('-');
+    expect(useAppStore.getState().message).toEqual({ text: '', type: '' });
   });
 });

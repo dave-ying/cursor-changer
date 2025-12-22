@@ -50,7 +50,13 @@ export const createDataLoadingOperations = (
     },
 
     loadAvailableCursors: async () => {
-        const tauri = getTauri();
+        let tauri = getTauri();
+        if (!tauri.invoke && typeof window !== 'undefined') {
+            const runtime = (window as any).__TAURI__;
+            if (runtime?.core?.invoke) {
+                tauri = { ...tauri, invoke: runtime.core.invoke };
+            }
+        }
         if (!tauri.invoke) return;
         const result = await invokeWithFeedback(tauri.invoke, Commands.getAvailableCursors, {
             logLabel: 'Failed to load cursors:'
@@ -74,7 +80,13 @@ export const createDataLoadingOperations = (
     },
 
     loadLibraryCursors: async () => {
-        const tauri = getTauri();
+        let tauri = getTauri();
+        if (!tauri.invoke && typeof window !== 'undefined') {
+            const runtime = (window as any).__TAURI__;
+            if (runtime?.core?.invoke) {
+                tauri = { ...tauri, invoke: runtime.core.invoke };
+            }
+        }
         if (!tauri.invoke) return;
         const result = await invokeWithFeedback(tauri.invoke, Commands.getLibraryCursors, {
             logLabel: 'Failed to load library cursors:'

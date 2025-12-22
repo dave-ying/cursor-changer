@@ -18,8 +18,7 @@ pub use cursor_types::{CursorType, CURSOR_TYPES};
 
 pub use defaults::{
     find_cursor_file_in_dir, find_default_cursor_in_dir, get_default_cursor_base_name,
-    get_default_cursor_file, get_windows_cursors_folder, CURSOR_EXTENSIONS,
-    DEFAULT_CURSOR_BASE_NAMES, DEFAULT_CURSOR_FILES,
+    get_windows_cursors_folder, CURSOR_EXTENSIONS, DEFAULT_CURSOR_BASE_NAMES,
 };
 
 pub use toggle::{perform_toggle, toggle_action, SystemApi, ToggleAction};

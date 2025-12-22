@@ -2,6 +2,8 @@ import React from 'react';
 import { DndContext, DragOverlay, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { logger } from '../../utils/logger';
+import type { DragEndEvent } from '@dnd-kit/core';
+import type { DraggedLibraryCursor } from './types';
 
 /**
  * DragDropContext component - handles all drag and drop functionality
@@ -9,9 +11,9 @@ import { logger } from '../../utils/logger';
  */
 interface DragDropContextProps {
   children: React.ReactNode;
-  draggingLib: any;
-  setDraggingLib: (lib: any) => void;
-  handleDragEnd: (event: any) => void;
+  draggingLib: DraggedLibraryCursor | null;
+  setDraggingLib: (lib: DraggedLibraryCursor | null) => void;
+  handleDragEnd: (event: DragEndEvent) => void;
 }
 
 export function DragDropContext({
@@ -45,9 +47,10 @@ export function DragDropContext({
       }}
       onDragStart={({ active }) => {
         try {
-          const data = active?.data?.current;
-          if (data?.['type'] === 'library' && data?.['lib']) {
-            setDraggingLib(data['lib']);
+          const data = active?.data?.current as { type?: unknown; lib?: unknown } | undefined;
+
+          if (data?.type === 'library' && data.lib) {
+            setDraggingLib(data.lib as DraggedLibraryCursor);
           } else {
             setDraggingLib(null);
           }
@@ -55,7 +58,7 @@ export function DragDropContext({
           logger.warn('[DragDropContext] Drag start error:', error);
         }
       }}
-      onDragEnd={(event) => {
+      onDragEnd={(event: DragEndEvent) => {
         try {
           handleDragEnd(event);
         } catch (error) {

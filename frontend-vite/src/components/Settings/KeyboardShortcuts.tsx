@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
-import { useMessage } from '@/context/MessageContext';
+import { useMessage } from '@/hooks/useMessage';
 import { useAppStore } from '@/store/useAppStore';
 import { defaultCursorState } from '@/store/slices/cursorStateStore';
 import { Card } from '@/components/ui/card';
@@ -9,12 +9,15 @@ import { Kbd, KbdGroup } from '@/components/ui/kbd';
 import { useKeyboardRecording } from '../../hooks/useKeyboardRecording';
 import { BuildingShortcutDisplay } from './KeyboardShortcuts/BuildingShortcutDisplay';
 import { ShortcutActions } from './KeyboardShortcuts/ShortcutActions';
-import { Commands, invokeCommand } from '../../tauri/commands';
+import { Commands } from '../../tauri/commands';
 import { logger } from '../../utils/logger';
+import { invokeWithFeedback } from '../../store/operations/invokeWithFeedback';
+import type { Message } from '../../store/slices/uiStateStore';
 
 export function KeyboardShortcuts() {
     const { invoke } = useApp();
     const { showMessage } = useMessage();
+
     const cursorState = useAppStore((s) => s.cursorState);
     const setHotkey = useAppStore((s) => s.operations.setHotkey);
     const setShortcutEnabled = useAppStore((s) => s.operations.setShortcutEnabled);
@@ -23,6 +26,14 @@ export function KeyboardShortcuts() {
     const capturedShortcut = useAppStore((s) => s.capturedShortcut);
     const setCapturedShortcut = useAppStore((s) => s.setCapturedShortcut);
     const setOriginalShortcut = useAppStore((s) => s.setOriginalShortcut);
+
+    const showMessageTyped = React.useCallback(
+        (text: string, type?: Message['type']) => {
+            const normalized: Message['type'] | undefined = type === '' || type === undefined ? undefined : type;
+            showMessage(text, normalized);
+        },
+        [showMessage]
+    );
 
     const defaultShortcut = defaultCursorState.shortcut ?? 'Ctrl+Shift+X';
 
@@ -39,12 +50,14 @@ export function KeyboardShortcuts() {
         setCapturedShortcut(null);
 
         // Disable the global hotkey while recording
-        try {
-            await invokeCommand(invoke, Commands.setHotkeyTemporarilyEnabled, { enabled: false });
-        } catch (_error) {
-            logger.error('Failed to disable hotkey:', _error);
-        }
-        showMessage('Press any keyboard combination', 'info');
+        const result = await invokeWithFeedback(invoke, Commands.setHotkeyTemporarilyEnabled, {
+            args: { enabled: false },
+            logLabel: '[KeyboardShortcuts] Failed to disable hotkey while recording:',
+            errorMessage: 'Failed to disable hotkey for recording',
+            errorType: 'error'
+        });
+        if (result.status !== 'success') return;
+        showMessageTyped('Press any keyboard combination', 'info');
     };
 
     const handleApplyShortcut = async () => {
@@ -60,22 +73,24 @@ export function KeyboardShortcuts() {
             setOriginalShortcut(null);
 
             // Re-enable the global hotkey
-            try {
-                await invokeCommand(invoke, Commands.setHotkeyTemporarilyEnabled, { enabled: true });
-            } catch (_error) {
-                logger.error('Failed to re-enable hotkey:', _error);
-            }
-            showMessage('Shortcut updated successfully', 'success');
+            await invokeWithFeedback(invoke, Commands.setHotkeyTemporarilyEnabled, {
+                args: { enabled: true },
+                logLabel: '[KeyboardShortcuts] Failed to re-enable hotkey after apply:',
+                errorMessage: 'Failed to re-enable hotkey after apply',
+                errorType: 'error'
+            });
+            showMessageTyped('Shortcut updated successfully', 'success');
         } catch (_error) {
             // Error already shown in setHotkey
             setRecording(false);
 
             //Re-enable the global hotkey even on error
-            try {
-                await invokeCommand(invoke, Commands.setHotkeyTemporarilyEnabled, { enabled: true });
-            } catch (_error) {
-                logger.error('Failed to re-enable hotkey:', _error);
-            }
+            await invokeWithFeedback(invoke, Commands.setHotkeyTemporarilyEnabled, {
+                args: { enabled: true },
+                logLabel: '[KeyboardShortcuts] Failed to re-enable hotkey after error:',
+                errorMessage: 'Failed to re-enable hotkey after error',
+                errorType: 'error'
+            });
         }
     };
 
@@ -85,12 +100,13 @@ export function KeyboardShortcuts() {
         setOriginalShortcut(null);
 
         // Re-enable the global hotkey
-        try {
-            await invokeCommand(invoke, Commands.setHotkeyTemporarilyEnabled, { enabled: true });
-        } catch (_error) {
-            logger.error('Failed to re-enable hotkey:', _error);
-        }
-        showMessage('Shortcut editing cancelled', 'info');
+        await invokeWithFeedback(invoke, Commands.setHotkeyTemporarilyEnabled, {
+            args: { enabled: true },
+            logLabel: '[KeyboardShortcuts] Failed to re-enable hotkey on cancel:',
+            errorMessage: 'Failed to re-enable hotkey on cancel',
+            errorType: 'error'
+        });
+        showMessageTyped('Shortcut editing cancelled', 'info');
     };
 
     const handleResetShortcut = async () => {
@@ -111,10 +127,10 @@ export function KeyboardShortcuts() {
             setOriginalShortcut(null);
 
             // Re-enable the global hotkey
-            invokeCommand(invoke, Commands.setHotkeyTemporarilyEnabled, { enabled: true })
-                .catch(error => {
-                    logger.error('Failed to re-enable hotkey:', error);
-                });
+            invokeWithFeedback(invoke, Commands.setHotkeyTemporarilyEnabled, {
+                args: { enabled: true },
+                logLabel: '[KeyboardShortcuts] Failed to re-enable hotkey while disabling:',
+            }).catch((error) => logger.error('Failed to re-enable hotkey:', error));
         }
     }, [cursorState.shortcutEnabled, recording, setRecording, setCapturedShortcut, setOriginalShortcut, invoke]);
 

@@ -30,9 +30,11 @@ vi.mock('@/context/AppContext', () => ({
   })
 }));
 
-vi.mock('@/context/MessageContext', () => ({
+vi.mock('@/hooks/useMessage', () => ({
   useMessage: () => ({
     showMessage: mockShowMessage,
+    addToast: vi.fn(),
+    message: { text: '', type: '' }
   })
 }));
 

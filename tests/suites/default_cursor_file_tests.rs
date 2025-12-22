@@ -1,63 +1,7 @@
 use cursor_changer::{
     find_cursor_file_in_dir, find_default_cursor_in_dir, get_default_cursor_base_name,
-    get_default_cursor_file, CURSOR_EXTENSIONS, DEFAULT_CURSOR_BASE_NAMES, DEFAULT_CURSOR_FILES,
+    CURSOR_EXTENSIONS, DEFAULT_CURSOR_BASE_NAMES,
 };
-
-#[test]
-fn test_get_default_cursor_file_normal() {
-    assert_eq!(get_default_cursor_file("Normal"), Some("normal-select.cur"));
-}
-
-#[test]
-fn test_get_default_cursor_file_ibeam() {
-    assert_eq!(get_default_cursor_file("IBeam"), Some("text-select.cur"));
-}
-
-#[test]
-fn test_get_default_cursor_file_hand() {
-    assert_eq!(get_default_cursor_file("Hand"), Some("link-select.cur"));
-}
-
-#[test]
-fn test_get_default_cursor_file_wait() {
-    assert_eq!(get_default_cursor_file("Wait"), Some("busy.cur"));
-}
-
-#[test]
-fn test_get_default_cursor_file_all_15_types() {
-    for name in crate::common::ALL_CURSOR_NAMES {
-        let file = get_default_cursor_file(name);
-        assert!(file.is_some(), "Missing file for cursor: {name}");
-        assert!(std::path::Path::new(file.unwrap())
-            .extension()
-            .is_some_and(|ext| ext.eq_ignore_ascii_case("cur")));
-    }
-}
-
-#[test]
-fn test_get_default_cursor_file_nonexistent() {
-    assert_eq!(get_default_cursor_file("NonExistent"), None);
-}
-
-#[test]
-fn test_get_default_cursor_file_case_sensitive() {
-    // Should be case-sensitive
-    assert_eq!(get_default_cursor_file("normal"), None);
-    assert_eq!(get_default_cursor_file("NORMAL"), None);
-}
-
-#[test]
-fn test_default_cursor_files_count() {
-    assert_eq!(DEFAULT_CURSOR_FILES.len(), 15);
-}
-
-#[test]
-fn test_default_cursor_files_all_unique() {
-    let mut files = std::collections::HashSet::new();
-    for (_, file) in &DEFAULT_CURSOR_FILES {
-        assert!(files.insert(file), "Duplicate file: {file}");
-    }
-}
 
 // Tests for new name-based cursor lookup functions
 #[test]

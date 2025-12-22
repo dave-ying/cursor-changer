@@ -1,18 +1,27 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
-import { useMessage } from '../../context/MessageContext';
+import { useMessage } from '../../hooks/useMessage';
 import { useAppStore } from '../../store/useAppStore';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 
 import { useDebounce } from '../../hooks/safe/useDebounce';
-import { Commands, invokeCommand } from '../../tauri/commands';
+import { Commands } from '../../tauri/commands';
 import { MAX_CURSOR_SIZE } from '@/constants/cursorConstants';
 import { logger } from '../../utils/logger';
+import { invokeWithFeedback } from '../../store/operations/invokeWithFeedback';
+import type { Message } from '../../store/slices/uiStateStore';
 
 export function CursorSettings() {
     const { invoke } = useApp();
     const { showMessage } = useMessage();
+    const showMessageTyped = React.useCallback(
+        (text: string, type?: Message['type']) => {
+            const normalized: Message['type'] | undefined = type === '' || type === undefined ? undefined : type;
+            showMessage(text, normalized);
+        },
+        [showMessage]
+    );
     const cursorState = useAppStore((s) => s.cursorState);
     // Default to empty array so tests and initial renders don't throw before cursors load
     const availableCursors = useAppStore((s) => s.availableCursors) ?? [];
@@ -25,15 +34,17 @@ export function CursorSettings() {
     const [normalPreviewLoading, setNormalPreviewLoading] = useState<boolean>(false);
 
     const handleResetCursors = useCallback(async () => {
-        try {
-            await invokeCommand(invoke, Commands.resetCurrentModeCursors);
+        const result = await invokeWithFeedback(invoke, Commands.resetCurrentModeCursors, {
+            logLabel: '[CursorSettings] Failed to reset cursors:',
+            errorMessage: 'Failed to reset cursors',
+            errorType: 'error',
+            successMessage: 'Active cursors reset to default',
+            successType: 'success'
+        });
+        if (result.status === 'success') {
             await loadAvailableCursors();
-            showMessage('Active cursors reset to default', 'success');
-        } catch (error) {
-            logger.error('Failed to reset cursors', error);
-            showMessage('Failed to reset cursors', 'error');
         }
-    }, [invoke, loadAvailableCursors, showMessage]);
+    }, [invoke, loadAvailableCursors]);
 
     // Debounce utility function
     const { debounce, cleanup } = useDebounce();
@@ -64,27 +75,26 @@ export function CursorSettings() {
         let isMounted = true;
         setNormalPreviewLoading(true);
         const loadPreview = async () => {
-            try {
-                const dataUrl = normalCursor.image_path
-                    ? await invokeCommand(invoke, Commands.getLibraryCursorPreview, {
-                        file_path: normalCursor.image_path
-                    })
-                    : await invokeCommand(invoke, Commands.getSystemCursorPreview, {
-                        cursor_name: 'Normal'
-                    });
-                if (isMounted) {
-                    setNormalPreviewUrl(dataUrl);
+            const previewResult = await invokeWithFeedback(
+                invoke,
+                normalCursor.image_path ? Commands.getLibraryCursorPreview : Commands.getSystemCursorPreview,
+                {
+                    args: normalCursor.image_path
+                        ? { file_path: normalCursor.image_path }
+                        : { cursor_name: 'Normal' },
+                    logLabel: '[CursorSettings] Failed to load Normal cursor preview:'
                 }
-            } catch (error) {
-                logger.warn('[CursorSettings] Failed to load Normal cursor preview:', error);
-                if (isMounted) {
-                    setNormalPreviewUrl(null);
-                }
-            } finally {
-                if (isMounted) {
-                    setNormalPreviewLoading(false);
-                }
+            );
+            if (!isMounted) return;
+
+            if (previewResult.status === 'success') {
+                setNormalPreviewUrl(previewResult.value as string);
+            } else {
+                logger.warn('[CursorSettings] Failed to load Normal cursor preview:', previewResult.status === 'error' ? previewResult.error : 'skipped');
+                setNormalPreviewUrl(null);
             }
+
+            setNormalPreviewLoading(false);
         };
 
         loadPreview();

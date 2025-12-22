@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useSafeTimer, useSafeEventListener } from '../../hooks/useSafeAsync';
+import { useSafeEventListener } from '../../hooks/useSafeAsync';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { Navigation } from './Navigation';
 import { ContentArea } from './ContentArea';
@@ -8,140 +8,62 @@ import { ClickOutsideHandler } from './ClickOutsideHandler';
 import { ModalManager } from './ModalManager';
 import { LibrarySection } from './LibrarySection';
 import { ActiveSection } from './ActiveSection';
+import type { MainLayoutProps } from './types';
 
 /**
  * Refactored MainLayout component
  * Now composed of smaller, focused components following Single Responsibility Principle
+ * Props are grouped by concern for better maintainability
  */
-export function MainLayout(props: {
-  // State
-  currentView: string;
-  showBrowseModal: boolean;
-  selectingFromLibrary: boolean;
-  selectedCursor: any;
-  pendingLibraryCursor: any;
-  selectedLibraryCursor: any;
-  selectingCursorForCustomization: boolean;
-  showClickPointPicker: boolean;
-  clickPointFile: File | null;
-  clickPointFilePath: string | null;
-  clickPointItemId: string | null;
-  clickPointPickerKey: number;
-  showSettingsModal: boolean;
-  draggingLib: any;
-  localLibrary: any[];
-  selectedPreviewUrl: string | null;
-  selectedPreviewLoading: boolean;
-  visibleCursors: any[];
-  customizationMode: 'simple' | 'advanced' | string;
-  availableCursors: any[];
-  defaultCursorStyle: 'windows' | 'mac';
-  accentColor?: string;
-  onResetCursors: () => void | Promise<void>;
-
-  // Actions
-  setCurrentView: (view: string) => void;
-  setShowBrowseModal: (show: boolean) => void;
-  setSelectingFromLibrary: (selecting: boolean) => void;
-  setSelectedCursor: (cursor: any) => void;
-  setShowClickPointPicker: (show: boolean) => void;
-  setClickPointFile: (file: File | null) => void;
-  setClickPointFilePath: (path: string | null) => void;
-  setClickPointItemId: (id: string | null) => void;
-  setShowSettingsModal: (show: boolean) => void;
-  setDraggingLib: (dragging: any) => void;
-  setLocalLibrary: (library: any[]) => void;
-  setSelectedPreviewUrl: (url: string | null) => void;
-  setSelectedPreviewLoading: (loading: boolean) => void;
-  onBrowse: (cursor: any) => void;
-  onModeChange: (mode: 'simple' | 'advanced' | string) => void | Promise<void>;
-
-  // New unified prop name for Click Point / Hotspot editor — both prop names are accepted for
-  // backwards compatibility: `onOpenClickPointEditor` (new) and `onOpenHotspotEditor` (legacy).
-  onOpenHotspotEditor?: (filePath: string, itemId: string) => void;
-  onOpenClickPointEditor?: (filePath: string, itemId: string) => void;
-  onAddCursor: () => void;
-  onSelectFromLibrary: (cursor: any) => void;
-  onApplyLibraryToSelected: (libCursor: any) => void | Promise<void>;
-  onApplyLibraryToSlot: (libCursor: any, targetCursor: any) => void | Promise<void>;
-  onLibraryOrderChange: (newOrder: any[]) => void;
-  onApplyFromLibrary: (libCursor: any) => void;
-  onDeleteLibraryCursor: (item: any) => void;
-  handleDragEnd: (event: any) => void;
-  handleFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  cancelBrowseMode: () => void;
-  cancelPreviewSelection?: () => void;
-  loadLibraryCursors: () => void | Promise<void>;
-  loadAvailableCursors: () => void | Promise<void>;
-  setPendingLibraryCursor: (cursor: any) => void;
-  onDefaultCursorStyleChange: (value: 'windows' | 'mac') => void | Promise<void>;
-  onResetCursors: () => void | Promise<void>;
-}) {
-  // Destructure props for easier access
+export function MainLayout({
+  currentView,
+  selectionState,
+  cursorState,
+  clickPointState,
+  modalState,
+  dragDropState,
+  libraryState,
+  actions
+}: MainLayoutProps) {
+  // Destructure grouped state for easier access
   const {
-    // State
-    currentView,
-    showBrowseModal,
-    selectingFromLibrary,
-    selectedCursor,
     pendingLibraryCursor,
     selectedLibraryCursor,
-    selectingCursorForCustomization,
+    selectedCursor,
+    selectingFromLibrary,
+    selectingCursorForCustomization
+  } = selectionState;
+
+  const {
+    visibleCursors,
+    customizationMode,
+    defaultCursorStyle,
+    accentColor
+  } = cursorState;
+
+  const {
     showClickPointPicker,
     clickPointFile,
     clickPointFilePath,
     clickPointItemId,
-    clickPointPickerKey,
-    showSettingsModal,
-    draggingLib,
-    localLibrary,
-    selectedPreviewUrl,
-    selectedPreviewLoading,
-    visibleCursors,
-    customizationMode,
-    availableCursors,
-    defaultCursorStyle,
-    accentColor,
+    clickPointPickerKey
+  } = clickPointState;
 
-    // Actions
-    setCurrentView,
-    setShowBrowseModal,
-    setSelectingFromLibrary,
-    setSelectedCursor,
-    setShowClickPointPicker,
-    setClickPointFile,
-    setClickPointFilePath,
-    setClickPointItemId,
-    setShowSettingsModal,
-    setDraggingLib,
-    setLocalLibrary,
-    setSelectedPreviewUrl,
-    setSelectedPreviewLoading,
-    onBrowse,
-    onModeChange,
-    onOpenHotspotEditor,
-    onOpenClickPointEditor,
-    onAddCursor,
-    onSelectFromLibrary,
-    onApplyLibraryToSelected,
-    onApplyLibraryToSlot,
-    onLibraryOrderChange,
-    onApplyFromLibrary,
-    onDeleteLibraryCursor,
-    handleDragEnd,
-    handleFileSelect,
-    cancelBrowseMode,
-    cancelPreviewSelection,
-    loadLibraryCursors,
-    loadAvailableCursors,
-    setPendingLibraryCursor,
-    onDefaultCursorStyleChange,
-    onResetCursors
-  } = props;
+  const { showSettingsModal } = modalState;
+  const { draggingLib } = dragDropState;
+  const { localLibrary } = libraryState;
+
+  // Destructure grouped actions
+  const { setCurrentView } = actions.view;
+  const { cancelBrowseMode, cancelPreviewSelection } = actions.selection;
+  const { onAddCursor, onSelectFromLibrary, onLibraryOrderChange, onApplyFromLibrary, onDeleteLibraryCursor, loadLibraryCursors } = actions.library;
+  const { onBrowse, onModeChange, onDefaultCursorStyleChange, onResetCursors, loadAvailableCursors } = actions.cursor;
+  const { setShowClickPointPicker, setClickPointFile, setClickPointFilePath, setClickPointItemId, onOpenClickPointEditor } = actions.clickPoint;
+  const { setShowSettingsModal } = actions.modal;
+  const { setDraggingLib, handleDragEnd } = actions.dragDrop;
 
   // Use safe async patterns for cleanup and event handling
   const { cleanup: cleanupEventListeners } = useSafeEventListener();
-  const { safeSetTimeout } = useSafeTimer();
 
   useEffect(() => {
     // Simple cleanup without race conditions
@@ -188,7 +110,7 @@ export function MainLayout(props: {
                   selectingCursorForCustomization={selectingCursorForCustomization}
                   defaultCursorStyle={defaultCursorStyle}
                   accentColor={accentColor}
-                  onBrowse={(cursor: any) => onBrowse(cursor)}
+                  onBrowse={onBrowse}
                   onModeChange={onModeChange}
                   onDefaultCursorStyleChange={onDefaultCursorStyleChange}
                   onResetCursors={onResetCursors}
@@ -210,8 +132,7 @@ export function MainLayout(props: {
                   selectedLibraryCursor={selectedLibraryCursor}
                   onAddCursor={() => onAddCursor()}
                   onSelectFromLibrary={onSelectFromLibrary}
-                  // Accept either the new `onOpenClickPointEditor` or legacy `onOpenHotspotEditor`.
-                  onOpenClickPointEditor={onOpenClickPointEditor ?? onOpenHotspotEditor}
+                  onOpenClickPointEditor={onOpenClickPointEditor}
                   onLibraryOrderChange={onLibraryOrderChange}
                   onApplyFromLibrary={onApplyFromLibrary}
                   onDeleteLibraryCursor={onDeleteLibraryCursor}

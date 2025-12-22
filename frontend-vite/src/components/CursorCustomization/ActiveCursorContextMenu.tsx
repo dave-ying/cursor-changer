@@ -90,6 +90,7 @@ export function ActiveCursorContextMenu({ isOpen, x, y, onClose, onChange, onRes
     const menuContent = (
         <div
             id="active-cursor-context-menu"
+            data-testid="cursor-context-menu"
             ref={menuRef}
             className="fixed z-50 min-w-[160px] rounded-lg border border-border bg-popover p-1 shadow-lg"
             style={{

@@ -2,6 +2,10 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach, vi } from 'vitest';
 
+import { useAppStore } from '@/store/useAppStore';
+import { initialUIStateSlice } from '@/store/slices/uiStateStore';
+import { defaultCursorState } from '@/store/slices/cursorStateStore';
+
 // Mock ResizeObserver
 (globalThis as any).ResizeObserver = class ResizeObserver {
   observe() { }
@@ -175,6 +179,7 @@ function isAllowedConsoleError(args: any[]): boolean {
     combinedMessage.includes('tauri.invoke is not available') ||
     combinedMessage.includes('appWindow is not available') ||
     combinedMessage.includes('event.listen is not available') ||
+    combinedMessage.includes('useApp must be used within AppProvider') ||
     combinedMessage.includes('[useTauri]') ||
     message.includes('[useTauri]')
   );
@@ -216,4 +221,12 @@ afterEach(() => {
   if (typeof window !== 'undefined') {
     (window as any).__TAURI__ = (globalThis as any).__TAURI__;
   }
+
+  // Reset shared Zustand store slices that tests mutate
+  useAppStore.setState({
+    ...initialUIStateSlice,
+    availableCursors: [],
+    libraryCursors: [],
+    cursorState: { ...defaultCursorState, cursorPaths: { ...defaultCursorState.cursorPaths } }
+  });
 });

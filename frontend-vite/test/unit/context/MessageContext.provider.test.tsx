@@ -2,7 +2,7 @@ import * as React from 'react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 
-import { MessageProvider, useMessage } from '@/context/MessageContext';
+import { useMessage } from '@/hooks/useMessage';
 
 const loggerMock = vi.hoisted(() => ({
   warn: vi.fn(),
@@ -66,11 +66,7 @@ describe('MessageProvider bridge', () => {
       message: { text: 'existing', type: 'info' }
     });
 
-    render(
-      <MessageProvider>
-        <MessageConsumer />
-      </MessageProvider>
-    );
+    render(<MessageConsumer />);
 
     expect(screen.getByTestId('message-text').textContent).toBe('existing-info');
 
@@ -84,11 +80,7 @@ describe('MessageProvider bridge', () => {
   it('logs a warning when store addToast is unavailable', () => {
     storeStateRef.current = createStoreState({ addToast: undefined });
 
-    render(
-      <MessageProvider>
-        <MessageConsumer />
-      </MessageProvider>
-    );
+    render(<MessageConsumer />);
 
     fireEvent.click(screen.getByText('toast'));
     expect(loggerMock.warn).toHaveBeenCalledWith(
@@ -101,11 +93,7 @@ describe('MessageProvider bridge', () => {
     const clearMessageSpy = vi.fn();
     storeStateRef.current = createStoreState({ clearMessage: clearMessageSpy });
 
-    render(
-      <MessageProvider>
-        <MessageConsumer />
-      </MessageProvider>
-    );
+    render(<MessageConsumer />);
 
     fireEvent.click(screen.getByText('show'));
 
@@ -119,11 +107,7 @@ describe('MessageProvider bridge', () => {
   it('warns when showMessage is missing on the store', () => {
     storeStateRef.current = createStoreState({ showMessage: undefined });
 
-    render(
-      <MessageProvider>
-        <MessageConsumer />
-      </MessageProvider>
-    );
+    render(<MessageConsumer />);
 
     fireEvent.click(screen.getByText('show'));
 

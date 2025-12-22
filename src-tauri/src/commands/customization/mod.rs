@@ -4,7 +4,6 @@ pub(super) mod cursor_apply_service;
 pub(super) mod cursor_preview_resolver;
 pub mod file_ops;
 pub mod query;
-pub mod set_cursor;
 pub mod set_cursor_bulk;
 pub mod set_cursor_core;
 pub mod set_cursor_focus;

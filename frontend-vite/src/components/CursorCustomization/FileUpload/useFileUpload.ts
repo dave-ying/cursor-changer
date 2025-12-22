@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useApp } from '../../../context/AppContext';
-import { useMessage } from '../../../context/MessageContext';
+import { useMessage } from '../../../hooks/useMessage';
 import { useAppStore } from '../../../store/useAppStore';
 import { Commands, invokeCommand } from '../../../tauri/commands';
 import { logger } from '../../../utils/logger';

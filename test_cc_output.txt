@@ -1,0 +1,712 @@
+
+> test
+> npm run test:debug --workspace frontend-vite test/unit/components/CursorCustomization.unit.test.tsx --workspace frontend-vite
+
+
+> cursor-changer-frontend@1.0.0 test:debug
+> vitest run --reporter=verbose --no-coverage test/unit/components/CursorCustomization.unit.test.tsx
+
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90mC:/Files/GitHub/cursor-changer/frontend-vite[39m
+
+stderr | test/unit/components/CursorCustomization.unit.test.tsx > CursorCustomization - Unit Tests - Rendering > should render the component correctly
+[WARN] [PreloadCache] Failed to preload system cursor preview for Normal: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for IBeam: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Hand: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Wait: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+
+stderr | test/unit/components/CursorCustomization.unit.test.tsx > CursorCustomization - Unit Tests - Rendering > should display all available cursors
+[WARN] [PreloadCache] Failed to preload system cursor preview for Normal: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for IBeam: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Hand: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Wait: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+
+ [32mΓ£ô[39m test/unit/components/CursorCustomization.unit.test.tsx[2m > [22mCursorCustomization - Unit Tests - Rendering[2m > [22mshould render the component correctly[33m 1137[2mms[22m[39m
+stderr | test/unit/components/CursorCustomization.unit.test.tsx > CursorCustomization - Unit Tests - Rendering > should display library cursors
+[WARN] [PreloadCache] Failed to preload system cursor preview for Normal: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for IBeam: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Hand: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Wait: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+
+ [31m├ù[39m test/unit/components/CursorCustomization.unit.test.tsx[2m > [22mCursorCustomization - Unit Tests - Rendering[2m > [22mshould display all available cursors[32m 98[2mms[22m[39m
+[31m   ΓåÆ Unable to find an element with the text: IBeam. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m""[31m
+      [33mdata-testid[31m=[32m"cursor-customization"[31m
+      [33mid[31m=[32m"main-content"[31m
+    [36m>[31m
+      [36m<nav[31m
+        [33maria-label[31m=[32m"Cursor Customization"[31m
+        [33mclass[31m=[32m"cursor-sidebar"[31m
+        [33mid[31m=[32m"toolbar"[31m
+      [36m>[31m
+        [36m<div[31m
+          [33mclass[31m=[32m"cursor-sidebar-nav"[31m
+        [36m>[31m
+          [36m<button[31m
+            [33maria-label[31m=[32m"Cursor"[31m
+            [33mclass[31m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2 cursor-sidebar-button"[31m
+            [33mtitle[31m=[32m"Cursor"[31m
+          [36m>[31m
+            [36m<span[31m
+              [33mclass[31m=[32m"cursor-sidebar-icon"[31m
+            [36m>[31m
+              [36m<svg[31m
+                [33mclass[31m=[32m"!w-5 !h-5"[31m
+                [33mfill[31m=[32m"none"[31m
+                [33mheight[31m=[32m"24"[31m
+                [33mstroke[31m=[32m"currentColor"[31m
+                [33mstroke-linecap[31m=[32m"round"[31m
+                [33mstroke-linejoin[31m=[32m"round"[31m
+                [33mstroke-width[31m=[32m"2"[31m
+                [33mviewBox[31m=[32m"0 0 24 24"[31m
+                [33mwidth[31m=[32m"24"[31m
+                [33mxmlns[31m=[32m"http://www.w3.org/2000/svg"[31m
+              [36m>[31m
+                [36m<path[31m
+                  [33md[31m=[32m"M12.586 12.586 19 19"[31m
+                [36m/>[31m
+                [36m<path[31m
+                  [33md[31m=[32m"M3.688 3.037a.497.497 0 0 0-.651.651l6.5 15.999a.501.501 0 0 0 .947-.062l1.569-6.083a2 2 0 0 1 1.448-1.479l6.124-1.579a.5.5 0 0 0 .063-.947z"[31m
+                [36m/>[31m
+              [36m</svg>[31m
+            [36m</span>[31m
+            [36m<span[31m
+              [33mclass[31m=[32m"cursor-sidebar-text"[31m
+            [36m>[31m
+              [0mCursor[0m
+            [36m</span>[31m
+          [36m</button>[31m
+          [36m<button[31m
+            [33maria-label[31m=[32m"Settings"[31m
+            [33mclass[31m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 cursor-sidebar-button"[31m
+            [33mtitle[31m=[32m"Settings"[31m
+          [36m>[31m
+            [36m<span[31m
+              [33mclass[31m=[32m"cursor-sidebar-icon"[31m
+            [36m>[31m
+              [36m<svg[31m
+                [33mclass[31m=[32m"!w-5 !h-5"[31m
+                [33mfill[31m=[32m"none"[31m
+                [33mheight[31m=[32m"24"[31m
+                [33mstroke[31m=[32m"currentColor"[31m
+                [33mstroke-linecap[31m=[32m"round"[31m
+                [33mstroke-linejoin[31m=[32m"round"[31m
+                [33mstroke-width[31m=[32m"2"[31m
+                [33mviewBox[31m=[32m"0 0 24 24"[31m
+                [33mwidth[31m=[32m"24"[31m
+                [33mxmlns[31m=[32m"http://www.w3.org/2000/svg"[31m
+              [36m>[31m
+                [36m<path[31m
+                  [33md[31m=[32m"M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"[31m
+                [36m/>[31m
+                [36m<circle[31m
+                  [33mcx[31m=[32m"12"[31m
+                  [33mcy[31m=[32m"12"[31m
+                  [33mr[31m=[32m"3"[31m
+                [36m/>[31m
+              [36m</svg>[31m
+            [36m</span>[31m
+            [36m<span[31m
+              [33mclass[31m=[32m"cursor-sidebar-text"[31m
+            [36m>[31m
+              [0mSettings[0m
+            [36m</span>[31m
+          [36m</button>[31m
+          [36m<div[31m
+            [33mclass[31m=[32m"flex-1"[31m
+          [36m/>[31m
+          [36m<button[31m
+            [33maria-label[31m=[32m"About"[31m
+            [33mclass[31m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 cursor-sidebar-button"[31m
+            [33mtitle[31m=[32m"About"[31m
+          [36m>[31m
+            [36m<span[31m
+              [33mclass[31m=[32m"cursor-sidebar-icon"[31m
+            [36m>[31m
+              [36m<svg[31m
+                [33maria-hidden[31m=[32m"true"[31m
+                [33mclass[31m=[32m"lucide lucide-info !w-5 !h-5"[31m
+                [33mfill[31m=[32m"none"[31m
+                [33mheight[31m=[32m"24"[31m
+                [33mstroke[31m=[32m"currentColor"[31m
+                [33mstroke-linecap[31m=[32m"round"[31m
+                [33mstroke-linejoin[31m=[32m"round"[31m
+                [33mstroke-width[31m=[32m"2"[31m
+                [33mviewBox[31m=[32m"0 0 24 24"[31m
+                [33mwidth[31m=[32m"24"[31m
+                [33mxmlns[31m=[32m"http://www.w3.org/2000/svg"[31m
+              [36m>[31m
+                [36m<circle[31m
+                  [33mcx[31m=[32m"12"[31m
+                  [33mcy[31m=[32m"12"[31m
+                  [33mr[31m=[32m"10"[31m
+                [36m/>[31m
+                [36m<path[31m
+                  [33md[31m=[32m"M12 16v-4"[31m
+                [36m/>[31m
+                [36m<path[31m
+                  [33md[31m=[32m"M12 8h.01"[31m
+                [36m/>[31m
+              [36m</svg>[31m
+            [36m</span>[31m
+            [36m<span[31m
+              [33mclass[31m=[32m"cursor-sidebar-text"[31m
+            [36m>[31m
+              [0mAbout[0m
+            [36m</span>[31m
+          [36m</button>[31m
+        [36m</div>[31m
+      [36m</nav>[31m
+      [36m<div[31m
+        [33mclass[31m=[32m"flex-1 min-h-0 flex flex-col"[31m
+      [36m>[31m
+        [36m<div[31m
+          ...[39m
+ [32mΓ£ô[39m test/unit/components/CursorCustomization.unit.test.tsx[2m > [22mCursorCustomization - Unit Tests - Rendering[2m > [22mshould display library cursors[32m 70[2mms[22m[39m
+stderr | test/unit/components/CursorCustomization.unit.test.tsx > CursorCustomization - Unit Tests - Rendering > should show loading state initially
+[WARN] [PreloadCache] Failed to preload system cursor preview for Normal: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for IBeam: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Hand: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Wait: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+
+stderr | test/unit/components/CursorCustomization.unit.test.tsx > CursorCustomization - Unit Tests - Cursor Cards > should render cursor cards with correct properties
+[WARN] [PreloadCache] Failed to preload system cursor preview for Normal: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for IBeam: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Hand: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Wait: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+
+stderr | test/unit/components/CursorCustomization.unit.test.tsx > CursorCustomization - Unit Tests - Cursor Cards > should show custom indicator for custom cursors
+[WARN] [PreloadCache] Failed to preload system cursor preview for Normal: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for IBeam: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Hand: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Wait: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+
+ [32mΓ£ô[39m test/unit/components/CursorCustomization.unit.test.tsx[2m > [22mCursorCustomization - Unit Tests - Rendering[2m > [22mshould show loading state initially[32m 35[2mms[22m[39m
+ [32mΓ£ô[39m test/unit/components/CursorCustomization.unit.test.tsx[2m > [22mCursorCustomization - Unit Tests - Cursor Cards[2m > [22mshould render cursor cards with correct properties[32m 75[2mms[22m[39m
+stderr | test/unit/components/CursorCustomization.unit.test.tsx > CursorCustomization - Unit Tests - Cursor Cards > should handle cursor card click
+[WARN] [PreloadCache] Failed to preload system cursor preview for Normal: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for IBeam: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Hand: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Wait: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+
+stderr | test/unit/components/CursorCustomization.unit.test.tsx > CursorCustomization - Unit Tests - Cursor Cards > should show hotspot coordinates when available
+[WARN] [PreloadCache] Failed to preload system cursor preview for Normal: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for IBeam: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Hand: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Wait: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+
+stderr | test/unit/components/CursorCustomization.unit.test.tsx > CursorCustomization - Unit Tests - Cursor Cards > should handle cursor card hover
+[WARN] [PreloadCache] Failed to preload system cursor preview for Normal: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for IBeam: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Hand: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Wait: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+
+ [32mΓ£ô[39m test/unit/components/CursorCustomization.unit.test.tsx[2m > [22mCursorCustomization - Unit Tests - Cursor Cards[2m > [22mshould show custom indicator for custom cursors[32m 72[2mms[22m[39m
+ [32mΓ£ô[39m test/unit/components/CursorCustomization.unit.test.tsx[2m > [22mCursorCustomization - Unit Tests - Cursor Cards[2m > [22mshould handle cursor card click[32m 51[2mms[22m[39m
+ [32mΓ£ô[39m test/unit/components/CursorCustomization.unit.test.tsx[2m > [22mCursorCustomization - Unit Tests - Cursor Cards[2m > [22mshould show hotspot coordinates when available[32m 38[2mms[22m[39m
+stderr | test/unit/components/CursorCustomization.unit.test.tsx > CursorCustomization - Unit Tests - Cursor Cards > should handle cursor card right-click
+[WARN] [PreloadCache] Failed to preload system cursor preview for Normal: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for IBeam: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Hand: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+[WARN] [PreloadCache] Failed to preload system cursor preview for Wait: Error: Unknown command: get_system_cursor_preview
+    at C:/Files/GitHub/cursor-changer/frontend-vite/test/unit/components/CursorCustomization.unit.test.tsx:48:31
+    at invoke (file:///C:/Files/GitHub/cursor-changer/frontend-vite/node_modules/@vitest/spy/dist/index.js:285:34)
+    at Object.fetchSystemCursorPreview (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:187:35)
+    at C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:88:42
+    at Object.preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewService.ts:93:7)
+    at preloadCursorPreviews (C:/Files/GitHub/cursor-changer/frontend-vite/src/services/cursorPreviewCache.ts:194:40)
+    at loadAvailableCursors (C:/Files/GitHub/cursor-changer/frontend-vite/src/store/operations/dataLoadingOperations.ts:77:9)
+    at ensureTauriAndLoad (C:/Files/GitHub/cursor-changer/frontend-vite/src/components/CursorCustomization.tsx:47:9)
+
+ [32mΓ£ô[39m test/unit/components/CursorCustomization.unit.test.tsx[2m > [22mCursorCustomization - Unit Tests - Cursor Cards[2m > [22mshould handle cursor card hover[32m 56[2mms[22m[39m
+ [32mΓ£ô[39m test/unit/components/CursorCustomization.unit.test.tsx[2m > [22mCursorCustomization - Unit Tests - Cursor Cards[2m > [22mshould handle cursor card right-click[32m 54[2mms[22m[39m
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 1 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  test/unit/components/CursorCustomization.unit.test.tsx > CursorCustomization - Unit Tests - Rendering > should display all available cursors
+TestingLibraryElementError: Unable to find an element with the text: IBeam. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class=""
+      data-testid="cursor-customization"
+      id="main-content"
+    >
+      <nav
+        aria-label="Cursor Customization"
+        class="cursor-sidebar"
+        id="toolbar"
+      >
+        <div
+          class="cursor-sidebar-nav"
+        >
+          <button
+            aria-label="Cursor"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2 cursor-sidebar-button"
+            title="Cursor"
+          >
+            <span
+              class="cursor-sidebar-icon"
+            >
+              <svg
+                class="!w-5 !h-5"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12.586 12.586 19 19"
+                />
+                <path
+                  d="M3.688 3.037a.497.497 0 0 0-.651.651l6.5 15.999a.501.501 0 0 0 .947-.062l1.569-6.083a2 2 0 0 1 1.448-1.479l6.124-1.579a.5.5 0 0 0 .063-.947z"
+                />
+              </svg>
+            </span>
+            <span
+              class="cursor-sidebar-text"
+            >
+              Cursor
+            </span>
+          </button>
+          <button
+            aria-label="Settings"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 cursor-sidebar-button"
+            title="Settings"
+          >
+            <span
+              class="cursor-sidebar-icon"
+            >
+              <svg
+                class="!w-5 !h-5"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"
+                />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="3"
+                />
+              </svg>
+            </span>
+            <span
+              class="cursor-sidebar-text"
+            >
+              Settings
+            </span>
+          </button>
+          <div
+            class="flex-1"
+          />
+          <button
+            aria-label="About"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 cursor-sidebar-button"
+            title="About"
+          >
+            <span
+              class="cursor-sidebar-icon"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-info !w-5 !h-5"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="M12 16v-4"
+                />
+                <path
+                  d="M12 8h.01"
+                />
+              </svg>
+            </span>
+            <span
+              class="cursor-sidebar-text"
+            >
+              About
+            </span>
+          </button>
+        </div>
+      </nav>
+      <div
+        class="flex-1 min-h-0 flex flex-col"
+      >
+        <div
+          ...
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» getByText node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» test/unit/components/CursorCustomization.unit.test.tsx:153:19
+    151|     
+    152|     expect(screen.getByText('Normal')).toBeInTheDocument();
+    153|     expect(screen.getByText('IBeam')).toBeInTheDocument();
+       |                   ^
+    154|     expect(screen.getByText('Hand')).toBeInTheDocument();
+    155|     expect(screen.getByText('Wait')).toBeInTheDocument();
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/1]ΓÄ»
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 02:26:15
+[2m   Duration [22m 3.30s[2m (transform 801ms, setup 315ms, import 108ms, tests 1.69s, environment 759ms)[22m
+
+npm error Lifecycle script `test:debug` failed with error:
+npm error code 1
+npm error path C:\Files\GitHub\cursor-changer\frontend-vite
+npm error workspace cursor-changer-frontend@1.0.0
+npm error location C:\Files\GitHub\cursor-changer\frontend-vite
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c vitest run --reporter=verbose --no-coverage test/unit/components/CursorCustomization.unit.test.tsx

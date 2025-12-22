@@ -3,6 +3,9 @@ import type { CursorClickPointInfo } from '../types/generated/CursorClickPointIn
 import type { CursorInfo } from '../types/generated/CursorInfo';
 import type { CursorStatePayload } from '../types/generated/CursorStatePayload';
 import type { EffectsConfig } from '../types/generated/EffectsConfig';
+import type { DefaultCursorStyle } from '../types/generated/DefaultCursorStyle';
+import type { ThemeMode } from '../types/generated/ThemeMode';
+import type { CustomizationMode } from '../types/generated/CustomizationMode';
 import type { LibraryCursor } from '../types/generated/LibraryCursor';
 
 import { Commands as GeneratedCommands } from './commands.generated';
@@ -25,16 +28,16 @@ export type CommandArgsMap = {
   [Commands.setMinimizeToTray]: { enable: boolean };
   [Commands.setRunOnStartup]: { enable: boolean };
   [Commands.setCursorSize]: { size: number };
-  [Commands.setDefaultCursorStyle]: { style: string };
+  [Commands.setDefaultCursorStyle]: { style: DefaultCursorStyle };
   [Commands.resetAllSettings]: undefined;
   [Commands.resetWindowSizeToDefault]: undefined;
 
   [Commands.quitApp]: undefined;
 
   [Commands.setAccentColor]: { color: string };
-  [Commands.setThemeMode]: { theme_mode: string };
+  [Commands.setThemeMode]: { theme_mode: ThemeMode };
 
-  [Commands.switchCustomizationMode]: { mode: string };
+  [Commands.switchCustomizationMode]: { mode: CustomizationMode };
 
   [Commands.getCustomizationMode]: undefined;
 
@@ -132,7 +135,7 @@ export type CommandResultMap = {
   [Commands.toggleCursor]: CursorStatePayload;
   [Commands.restoreCursor]: CursorStatePayload;
 
-  [Commands.getThemeMode]: string;
+  [Commands.getThemeMode]: ThemeMode;
 
   [Commands.setHotkey]: CursorStatePayload;
   [Commands.setHotkeyTemporarilyEnabled]: void;
@@ -150,9 +153,9 @@ export type CommandResultMap = {
   [Commands.setAccentColor]: CursorStatePayload;
   [Commands.setThemeMode]: CursorStatePayload;
 
-  [Commands.switchCustomizationMode]: string;
+  [Commands.switchCustomizationMode]: CustomizationMode;
 
-  [Commands.getCustomizationMode]: string;
+  [Commands.getCustomizationMode]: CustomizationMode;
 
   [Commands.getAvailableCursors]: CursorInfo[];
   [Commands.getCustomCursors]: CursorInfo[];
@@ -214,6 +217,21 @@ export type CommandResultMap = {
   [Commands.getAniPreviewData]: AniPreviewData;
   [Commands.resetLibrary]: void;
 };
+
+type AssertAllCommandArgsMapped = CommandName extends keyof CommandArgsMap
+  ? keyof CommandArgsMap extends CommandName
+    ? true
+    : never
+  : never;
+
+type AssertAllCommandResultsMapped = CommandName extends keyof CommandResultMap
+  ? keyof CommandResultMap extends CommandName
+    ? true
+    : never
+  : never;
+
+export const _assertAllCommandArgsMapped: AssertAllCommandArgsMapped = true;
+export const _assertAllCommandResultsMapped: AssertAllCommandResultsMapped = true;
 
 type InvokeFn = (command: string, args?: Record<string, unknown>) => Promise<unknown>;
 

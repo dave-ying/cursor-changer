@@ -1,7 +1,7 @@
 // UI state slice for Zustand store
 import { StateCreator } from 'zustand';
-import { toastService } from '../../services/toastService';
-import type { ToastType } from '../../types/toastTypes';
+import { toastService } from '@/services/toastService';
+import type { ToastType } from '@/types/toastTypes';
 
 export interface Message {
     text: string;
@@ -15,7 +15,6 @@ export interface UIStateSlice {
     recording: boolean;
     capturedShortcut: string | null;
     originalShortcut: string | null;
-    selectingCursorForCustomization: boolean;
 
     setCustomizationMode: (mode: 'simple' | 'advanced') => void;
     setActiveSection: (section: string) => void;
@@ -27,8 +26,23 @@ export interface UIStateSlice {
     setRecording: (recording: boolean) => void;
     setCapturedShortcut: (shortcut: string | null) => void;
     setOriginalShortcut: (shortcut: string | null) => void;
-    setSelectingCursorForCustomization: (selecting: boolean) => void;
 }
+
+export const initialUIStateSlice: Pick<UIStateSlice,
+    'customizationMode' |
+    'activeSection' |
+    'message' |
+    'recording' |
+    'capturedShortcut' |
+    'originalShortcut'
+> = {
+    customizationMode: 'simple',
+    activeSection: 'cursor-customization',
+    message: { text: '', type: '' },
+    recording: false,
+    capturedShortcut: null,
+    originalShortcut: null
+};
 
 export const createUIStateSlice: StateCreator<
     UIStateSlice,
@@ -36,16 +50,10 @@ export const createUIStateSlice: StateCreator<
     [],
     UIStateSlice
 > = (set) => ({
-    customizationMode: 'simple',
-    activeSection: 'cursor-customization',
-    message: { text: '', type: '' },
-    recording: false,
-    capturedShortcut: null,
-    originalShortcut: null,
-    selectingCursorForCustomization: false,
+    ...initialUIStateSlice,
 
-    setCustomizationMode: (mode) => set({ customizationMode: mode }),
-    setActiveSection: (section) => set({ activeSection: section }),
+    setCustomizationMode: (mode) => set({ customizationMode: mode ?? 'simple' }),
+    setActiveSection: (section) => set({ activeSection: section ?? 'cursor-customization' }),
 
     showMessage: (text, type = 'info') =>
         set({ message: { text, type } }),
@@ -60,15 +68,24 @@ export const createUIStateSlice: StateCreator<
     },
 
     removeToast: (id) => {
-        toastService.remove(id);
+        try {
+            toastService.remove(id);
+        } catch (error) {
+            // Surface errors to callers to handle
+            throw error;
+        }
     },
 
     clearAllToasts: () => {
-        toastService.clear();
+        try {
+            toastService.clear();
+        } catch (error) {
+            // Surface errors to callers to handle
+            throw error;
+        }
     },
 
     setRecording: (recording) => set({ recording }),
     setCapturedShortcut: (shortcut) => set({ capturedShortcut: shortcut }),
-    setOriginalShortcut: (shortcut) => set({ originalShortcut: shortcut }),
-    setSelectingCursorForCustomization: (selecting) => set({ selectingCursorForCustomization: selecting })
+    setOriginalShortcut: (shortcut) => set({ originalShortcut: shortcut })
 });

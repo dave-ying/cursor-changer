@@ -5,7 +5,6 @@ import { act } from 'react';
 import App from '@/App';
 import { AppProvider } from '@/context/AppContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import { MessageProvider } from '@/context/MessageContext';
 import { Events } from '@/tauri/events';
 
 describe('Close confirmation flow (show-close-confirmation)', () => {
@@ -97,9 +96,7 @@ describe('Close confirmation flow (show-close-confirmation)', () => {
     return render(
       <AppProvider>
         <ThemeProvider>
-          <MessageProvider>
-            <App />
-          </MessageProvider>
+          <App />
         </ThemeProvider>
       </AppProvider>
     );

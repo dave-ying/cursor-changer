@@ -4,7 +4,6 @@ import * as React from 'react';
 import App from '@/App';
 import { AppProvider } from '@/context/AppContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import { MessageProvider } from '@/context/MessageContext';
 
  declare global {
   interface Window {
@@ -170,9 +169,7 @@ function renderApp() {
   return render(
     <AppProvider>
       <ThemeProvider>
-        <MessageProvider>
-          <App />
-        </MessageProvider>
+        <App />
       </ThemeProvider>
     </AppProvider>
   );

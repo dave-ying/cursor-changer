@@ -24,10 +24,6 @@ vi.mock('@/context/TauriContext', () => ({
   }
 }));
 
-vi.mock('@/context/MessageContext', () => ({
-  MessageProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
-}));
-
 vi.mock('@/context/AppBootstrapProvider', () => ({
   AppBootstrapProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
 }));

@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { useMessage } from '../../context/MessageContext';
+import { useMessage } from '../../hooks/useMessage';
 import { useAppStore } from '../../store/useAppStore';
 import { useSortable } from '@dnd-kit/sortable';
 import { ContextMenu } from './ContextMenu';
 import { useLibraryAnimation, useAnimationCSSProperties } from '../../hooks/useLibraryAnimation';
 import { AniPreview, useAniPreview } from './AniPreview';
 import { LoaderCircle } from 'lucide-react';
-import { Commands, invokeCommand } from '../../tauri/commands';
+import { Commands } from '../../tauri/commands';
 import { logger } from '../../utils/logger';
+import type { LibraryCursor as LibraryCursorItem } from '../../types/generated/LibraryCursor';
+import type { DraggedLibraryCursor } from './types';
+import { invokeWithFeedback } from '../../store/operations/invokeWithFeedback';
+import type { Message } from '../../store/slices/uiStateStore';
+
 import { 
   getCachedPreview, 
   setCachedPreview,
@@ -35,7 +40,7 @@ import {
  */
 
 interface LibraryCursorProps {
-  item: any;
+  item: LibraryCursorItem;
   displayOrderIds?: string[];
   onSelect?: () => void;
   suppressTestId?: boolean;
@@ -44,8 +49,8 @@ interface LibraryCursorProps {
   isHighlighted?: boolean;
 
   onClickPointEdit?: (filePath: string, id: string) => void;
-  onApply?: (item: any) => void;
-  onEdit?: (item: any) => void;
+  onApply?: (item: LibraryCursorItem) => void;
+  onEdit?: (item: LibraryCursorItem) => void;
   onDelete?: (id: string) => void;
   animationIndex?: number;
   enablePulseAnimation?: boolean;
@@ -72,6 +77,14 @@ export function LibraryCursor({
   const { invoke } = useApp();
   const loadLibraryCursors = useAppStore((s) => s.operations.loadLibraryCursors);
   const { showMessage } = useMessage();
+  const showMessageTyped = React.useCallback(
+    (text: string, type?: Message['type']) => {
+      const normalized: Message['type'] | undefined = type === '' || type === undefined ? undefined : type;
+      showMessage(text, normalized);
+    },
+    [showMessage]
+  );
+
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [contextMenuOpen, setContextMenuOpen] = useState<boolean>(false);
@@ -79,23 +92,17 @@ export function LibraryCursor({
 
   // Check if this is an ANI file for optimized animated preview
   const isAniFile = item.file_path?.toLowerCase().endsWith('.ani');
-  const { data: aniData, loading: aniLoading, error: aniError } = useAniPreview(
+  const { data: aniData, loading: aniLoading } = useAniPreview(
     invoke,
     isAniFile ? item.file_path : null
   );
 
   // useSortable provides drag behavior and sorting metadata
+  const draggedItem: DraggedLibraryCursor = { ...item, preview };
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
-    data: { type: 'library', lib: { ...item, preview }, displayOrderIds },
-    options: {
-      // Disable accessibility features that create DndDescribedBy and DndLiveRegion elements
-      accessibility: {
-        announcements: null,
-        container: null
-      }
-    }
-  } as any);
+    data: { type: 'library', lib: draggedItem, displayOrderIds }
+  });
 
   // For non-ANI files, load static preview
   useEffect(() => {
@@ -144,17 +151,14 @@ export function LibraryCursor({
 
     // Create the load promise - try read_cursor_file_as_data_url first, fallback to get_library_cursor_preview
     const loadPromise = (async () => {
-      try {
-        const url = await invokeCommand(invoke, Commands.readCursorFileAsDataUrl, { file_path: filePath });
-        setCachedPreview(filePath, url);
-        if (mounted) {
-          setPreview(url);
-          setLoading(false);
-        }
-        return url;
-      } catch (e) {
-        logger.warn('Preview failed for', filePath, e);
-        const url = await invokeCommand(invoke, Commands.getLibraryCursorPreview, { file_path: filePath });
+      const primary = await invokeWithFeedback(invoke, Commands.readCursorFileAsDataUrl, {
+        args: { file_path: filePath },
+        logLabel: '[LibraryCursor] Failed to load preview via readCursorFileAsDataUrl:',
+        shouldHandleError: () => false
+      });
+
+      if (primary.status === 'success') {
+        const url = primary.value as string;
         setCachedPreview(filePath, url);
         if (mounted) {
           setPreview(url);
@@ -162,6 +166,23 @@ export function LibraryCursor({
         }
         return url;
       }
+
+      logger.warn('Preview failed for', filePath, primary.status === 'error' ? primary.error : 'skipped');
+      const fallback = await invokeWithFeedback(invoke, Commands.getLibraryCursorPreview, {
+        args: { file_path: filePath },
+        logLabel: '[LibraryCursor] Failed to load preview via getLibraryCursorPreview:'
+      });
+      if (fallback.status === 'success') {
+        const url = fallback.value as string;
+        setCachedPreview(filePath, url);
+        if (mounted) {
+          setPreview(url);
+          setLoading(false);
+        }
+        return url;
+      }
+
+      throw new Error('Failed to load library cursor preview');
     })();
 
     // Register as pending to prevent duplicate requests
@@ -230,6 +251,9 @@ export function LibraryCursor({
             <span className="cursor-preview-emoji" style={{ color: '#ffffff' }}>✓</span>
           )}
         </div>
+        <div className="library-item-label mt-3 text-sm font-medium text-foreground text-center" data-testid={`library-card-label-${item.id}`}>
+          {item.name}
+        </div>
       </div>
 
       <ContextMenu
@@ -246,19 +270,23 @@ export function LibraryCursor({
         onEdit={() => { onEdit?.(item); }}
         onDelete={async () => {
           logger.debug('[LibraryCursor] onDelete called for item:', item);
-          // Use direct invoke instead of prop to avoid prop drilling issues
-          try {
-            // If a parent provided an onDelete prop, call it and allow it to handle deletion
-            if (onDeleteProp) {
-              await Promise.resolve(onDeleteProp(item.id));
-            } else {
-              await invokeCommand(invoke, Commands.removeCursorFromLibrary, { id: item.id });
-            }
-            showMessage(`Removed ${item.name} from library`, 'success');
+          // If a parent provided an onDelete prop, call it and allow it to handle deletion
+          if (onDeleteProp) {
+            await Promise.resolve(onDeleteProp(item.id));
+            return;
+          }
+
+          const result = await invokeWithFeedback(invoke, Commands.removeCursorFromLibrary, {
+            args: { id: item.id },
+            showMessage: showMessageTyped,
+            successMessage: `Removed ${item.name} from library`,
+            successType: 'success',
+            logLabel: '[LibraryCursor] Failed to delete:',
+            errorMessage: (err) => 'Failed to delete cursor: ' + String(err),
+            errorType: 'error'
+          });
+          if (result.status === 'success') {
             await loadLibraryCursors();
-          } catch (err) {
-            logger.error('[LibraryCursor] Failed to delete:', err);
-            showMessage('Failed to delete cursor: ' + err, 'error');
           }
         }}
       />

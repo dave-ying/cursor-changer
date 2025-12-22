@@ -15,7 +15,6 @@ import { act } from 'react';
 import App from '@/App';
 import { AppProvider } from '@/context/AppContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import { MessageProvider } from '@/context/MessageContext';
 
 vi.mock('@/context/AppBootstrapProvider', () => ({
   AppBootstrapProvider: ({ children }: { children: any }) => children
@@ -36,9 +35,7 @@ describe('App Component', () => {
       render(
         <AppProvider>
           <ThemeProvider>
-            <MessageProvider>
-              <App />
-            </MessageProvider>
+            <App />
           </ThemeProvider>
         </AppProvider>
       );
@@ -50,9 +47,7 @@ describe('App Component', () => {
       const { container } = render(
         <AppProvider>
           <ThemeProvider>
-            <MessageProvider>
-              <App />
-            </MessageProvider>
+            <App />
           </ThemeProvider>
         </AppProvider>
       );
@@ -66,9 +61,7 @@ describe('App Component', () => {
       render(
         <AppProvider>
           <ThemeProvider>
-            <MessageProvider>
-              <App />
-            </MessageProvider>
+            <App />
           </ThemeProvider>
         </AppProvider>
       );
@@ -83,9 +76,7 @@ describe('App Component', () => {
       const { container } = render(
         <AppProvider>
           <ThemeProvider>
-            <MessageProvider>
-              <App />
-            </MessageProvider>
+            <App />
           </ThemeProvider>
         </AppProvider>
       );
@@ -99,9 +90,7 @@ describe('App Component', () => {
       render(
         <AppProvider>
           <ThemeProvider>
-            <MessageProvider>
-              <App />
-            </MessageProvider>
+            <App />
           </ThemeProvider>
         </AppProvider>
       );
@@ -128,9 +117,7 @@ describe('App Component', () => {
         render(
           <AppProvider>
             <ThemeProvider>
-              <MessageProvider>
-                <App />
-              </MessageProvider>
+              <App />
             </ThemeProvider>
           </AppProvider>
         );
@@ -157,9 +144,7 @@ describe('App Component', () => {
         ({ unmount } = render(
           <AppProvider>
              <ThemeProvider>
-               <MessageProvider>
-                 <App />
-               </MessageProvider>
+               <App />
              </ThemeProvider>
           </AppProvider>
         ));
@@ -195,9 +180,7 @@ describe('App Component', () => {
         render(
           <AppProvider>
              <ThemeProvider>
-               <MessageProvider>
-                 <App />
-               </MessageProvider>
+               <App />
              </ThemeProvider>
           </AppProvider>
         );
@@ -217,9 +200,7 @@ describe('App Component', () => {
         render(
           <AppProvider>
              <ThemeProvider>
-               <MessageProvider>
-                 <App />
-               </MessageProvider>
+               <App />
              </ThemeProvider>
           </AppProvider>
         );
@@ -232,9 +213,7 @@ describe('App Component', () => {
       render(
         <AppProvider>
           <ThemeProvider>
-            <MessageProvider>
-              <App />
-            </MessageProvider>
+            <App />
           </ThemeProvider>
         </AppProvider>
       );
@@ -248,9 +227,7 @@ describe('App Component', () => {
       render(
         <AppProvider>
           <ThemeProvider>
-            <MessageProvider>
-              <App />
-            </MessageProvider>
+            <App />
           </ThemeProvider>
         </AppProvider>
       );
@@ -266,9 +243,7 @@ describe('App Component', () => {
       render(
         <AppProvider>
           <ThemeProvider>
-            <MessageProvider>
-              <App />
-            </MessageProvider>
+            <App />
           </ThemeProvider>
         </AppProvider>
       );
@@ -281,9 +256,7 @@ describe('App Component', () => {
       render(
         <AppProvider>
           <ThemeProvider>
-            <MessageProvider>
-              <App />
-            </MessageProvider>
+            <App />
           </ThemeProvider>
         </AppProvider>
       );

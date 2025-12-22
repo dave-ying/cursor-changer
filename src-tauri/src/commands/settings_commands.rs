@@ -7,6 +7,7 @@ use std::sync::atomic::Ordering;
 use tauri::{AppHandle, Emitter, State};
 use tauri_plugin_global_shortcut::GlobalShortcutExt;
 
+#[tauri::command]
 pub fn set_run_on_startup(
     app: AppHandle,
     state: State<AppState>,
@@ -39,6 +40,7 @@ pub fn set_run_on_startup(
     Ok(payload)
 }
 
+#[tauri::command]
 pub fn set_minimize_to_tray(
     app: AppHandle,
     state: State<AppState>,
@@ -64,6 +66,7 @@ pub fn set_minimize_to_tray(
     })
 }
 
+#[tauri::command]
 pub fn set_accent_color(
     app: AppHandle,
     state: State<AppState>,
@@ -79,6 +82,7 @@ pub fn set_accent_color(
     })
 }
 
+#[tauri::command]
 pub fn set_default_cursor_style(
     app: AppHandle,
     state: State<AppState>,
@@ -106,6 +110,7 @@ pub fn set_default_cursor_style(
     })
 }
 
+#[tauri::command]
 pub fn reset_all_settings(
     app: AppHandle,
     state: State<AppState>,
