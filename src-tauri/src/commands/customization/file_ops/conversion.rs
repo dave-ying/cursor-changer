@@ -1,5 +1,6 @@
 /// Image to cursor conversion operations
 use std::path::{Path, PathBuf};
+use std::fs;
 
 use crate::cursor_converter;
 use crate::paths;
@@ -59,13 +60,23 @@ fn extension_lower(path_or_filename: &str) -> String {
 
 fn make_output_path(file_stem: &str) -> Result<String, String> {
     let cursors_dir = paths::cursors_dir()?;
-    let timestamp = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_millis();
-    let output_filename = format!("{}_{}.cur", file_stem, timestamp);
-    let output_path = cursors_dir.join(&output_filename);
-    Ok(output_path.to_string_lossy().to_string())
+    let base_name = format!("{}.cur", file_stem);
+    let mut candidate = cursors_dir.join(&base_name);
+
+    if !candidate.exists() {
+        return Ok(candidate.to_string_lossy().to_string());
+    }
+
+    // Fallback to sequential suffixes: name_2.cur, name_3.cur, ...
+    for idx in 2u32.. {
+        let filename = format!("{}_{}.cur", file_stem, idx);
+        candidate = cursors_dir.join(&filename);
+        if !candidate.exists() {
+            return Ok(candidate.to_string_lossy().to_string());
+        }
+    }
+
+    Err("Unable to generate unique cursor filename".to_string())
 }
 
 fn convert_to_cur_impl(
