@@ -165,8 +165,8 @@ describe('CursorCustomization - Unit Tests - Rendering', () => {
   it('should display library cursors', async () => {
     await renderAndWaitForLoad();
 
-    expect(screen.getByText('Custom Arrow')).toBeInTheDocument();
-    expect(screen.getByText('Custom Hand')).toBeInTheDocument();
+    expect(screen.getByTestId('library-card-lib_1')).toBeInTheDocument();
+    expect(screen.getByTestId('library-card-lib_2')).toBeInTheDocument();
   });
 
   it('should show loading state initially', async () => {
