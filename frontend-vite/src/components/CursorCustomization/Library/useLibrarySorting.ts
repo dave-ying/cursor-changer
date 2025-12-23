@@ -69,12 +69,19 @@ export function useLibrarySorting({ localLibrary, onLibraryOrderChange }: UseLib
 
   const switchToCustomSort = React.useCallback(() => setSortBy('custom'), []);
 
-  const resetSortState = React.useCallback(() => {
-    setSortBy('date');
-    setSortDirections((prev) => ({ ...prev, date: 'desc' }));
+  const resetSortPreference = React.useCallback(() => {
+    setSortState({ sortBy: 'date', sortDirections: { name: 'asc', date: 'desc' } });
     suppressAutoCustomRef.current = true;
     previousOrderRef.current = '';
-  }, []);
+    previousLengthRef.current = localLibrary?.length ?? 0;
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.removeItem(SORT_PREF_KEY);
+      } catch (err) {
+        logger.warn('Failed to clear library sort preference', err);
+      }
+    }
+  }, [localLibrary?.length]);
 
   const displayLibrary = React.useMemo(() => {
     if (!Array.isArray(localLibrary)) return [];
@@ -175,10 +182,15 @@ export function useLibrarySorting({ localLibrary, onLibraryOrderChange }: UseLib
     if (!Array.isArray(localLibrary)) return;
     const currentOrder = localLibrary.map((item) => item.id).join('|');
     const lengthChanged = (localLibrary?.length ?? 0) !== previousLengthRef.current;
-    if (suppressAutoCustomRef.current) {
-      suppressAutoCustomRef.current = false;
-    } else if (previousOrderRef.current && previousOrderRef.current !== currentOrder && sortBy !== 'custom' && !lengthChanged) {
-      switchToCustomSort();
+    const orderChanged = previousOrderRef.current && previousOrderRef.current !== currentOrder;
+    
+    // Only clear suppress flag when we actually detect a library change that would trigger custom sort
+    if (orderChanged && sortBy !== 'custom' && !lengthChanged) {
+      if (suppressAutoCustomRef.current) {
+        suppressAutoCustomRef.current = false;
+      } else {
+        switchToCustomSort();
+      }
     }
     previousOrderRef.current = currentOrder;
     previousLengthRef.current = localLibrary?.length ?? 0;
@@ -190,6 +202,6 @@ export function useLibrarySorting({ localLibrary, onLibraryOrderChange }: UseLib
     sortDirections,
     handleSortSelection,
     handleLibraryReorder,
-    resetSortState
+    resetSortPreference
   };
 }

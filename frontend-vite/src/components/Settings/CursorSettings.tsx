@@ -5,7 +5,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 
-import { useDebounce } from '../../hooks/safe/useDebounce';
+import { useThrottle } from '../../hooks/safe/useThrottle';
 import { Commands } from '../../tauri/commands';
 import { MAX_CURSOR_SIZE } from '@/constants/cursorConstants';
 import { logger } from '../../utils/logger';
@@ -33,11 +33,6 @@ export function CursorSettings() {
     const isDragging = useRef<boolean>(false);
     const [normalPreviewUrl, setNormalPreviewUrl] = useState<string | null>(null);
     const [normalPreviewLoading, setNormalPreviewLoading] = useState<boolean>(false);
-    const [thumbCursorData, setThumbCursorData] = useState<{
-        url: string;
-        hotspotX: number;
-        hotspotY: number;
-    } | null>(null);
     const normalCursor = useMemo(
         () => availableCursors.find((cursor) => cursor.name.toLowerCase() === 'normal'),
         [availableCursors]
@@ -58,8 +53,8 @@ export function CursorSettings() {
         }
     }, [invoke, loadAvailableCursors]);
 
-    // Debounce utility function
-    const { debounce, cleanup } = useDebounce();
+    // Throttle utility function for real-time cursor updates during drag
+    const { throttle, cleanup } = useThrottle();
 
     useEffect(() => cleanup, [cleanup]);
 
@@ -111,26 +106,26 @@ export function CursorSettings() {
         };
     }, [normalCursor, invoke]);
 
-    // Debounced function to update cursor size in real-time while dragging
-    // Uses 30ms delay for near-instant feedback while preventing excessive backend calls
-    const debouncedSetCursorSize = useMemo(
-        () => debounce((size: number) => {
+    // Throttled function to update cursor size in real-time while dragging
+    // Uses 50ms interval for responsive feedback while preventing excessive backend calls
+    const throttledSetCursorSize = useMemo(
+        () => throttle((size: number) => {
             setCursorSize(String(size));
             lastCommittedSize.current = size;
-        }, 30),
-        [debounce, setCursorSize]
+        }, 50),
+        [throttle, setCursorSize]
     );
 
     // Handle value changes during dragging - updates local state immediately
-    // and triggers debounced backend updates for real-time cursor resizing
+    // and triggers throttled backend updates for real-time cursor resizing
     const handleValueChange = useCallback((value: number[]) => {
         const newSize = value[0];
         if (newSize !== undefined) {
             isDragging.current = true;  // Mark as dragging to prevent sync feedback loop
             setLocalCursorSize(newSize);
-            debouncedSetCursorSize(newSize);
+            throttledSetCursorSize(newSize);
         }
-    }, [debouncedSetCursorSize]);
+    }, [throttledSetCursorSize]);
 
     // Handle final value commit when user releases the slider
     // Ensures the final value is always committed even if debounce hasn't fired yet
@@ -152,61 +147,6 @@ export function CursorSettings() {
         100,
         Math.max(0, ((localCursorSize - sliderMin) / (sliderMax - sliderMin)) * 100)
     );
-    type CursorWithHotspot = CursorInfo & { hotspot_x?: number; hotspot_y?: number };
-
-    useEffect(() => {
-        if (!normalPreviewUrl || !normalCursor) {
-            setThumbCursorData(null);
-            return;
-        }
-
-        let isCancelled = false;
-        const img = new Image();
-        img.src = normalPreviewUrl;
-        img.onload = () => {
-            if (isCancelled) return;
-            const targetSize = Math.max(sliderMin, Math.min(sliderMax, localCursorSize));
-            const canvas = document.createElement('canvas');
-            canvas.width = targetSize;
-            canvas.height = targetSize;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) {
-                setThumbCursorData(null);
-                return;
-            }
-            ctx.imageSmoothingEnabled = true;
-            ctx.clearRect(0, 0, targetSize, targetSize);
-            ctx.drawImage(img, 0, 0, targetSize, targetSize);
-
-            const scaledUrl = canvas.toDataURL('image/png');
-            const hotspotCursor = normalCursor as CursorWithHotspot | undefined;
-            const baseHotspotX = typeof hotspotCursor?.hotspot_x === 'number' ? hotspotCursor.hotspot_x : 0;
-            const baseHotspotY = typeof hotspotCursor?.hotspot_y === 'number' ? hotspotCursor.hotspot_y : 0;
-            const sourceWidth = img.naturalWidth || targetSize;
-            const sourceHeight = img.naturalHeight || targetSize;
-            const scaleX = sourceWidth ? targetSize / sourceWidth : 1;
-            const scaleY = sourceHeight ? targetSize / sourceHeight : 1;
-            setThumbCursorData({
-                url: scaledUrl,
-                hotspotX: Math.round(baseHotspotX * scaleX),
-                hotspotY: Math.round(baseHotspotY * scaleY)
-            });
-        };
-        img.onerror = () => {
-            if (!isCancelled) {
-                setThumbCursorData(null);
-            }
-        };
-
-        return () => {
-            isCancelled = true;
-        };
-    }, [normalPreviewUrl, normalCursor, localCursorSize, sliderMin, sliderMax]);
-
-    const sliderThumbCursor = useMemo(() => {
-        if (!thumbCursorData) return undefined;
-        return `url(${thumbCursorData.url}) ${thumbCursorData.hotspotX} ${thumbCursorData.hotspotY}, auto`;
-    }, [thumbCursorData]);
 
     return (
         <>
@@ -262,8 +202,6 @@ export function CursorSettings() {
                                         onValueChange={handleValueChange}
                                         onValueCommit={handleValueCommit}
                                         className="w-full"
-                                        thumbCursor="pointer"
-                                        thumbActiveCursor={sliderThumbCursor}
                                     />
                                 </div>
 

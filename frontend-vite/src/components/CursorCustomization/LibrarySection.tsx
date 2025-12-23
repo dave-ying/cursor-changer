@@ -50,7 +50,7 @@ export function LibrarySection({
     try {
       await invokeCommand(invoke, Commands.resetLibrary);
       await invokeCommand(invoke, Commands.syncLibraryWithFolder);
-      resetSortState();
+      resetSortPreference();
       await loadLibraryCursors();
       showMessage('Library reset to defaults', 'success');
     } catch (error) {
@@ -67,7 +67,7 @@ export function LibrarySection({
     sortDirections,
     handleSortSelection,
     handleLibraryReorder,
-    resetSortState
+    resetSortPreference
   } = useLibrarySorting({
     localLibrary,
     onLibraryOrderChange

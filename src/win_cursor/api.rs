@@ -2,8 +2,9 @@ use std::ptr::null_mut;
 
 use winapi::ctypes::c_void;
 use winapi::shared::windef::HCURSOR;
+use winapi::shared::ntdef::HANDLE;
 use winapi::um::winuser::{
-    CreateCursor, LoadImageW, SetSystemCursor, SystemParametersInfoW, IMAGE_CURSOR,
+    CopyImage, CreateCursor, LoadImageW, SetSystemCursor, SystemParametersInfoW, IMAGE_CURSOR,
     LR_LOADFROMFILE, SPIF_SENDCHANGE, SPI_SETCURSORS,
 };
 
@@ -117,18 +118,48 @@ pub unsafe fn apply_cursor_from_file_with_size(file_path: &str, cursor_id: u32, 
     // Convert path to wide string
     let wide_path = to_wide(file_path);
 
-    // Load cursor from file at the requested size.
-    // For multi-resolution .cur files, this allows Windows to select the best matching
-    // resolution from the file instead of always picking the smallest (32x32) size.
-    // This prevents pixelation when displaying larger cursors.
-    let cursor = LoadImageW(
-        null_mut(),         // hInst (null for files)
-        wide_path.as_ptr(), // File path
-        IMAGE_CURSOR,       // Type: cursor
-        size,               // Desired width - Windows picks best match from .cur
-        size,               // Desired height - Windows picks best match from .cur
-        LR_LOADFROMFILE,    // Load from file
+    // Try loading at the exact requested size first
+    let mut cursor = LoadImageW(
+        null_mut(),
+        wide_path.as_ptr(),
+        IMAGE_CURSOR,
+        size,
+        size,
+        LR_LOADFROMFILE,
     ) as HCURSOR;
+
+    // If exact size fails, try common sizes from largest to smallest
+    if cursor.is_null() {
+        let fallback_sizes: [i32; 8] = [256, 192, 160, 144, 128, 96, 64, 32];
+        
+        for &candidate in &fallback_sizes {
+            cursor = LoadImageW(
+                null_mut(),
+                wide_path.as_ptr(),
+                IMAGE_CURSOR,
+                candidate,
+                candidate,
+                LR_LOADFROMFILE,
+            ) as HCURSOR;
+            if !cursor.is_null() {
+                // Successfully loaded at fallback size, now scale to requested size
+                let scaled = CopyImage(
+                    cursor as HANDLE,
+                    IMAGE_CURSOR,
+                    size,
+                    size,
+                    0, // Don't delete original in case scaling fails
+                ) as HCURSOR;
+
+                if !scaled.is_null() {
+                    // Scaling succeeded, use scaled cursor
+                    cursor = scaled;
+                }
+                // If scaling failed, use the fallback-sized cursor as-is
+                break;
+            }
+        }
+    }
 
     if cursor.is_null() {
         eprintln!("LoadImageW failed for {file_path} at size {size}");
