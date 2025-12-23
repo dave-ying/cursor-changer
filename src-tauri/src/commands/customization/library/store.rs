@@ -219,6 +219,9 @@ pub fn initialize_library_with_defaults(app: &AppHandle) -> Result<LibraryData, 
     let total_cursors = cursor_files.len();
     let mut library = LibraryData::default();
 
+    // Build in chronological order (oldest -> newest) then reverse to persist newest-first,
+    // so default "Custom" order matches "Date Created" (newest to oldest).
+    let mut entries: Vec<LibraryCursor> = Vec::new();
     for (position, source_path) in cursor_files.into_iter().enumerate() {
         let file_name = match source_path.file_name().and_then(|s| s.to_str()) {
             Some(name) => name.to_string(),
@@ -252,8 +255,12 @@ pub fn initialize_library_with_defaults(app: &AppHandle) -> Result<LibraryData, 
             created_at,
         };
 
-        library.cursors.push(cursor);
+        entries.push(cursor);
     }
+
+    // Reverse to persist newest-first order by default
+    entries.reverse();
+    library.cursors.extend(entries);
 
     cc_debug!(
         "[CursorChanger] Initialized library with {} default cursors",
