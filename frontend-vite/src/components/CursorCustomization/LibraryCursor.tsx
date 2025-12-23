@@ -251,9 +251,6 @@ export function LibraryCursor({
             <span className="cursor-preview-emoji" style={{ color: '#ffffff' }}>✓</span>
           )}
         </div>
-        <div className="library-item-label mt-3 text-sm font-medium text-foreground text-center" data-testid={`library-card-label-${item.id}`}>
-          {item.name}
-        </div>
       </div>
 
       <ContextMenu

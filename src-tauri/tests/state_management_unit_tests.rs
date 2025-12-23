@@ -259,7 +259,7 @@ fn test_cursor_state_payload_from_app_state() {
     }
     state.modes.write().unwrap().customization_mode = CustomizationMode::Advanced;
 
-    let payload = CursorStatePayload::from(&state);
+    let payload = CursorStatePayload::try_from(&state).expect("Application state poisoned");
 
     assert_eq!(payload.hidden, true);
     assert_eq!(payload.shortcut, Some("Ctrl+Shift+X".to_string()));

@@ -99,11 +99,28 @@ export function CursorCustomization({ className = '' }: { className?: string }):
         clickPointItemId={controller.browseModal.clickPointItemId}
       />
 
-      {/* Test-friendly loading flags */}
-      {!cursorsLoaded && <div data-testid="loading-cursors">loading</div>}
-      {!libraryLoaded && <div data-testid="loading-library">loading</div>}
-      {cursorsLoaded && <div data-testid="cursors-loaded">true</div>}
-      {libraryLoaded && <div data-testid="library-loaded">true</div>}
+      {/* Test-friendly loading flags (hidden in production UI) */}
+      {!cursorsLoaded && (
+        <div data-testid="loading-cursors" className="sr-only">
+          loading
+        </div>
+      )}
+      {!libraryLoaded && (
+        <div data-testid="loading-library" className="sr-only">
+          loading
+        </div>
+      )}
+      {cursorsLoaded && (
+        <div data-testid="cursors-loaded" className="sr-only">
+          true
+        </div>
+      )}
+      {libraryLoaded && (
+        <div data-testid="library-loaded" className="sr-only">
+          true
+        </div>
+      )}
+
       {selectedCursorName && (
         <div data-testid="selected-cursor" className="sr-only">
           {selectedCursorName}

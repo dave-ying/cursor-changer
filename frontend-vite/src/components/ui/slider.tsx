@@ -3,10 +3,33 @@ import * as SliderPrimitive from "@radix-ui/react-slider"
 
 import { cn } from "@/lib/utils"
 
+type SliderProps = React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> & {
+  thumbClassName?: string
+  thumbStyle?: React.CSSProperties
+  thumbCursor?: React.CSSProperties['cursor']
+  thumbActiveCursor?: React.CSSProperties['cursor']
+}
+
 const Slider = React.forwardRef<
   React.ComponentRef<typeof SliderPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
->(({ className, style, ...props }, ref) => (
+  SliderProps
+>(({ className, style, thumbClassName, thumbStyle, thumbCursor = 'pointer', thumbActiveCursor, ...props }, ref) => {
+  const [isThumbActive, setIsThumbActive] = React.useState(false)
+
+  React.useEffect(() => {
+    if (!isThumbActive) return
+    const handlePointerEnd = () => setIsThumbActive(false)
+    window.addEventListener('pointerup', handlePointerEnd)
+    window.addEventListener('pointercancel', handlePointerEnd)
+    return () => {
+      window.removeEventListener('pointerup', handlePointerEnd)
+      window.removeEventListener('pointercancel', handlePointerEnd)
+    }
+  }, [isThumbActive])
+
+  const resolvedCursor = isThumbActive && thumbActiveCursor ? thumbActiveCursor : thumbCursor
+
+  return (
   <SliderPrimitive.Root
     ref={ref}
     className={cn("relative flex w-full touch-none select-none items-center", className)}
@@ -19,14 +42,24 @@ const Slider = React.forwardRef<
       />
     </SliderPrimitive.Track>
     <SliderPrimitive.Thumb
-      className="block rounded-full shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:scale-110 border-2 cursor-pointer slider-thumb"
+      className={cn(
+        "block rounded-full shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:scale-110 border-2 slider-thumb",
+        thumbClassName
+      )}
+      onPointerDown={() => setIsThumbActive(true)}
+      onPointerUp={() => setIsThumbActive(false)}
+      onPointerCancel={() => setIsThumbActive(false)}
+      onLostPointerCapture={() => setIsThumbActive(false)}
       style={{
         width: '18px',
-        height: '18px'
+        height: '18px',
+        cursor: resolvedCursor,
+        ...thumbStyle
       }}
     />
   </SliderPrimitive.Root>
-))
+  )
+})
 Slider.displayName = SliderPrimitive.Root.displayName
 
 export { Slider }

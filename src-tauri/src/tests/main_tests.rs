@@ -70,7 +70,7 @@ mod tests {
             prefs.default_cursor_style = DefaultCursorStyle::Windows;
         }
 
-        let payload = CursorStatePayload::from(&state);
+        let payload = CursorStatePayload::try_from(&state).expect("Application state poisoned");
         assert_eq!(payload.hidden, true);
         assert_eq!(payload.shortcut, Some("Ctrl+Shift+X".to_string()));
         assert_eq!(payload.shortcut_enabled, true);

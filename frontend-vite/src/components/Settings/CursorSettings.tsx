@@ -11,6 +11,7 @@ import { MAX_CURSOR_SIZE } from '@/constants/cursorConstants';
 import { logger } from '../../utils/logger';
 import { invokeWithFeedback } from '../../store/operations/invokeWithFeedback';
 import type { Message } from '../../store/slices/uiStateStore';
+import type { CursorInfo } from '@/types/generated/CursorInfo';
 
 export function CursorSettings() {
     const { invoke } = useApp();
@@ -32,6 +33,17 @@ export function CursorSettings() {
     const isDragging = useRef<boolean>(false);
     const [normalPreviewUrl, setNormalPreviewUrl] = useState<string | null>(null);
     const [normalPreviewLoading, setNormalPreviewLoading] = useState<boolean>(false);
+    const [thumbCursorData, setThumbCursorData] = useState<{
+        url: string;
+        hotspotX: number;
+        hotspotY: number;
+    } | null>(null);
+    const normalCursor = useMemo(
+        () => availableCursors.find((cursor) => cursor.name.toLowerCase() === 'normal'),
+        [availableCursors]
+    );
+    const sliderMin = 32;
+    const sliderMax = MAX_CURSOR_SIZE;
 
     const handleResetCursors = useCallback(async () => {
         const result = await invokeWithFeedback(invoke, Commands.resetCurrentModeCursors, {
@@ -62,10 +74,6 @@ export function CursorSettings() {
 
     // Load preview for the current Normal select cursor
     useEffect(() => {
-        const normalCursor = availableCursors.find(
-            (cursor) => cursor.name.toLowerCase() === 'normal'
-        );
-
         if (!normalCursor) {
             setNormalPreviewUrl(null);
             setNormalPreviewLoading(false);
@@ -101,7 +109,7 @@ export function CursorSettings() {
         return () => {
             isMounted = false;
         };
-    }, [availableCursors, invoke]);
+    }, [normalCursor, invoke]);
 
     // Debounced function to update cursor size in real-time while dragging
     // Uses 30ms delay for near-instant feedback while preventing excessive backend calls
@@ -140,12 +148,65 @@ export function CursorSettings() {
 
     // Reduce preview size to better match on-screen cursor
     const PREVIEW_SCALE = 0.8;
-    const sliderMin = 32;
-    const sliderMax = MAX_CURSOR_SIZE;
     const sliderPercent = Math.min(
         100,
         Math.max(0, ((localCursorSize - sliderMin) / (sliderMax - sliderMin)) * 100)
     );
+    type CursorWithHotspot = CursorInfo & { hotspot_x?: number; hotspot_y?: number };
+
+    useEffect(() => {
+        if (!normalPreviewUrl || !normalCursor) {
+            setThumbCursorData(null);
+            return;
+        }
+
+        let isCancelled = false;
+        const img = new Image();
+        img.src = normalPreviewUrl;
+        img.onload = () => {
+            if (isCancelled) return;
+            const targetSize = Math.max(sliderMin, Math.min(sliderMax, localCursorSize));
+            const canvas = document.createElement('canvas');
+            canvas.width = targetSize;
+            canvas.height = targetSize;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                setThumbCursorData(null);
+                return;
+            }
+            ctx.imageSmoothingEnabled = true;
+            ctx.clearRect(0, 0, targetSize, targetSize);
+            ctx.drawImage(img, 0, 0, targetSize, targetSize);
+
+            const scaledUrl = canvas.toDataURL('image/png');
+            const hotspotCursor = normalCursor as CursorWithHotspot | undefined;
+            const baseHotspotX = typeof hotspotCursor?.hotspot_x === 'number' ? hotspotCursor.hotspot_x : 0;
+            const baseHotspotY = typeof hotspotCursor?.hotspot_y === 'number' ? hotspotCursor.hotspot_y : 0;
+            const sourceWidth = img.naturalWidth || targetSize;
+            const sourceHeight = img.naturalHeight || targetSize;
+            const scaleX = sourceWidth ? targetSize / sourceWidth : 1;
+            const scaleY = sourceHeight ? targetSize / sourceHeight : 1;
+            setThumbCursorData({
+                url: scaledUrl,
+                hotspotX: Math.round(baseHotspotX * scaleX),
+                hotspotY: Math.round(baseHotspotY * scaleY)
+            });
+        };
+        img.onerror = () => {
+            if (!isCancelled) {
+                setThumbCursorData(null);
+            }
+        };
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [normalPreviewUrl, normalCursor, localCursorSize, sliderMin, sliderMax]);
+
+    const sliderThumbCursor = useMemo(() => {
+        if (!thumbCursorData) return undefined;
+        return `url(${thumbCursorData.url}) ${thumbCursorData.hotspotX} ${thumbCursorData.hotspotY}, auto`;
+    }, [thumbCursorData]);
 
     return (
         <>
@@ -201,6 +262,8 @@ export function CursorSettings() {
                                         onValueChange={handleValueChange}
                                         onValueCommit={handleValueCommit}
                                         className="w-full"
+                                        thumbCursor="pointer"
+                                        thumbActiveCursor={sliderThumbCursor}
                                     />
                                 </div>
 

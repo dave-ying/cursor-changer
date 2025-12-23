@@ -173,7 +173,7 @@ proptest! {
             }
 
             // Create payload (simulating what frontend receives)
-            let payload = CursorStatePayload::from(&*guard);
+            let payload = CursorStatePayload::try_from(&*guard).expect("Application state poisoned");
 
             let snapshot = guard.read_all().unwrap();
 
@@ -216,7 +216,7 @@ proptest! {
             }
 
             // Create payload
-            let payload = CursorStatePayload::from(&*guard);
+            let payload = CursorStatePayload::try_from(&*guard).expect("Application state poisoned");
 
             // Verify the cursor path is in the payload
             prop_assert_eq!(
@@ -262,7 +262,7 @@ proptest! {
             }
 
             // Create payload
-            let payload = CursorStatePayload::from(&*guard);
+            let payload = CursorStatePayload::try_from(&*guard).expect("Application state poisoned");
 
             // Verify the cursor path is not in the payload
             prop_assert!(
@@ -388,7 +388,7 @@ proptest! {
                 // Read state multiple times
                 for _ in 0..10 {
                     let guard = state_clone.lock().unwrap();
-                    let _payload = CursorStatePayload::from(&*guard);
+                    let _payload = CursorStatePayload::try_from(&*guard).expect("Application state poisoned");
                     // Just verify we can read without panicking
                 }
             });
@@ -601,7 +601,7 @@ proptest! {
             // Access via payload conversion
             {
                 let guard = state.lock().unwrap();
-                let payload = CursorStatePayload::from(&*guard);
+                let payload = CursorStatePayload::try_from(&*guard).expect("Application state poisoned");
 
                 // Verify payload contains the same data
                 let payload_path = payload.cursor_paths.get(&cursor_name);
@@ -634,7 +634,7 @@ proptest! {
         let mut payloads = Vec::new();
         for _ in 0..num_reads {
             let guard = state.lock().unwrap();
-            let payload = CursorStatePayload::from(&*guard);
+            let payload = CursorStatePayload::try_from(&*guard).expect("Application state poisoned");
             payloads.push(payload);
         }
 
@@ -860,7 +860,7 @@ mod unit_tests {
             .cursor_paths
             .insert("Normal".to_string(), "test.cur".to_string());
 
-        let payload = CursorStatePayload::from(&state);
+        let payload = CursorStatePayload::try_from(&state).expect("Application state poisoned");
 
         assert_eq!(payload.cursor_size, 96);
         assert_eq!(payload.shortcut, Some("Ctrl+Shift+X".to_string()));

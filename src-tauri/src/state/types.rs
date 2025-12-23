@@ -46,13 +46,6 @@ impl TryFrom<&AppState> for CursorStatePayload {
     }
 }
 
-impl From<&AppState> for CursorStatePayload {
-    fn from(state: &AppState) -> Self {
-        // Safe for tests and non-error-aware callers; production should prefer TryFrom.
-        CursorStatePayload::try_from(state).expect("Application state poisoned")
-    }
-}
-
 #[allow(dead_code)]
 #[derive(ts_rs::TS, Serialize)]
 #[ts(export, export_to = "../../frontend-vite/src/types/generated/")]
@@ -88,7 +81,7 @@ mod tests {
             prefs.default_cursor_style = DefaultCursorStyle::Windows;
         }
 
-        let payload = CursorStatePayload::from(&state);
+        let payload = CursorStatePayload::try_from(&state).expect("Application state poisoned");
         assert_eq!(payload.hidden, true);
         assert_eq!(payload.shortcut, Some("Ctrl+Shift+X".to_string()));
         assert_eq!(payload.minimize_to_tray, false);
