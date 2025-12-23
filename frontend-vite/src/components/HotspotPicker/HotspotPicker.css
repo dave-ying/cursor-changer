@@ -53,10 +53,13 @@
 .cursor-filename {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    text-align: left;
+    justify-content: center;
+    gap: 0;
+    text-align: center;
+    position: relative;
     flex: 1 1 auto;
-    max-width: calc(100% - 110px); /* Leave room for label + gap so row matches preview width */
+    min-width: 0; /* allow input to use remaining space without clipping */
+    width: 100%;
 
     font-weight: 600;
     font-size: 0.95rem;
@@ -78,15 +81,30 @@
     box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.2), 0 0 8px rgba(124, 58, 237, 0.15);
 }
 
+/* Shake animation for when clicking outside during edit */
+.cursor-filename.shake {
+    animation: shake 0.5s ease-in-out;
+    border-color: #ef4444; /* Red color for error feedback */
+    background: rgba(239, 68, 68, 0.08);
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2), 0 0 8px rgba(239, 68, 68, 0.15);
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+    20%, 40%, 60%, 80% { transform: translateX(3px); }
+}
+
 
 
 .cursor-name-input {
-    flex: 1;
+    width: 100%;
     min-width: 0;
-    text-align: left;
+    text-align: center;
+    padding-right: 2.8rem; /* room for action icons */
+    padding-left: 2.8rem;  /* balance left/right so text stays visually centered */
     background: transparent;
     border: none;
-    padding: 0;
     color: var(--text-primary);
     font-weight: 600;
     caret-color: var(--accent-color, #7c3aed);
@@ -132,12 +150,15 @@
 }
 
 .cursor-name-buttons {
+    position: absolute;
+    right: 0.55rem;
+    top: 50%;
+    transform: translateY(-50%);
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    margin-left: auto;
-    min-width: 2.8rem; /* Reserve space so input width stays stable */
     justify-content: flex-end;
+    min-width: 2.8rem;
 }
 
 .cursor-name-sanitization-hint {

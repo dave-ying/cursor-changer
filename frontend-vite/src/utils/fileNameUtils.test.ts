@@ -22,10 +22,12 @@ describe('fileNameUtils', () => {
       expect(sanitizeCursorName('LPT1')).toBe('LPT1_cursor');
     });
 
-    it('should trim leading/trailing spaces and dots', () => {
-      expect(sanitizeCursorName('  test  ')).toBe('test');
-      expect(sanitizeCursorName('...test...')).toBe('test');
-      expect(sanitizeCursorName(' .test. ')).toBe('test');
+    it('should trim leading spaces and dots but preserve trailing spaces', () => {
+      expect(sanitizeCursorName('  test  ')).toBe('test  ');
+      expect(sanitizeCursorName('...test...')).toBe('test...');
+      expect(sanitizeCursorName(' .test. ')).toBe('test. ');
+      expect(sanitizeCursorName('test  ')).toBe('test  ');
+      expect(sanitizeCursorName('  test')).toBe('test');
     });
 
     it('should handle empty or invalid input', () => {

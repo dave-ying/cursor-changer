@@ -65,7 +65,10 @@ export function useHotspotLogic({
         const extractParts = (name: string) => {
             const ext = (name.split('.').pop() || '').toLowerCase();
             const stem = name.replace(/\.[^/.]+$/, '') || fallbackName;
-            if (ext === 'cur' || ext === 'ani') {
+            // Preserve the original extension for image uploads so the backend
+            // can correctly detect and convert the bytes (PNG/JPG/SVG/etc.).
+            // Fallback to .cur when no extension exists.
+            if (ext) {
                 return { baseName: stem, extension: ext };
             }
             return { baseName: stem, extension: 'cur' };
@@ -139,8 +142,17 @@ export function useHotspotLogic({
     }, [targetSize, filePath]);
 
     // Add keyboard navigation for hotspot (arrow keys)
+    // Note: This effect needs to be aware of when the user is editing the cursor name
+    // to avoid interfering with text navigation in the input field
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            // Check if the user is currently editing the cursor name
+            // If so, don't interfere with text navigation
+            const activeElement = document.activeElement;
+            if (activeElement && activeElement.classList.contains('cursor-name-input')) {
+                return; // Let the input field handle the key events
+            }
+
             if (busy) return; // Don't allow navigation while processing
 
             let newX = hotspot.x;

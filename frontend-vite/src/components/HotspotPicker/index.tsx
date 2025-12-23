@@ -36,26 +36,69 @@ export function HotspotPicker(props: HotspotPickerProps) {
     const nameInputRef = useRef<HTMLInputElement>(null);
 
     // Reset name editing mode when the source cursor changes (new file or different library item)
+    // Don't reset when only the editableCursorName changes due to user typing
     useEffect(() => {
         setIsNameEditing(false);
         setNameSnapshot('');
         setRawNameInput(logic.editableCursorName);
-    }, [props.filePath, props.file?.name, props.itemId, logic.editableCursorName]);
+    }, [props.filePath, props.file?.name, props.itemId]);
 
     // Keep raw input aligned with latest editable name when not actively editing
+    // Only update when the source cursor changes, not during user typing
     useEffect(() => {
         if (!isNameEditing) {
             setRawNameInput(logic.editableCursorName);
         }
-    }, [logic.editableCursorName, isNameEditing]);
+    }, [props.filePath, props.file?.name, props.itemId, isNameEditing]);
 
     // Track mouse down position to detect drags vs clicks
     const mouseDownPosRef = useRef<{ x: number; y: number } | null>(null);
+    const [shakeAnimation, setShakeAnimation] = useState(false);
 
     const handleConfirmAndClose = async () => {
         await logic.handleConfirm();
         if (onComplete) onComplete();
     };
+
+    /**
+     * Handle click outside cursor name field - shake animation if changes made, exit if no changes
+     */
+    const handleCursorNameClickOutside = useCallback((e: MouseEvent) => {
+        if (!isNameEditing) return;
+
+        // Check if click is inside the cursor name field or its buttons
+        const cursorNameField = document.querySelector('.cursor-filename') as HTMLElement;
+        const clickedOnCursorNameField = cursorNameField?.contains(e.target as Node);
+        
+        if (!clickedOnCursorNameField) {
+            // Check if any changes were made to the cursor name
+            const originalName = nameSnapshot || logic.cursorDisplayName;
+            const hasChanges = logic.editableCursorName !== originalName;
+            
+            if (hasChanges) {
+                // If changes were made, prevent closing and show shake animation
+                e.stopPropagation();
+                e.preventDefault();
+                
+                // Trigger shake animation
+                setShakeAnimation(true);
+                setTimeout(() => setShakeAnimation(false), 500);
+            } else {
+                // If no changes were made, just exit edit mode normally
+                setIsNameEditing(false);
+            }
+        }
+    }, [isNameEditing, logic.editableCursorName, logic.cursorDisplayName, nameSnapshot]);
+
+    // Add event listener for click outside detection
+    useEffect(() => {
+        if (isNameEditing) {
+            document.addEventListener('mousedown', handleCursorNameClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleCursorNameClickOutside);
+        };
+    }, [isNameEditing, handleCursorNameClickOutside]);
 
     /**
      * Handle backdrop mouse down - record position to detect drags
@@ -143,7 +186,7 @@ export function HotspotPicker(props: HotspotPickerProps) {
                     {/* Cursor filename (final cursor file name) */}
                     <div className="cursor-name-block">
                         <span className="cursor-name-label">Cursor Name:</span>
-                        <div className={`cursor-filename ${isNameEditing ? 'is-editing' : ''}`} aria-label="cursor filename">
+                        <div className={`cursor-filename ${isNameEditing ? 'is-editing' : ''} ${shakeAnimation ? 'shake' : ''}`} aria-label="cursor filename">
                             <input
                                 type="text"
                                 ref={nameInputRef}
@@ -164,11 +207,20 @@ export function HotspotPicker(props: HotspotPickerProps) {
                                         return;
                                     }
 
+                                    // Explicitly allow spaces - they are valid in Windows filenames
+                                    if (e.key === ' ') {
+                                        // Spaces are allowed, don't prevent default
+                                        return;
+                                    }
+
                                     // Block Windows-invalid filename characters
                                     INVALID_FILENAME_CHARS.lastIndex = 0;
                                     if (e.key.length === 1 && INVALID_FILENAME_CHARS.test(e.key)) {
                                         e.preventDefault();
                                     }
+                                     
+                                    // Don't automatically exit edit mode on single character input
+                                    // Only exit on Enter or when clicking the save button
                                 }}
                                 onPaste={(e) => {
                                     // Sanitize pasted content instead of allowing invalid characters

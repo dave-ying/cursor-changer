@@ -30,8 +30,8 @@ export function sanitizeFilename(filename: string, replacement: string = '_'): s
     // Remove invalid characters
     let sanitized = filename.replace(INVALID_FILENAME_CHARS, replacement);
     
-    // Remove leading/trailing spaces and dots
-    sanitized = sanitized.trim().replace(/^[.\s]+|[.\s]+$/g, '');
+    // Remove leading spaces and dots, but allow trailing spaces
+    sanitized = sanitized.replace(/^[.\s]+/g, '');
     
     // Handle empty result after sanitization
     if (!sanitized) {
