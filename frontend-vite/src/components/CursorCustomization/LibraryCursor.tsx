@@ -251,6 +251,9 @@ export function LibraryCursor({
             <span className="cursor-preview-emoji" style={{ color: '#ffffff' }}>✓</span>
           )}
         </div>
+        <div className="cursor-name text-sm font-medium mt-2 text-card-foreground">
+          {item.name}
+        </div>
       </div>
 
       <ContextMenu

@@ -216,7 +216,7 @@ export function useCursorCustomizationController() {
   }, [cancelBrowseMode, selection.mode]);
 
   const handleLoadLibraryCursors = useCallback(() => {
-    loadLibraryCursors();
+    return loadLibraryCursors();
   }, [loadLibraryCursors]);
 
   const handleDeleteLibraryCursor = useCallback(async (item: { id: string }) => {
