@@ -6,7 +6,7 @@ import { Commands, invokeCommand } from '../../../tauri/commands';
 import { logger } from '../../../utils/logger';
 import type { LibraryCursor } from '../../../types/generated/LibraryCursor';
 
-type SortMode = 'custom' | 'name' | 'date';
+type SortMode = 'custom' | 'date';
 type SortDirection = 'asc' | 'desc';
 
 interface UseLibrarySortingParams {
@@ -20,29 +20,28 @@ export function useLibrarySorting({ localLibrary, onLibraryOrderChange }: UseLib
   const { invoke } = useApp();
   const loadLibraryCursors = useAppStore((s) => s.operations.loadLibraryCursors);
 
-  const getInitialSort = React.useCallback((): { sortBy: SortMode; sortDirections: { name: SortDirection; date: SortDirection } } => {
+  const getInitialSort = React.useCallback((): { sortBy: SortMode; sortDirections: { date: SortDirection } } => {
     if (typeof window === 'undefined') {
-      return { sortBy: 'date', sortDirections: { name: 'asc', date: 'desc' } };
+      return { sortBy: 'date', sortDirections: { date: 'desc' } };
     }
     try {
       const raw = window.localStorage.getItem(SORT_PREF_KEY);
-      if (!raw) return { sortBy: 'date', sortDirections: { name: 'asc', date: 'desc' } };
+      if (!raw) return { sortBy: 'date', sortDirections: { date: 'desc' } };
       const parsed = JSON.parse(raw);
-      const sortBy = (['custom', 'name', 'date'] as SortMode[]).includes(parsed?.sortBy) ? parsed.sortBy : 'date';
+      const sortBy = (['custom', 'date'] as SortMode[]).includes(parsed?.sortBy) ? parsed.sortBy : 'date';
       const sortDirections = {
-        name: parsed?.sortDirections?.name === 'desc' ? ('desc' as SortDirection) : ('asc' as SortDirection),
         date: parsed?.sortDirections?.date === 'asc' ? ('asc' as SortDirection) : ('desc' as SortDirection)
       };
       return { sortBy, sortDirections };
     } catch (err) {
       logger.warn('Failed to load library sort preference', err);
-      return { sortBy: 'date', sortDirections: { name: 'asc', date: 'desc' } };
+      return { sortBy: 'date', sortDirections: { date: 'desc' } };
     }
   }, []);
 
   const [{ sortBy, sortDirections }, setSortState] = React.useState<{
     sortBy: SortMode;
-    sortDirections: { name: SortDirection; date: SortDirection };
+    sortDirections: { date: SortDirection };
   }>(getInitialSort);
 
   const setSortBy = React.useCallback((mode: SortMode) => {
@@ -50,11 +49,7 @@ export function useLibrarySorting({ localLibrary, onLibraryOrderChange }: UseLib
   }, []);
 
   const setSortDirections = React.useCallback(
-    (
-      updater:
-        | { name: SortDirection; date: SortDirection }
-        | ((prev: { name: SortDirection; date: SortDirection }) => { name: SortDirection; date: SortDirection })
-    ) => {
+    (updater: { date: SortDirection } | ((prev: { date: SortDirection }) => { date: SortDirection })) => {
       setSortState((prev) => ({
         ...prev,
         sortDirections: typeof updater === 'function' ? updater(prev.sortDirections) : updater
@@ -70,7 +65,7 @@ export function useLibrarySorting({ localLibrary, onLibraryOrderChange }: UseLib
   const switchToCustomSort = React.useCallback(() => setSortBy('custom'), []);
 
   const resetSortPreference = React.useCallback(() => {
-    setSortState({ sortBy: 'date', sortDirections: { name: 'asc', date: 'desc' } });
+    setSortState({ sortBy: 'date', sortDirections: { date: 'desc' } });
     suppressAutoCustomRef.current = true;
     previousOrderRef.current = '';
     previousLengthRef.current = localLibrary?.length ?? 0;
@@ -85,11 +80,6 @@ export function useLibrarySorting({ localLibrary, onLibraryOrderChange }: UseLib
 
   const displayLibrary = React.useMemo(() => {
     if (!Array.isArray(localLibrary)) return [];
-    if (sortBy === 'name') {
-      const dir = sortDirections.name === 'asc' ? 1 : -1;
-      const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
-      return [...localLibrary].sort((a, b) => collator.compare(a.name ?? '', b.name ?? '') * dir);
-    }
     if (sortBy === 'date') {
       const dir = sortDirections.date === 'asc' ? 1 : -1;
       return [...localLibrary].sort((a, b) => {
@@ -111,7 +101,7 @@ export function useLibrarySorting({ localLibrary, onLibraryOrderChange }: UseLib
       if (sortBy === mode) {
         setSortDirections((prev) => ({
           ...prev,
-          [mode]: prev[mode] === 'asc' ? 'desc' : 'asc'
+          date: prev.date === 'asc' ? 'desc' : 'asc'
         }));
       } else {
         setSortBy(mode);
@@ -149,12 +139,11 @@ export function useLibrarySorting({ localLibrary, onLibraryOrderChange }: UseLib
       const raw = window.localStorage.getItem(SORT_PREF_KEY);
       if (!raw) return;
       const parsed = JSON.parse(raw);
-      if (parsed?.sortBy && (['custom', 'name', 'date'] as SortMode[]).includes(parsed.sortBy)) {
+      if (parsed?.sortBy && (['custom', 'date'] as SortMode[]).includes(parsed.sortBy)) {
         setSortBy(parsed.sortBy);
       }
-      if (parsed?.sortDirections?.name && parsed?.sortDirections?.date) {
+      if (parsed?.sortDirections?.date) {
         setSortDirections({
-          name: parsed.sortDirections.name === 'desc' ? ('desc' as SortDirection) : ('asc' as SortDirection),
           date: parsed.sortDirections.date === 'asc' ? ('asc' as SortDirection) : ('desc' as SortDirection)
         });
       }

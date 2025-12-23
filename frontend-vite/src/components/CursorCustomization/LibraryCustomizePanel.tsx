@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Slider } from '@/components/ui/slider';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { CollapsibleSection } from './CollapsibleSection';
 import { LibraryResetDialog } from './LibraryResetDialog';
@@ -10,10 +11,12 @@ interface LibraryCustomizePanelProps {
   showCustomizePanel: boolean;
   showMoreOptions: boolean;
   resetLibraryDialogOpen: boolean;
-  sortBy: 'custom' | 'name' | 'date';
-  sortDirections: Record<string, 'asc' | 'desc'>;
+  sortBy: 'custom' | 'date';
+  sortDirections: Record<'date', 'asc' | 'desc'>;
+  previewScale: number;
   onToggleMoreOptions: () => void;
-  onSortSelection: (sortBy: 'custom' | 'name' | 'date') => void;
+  onSortSelection: (sortBy: 'custom' | 'date') => void;
+  onPreviewScaleChange: (scale: number) => void;
   onOpenFolder: () => void;
   onResetLibraryDialogChange: (open: boolean) => void;
   onResetLibrary: () => void;
@@ -25,8 +28,10 @@ export function LibraryCustomizePanel({
   resetLibraryDialogOpen,
   sortBy,
   sortDirections,
+  previewScale,
   onToggleMoreOptions,
   onSortSelection,
+  onPreviewScaleChange,
   onOpenFolder,
   onResetLibraryDialogChange,
   onResetLibrary
@@ -35,7 +40,7 @@ export function LibraryCustomizePanel({
     <div
       className={`px-6 pb-4 border-b border-border/50 bg-muted/30 overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${showCustomizePanel ? 'opacity-100' : 'opacity-0'}`}
       style={{
-        maxHeight: showCustomizePanel ? '260px' : '0px',
+        maxHeight: showCustomizePanel ? '320px' : '0px',
         overflow: 'hidden'
       }}
       aria-expanded={showCustomizePanel}
@@ -48,7 +53,7 @@ export function LibraryCustomizePanel({
           <ToggleGroup
             type="single"
             value={sortBy}
-            onValueChange={(v) => v && onSortSelection(v as 'custom' | 'name' | 'date')}
+            onValueChange={(v) => v && onSortSelection(v as 'custom' | 'date')}
             className="bg-muted rounded-full p-1 shadow-sm"
             aria-label="Library sort order"
           >
@@ -67,27 +72,34 @@ export function LibraryCustomizePanel({
               </span>
             </ToggleGroupItem>
             <ToggleGroupItem
-              value="name"
-              className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-              onClick={() => onSortSelection('name')}
-            >
-              <span className="inline-flex items-center gap-1">
-                Name
-                {sortBy === 'name'
-                  ? (sortDirections['name'] === 'asc'
-                      ? <ArrowUp className="h-3.5 w-3.5" />
-                      : <ArrowDown className="h-3.5 w-3.5" />)
-                  : <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />}
-              </span>
-            </ToggleGroupItem>
-            <ToggleGroupItem
               value="custom"
               className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-              onClick={() => onSortSelection('custom')}
             >
               Custom
             </ToggleGroupItem>
           </ToggleGroup>
+        </div>
+        <div className="flex items-center gap-3">
+          <p className="text-sm font-semibold text-foreground whitespace-nowrap">Cursor Preview</p>
+          <div className="flex items-center gap-2 ml-auto">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">Small</span>
+            <Slider
+              min={0.6}
+              max={3}
+              step={0.05}
+              value={[previewScale]}
+              onValueChange={(value) => {
+                const next = value?.[0];
+                if (typeof next === 'number') onPreviewScaleChange(next);
+              }}
+              onValueCommit={(value) => {
+                const next = value?.[0];
+                if (typeof next === 'number') onPreviewScaleChange(next);
+              }}
+              className="w-40 sm:w-56 md:w-64"
+            />
+            <span className="text-xs text-muted-foreground whitespace-nowrap">Large</span>
+          </div>
         </div>
         <CollapsibleSection
           id="library-more-options"

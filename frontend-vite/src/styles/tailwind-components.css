@@ -35,20 +35,20 @@
 
 /* Library grid container */
 #library-grid {
-  padding: 8px;
+  padding: var(--cursor-grid-padding, 8px);
   margin: 0;
   overflow: visible;
   position: relative;
   z-index: 1;
-  padding-top: 24px;
-  padding-bottom: 24px;
+  padding-top: calc(var(--cursor-grid-padding, 8px) + 16px);
+  padding-bottom: calc(var(--cursor-grid-padding, 8px) + 16px);
 }
 
 /* Card grid layout */
 .cursor-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  gap: clamp(8px, 1.5vw, 16px);
+  grid-template-columns: var(--cursor-grid-template, repeat(auto-fit, minmax(var(--cursor-grid-min, 80px), 1fr)));
+  gap: var(--cursor-grid-gap, clamp(8px, 1.5vw, 16px));
   position: relative;
   z-index: 1;
   max-width: 100%;
@@ -195,11 +195,15 @@ section[aria-label="Library"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(64px, 8vw, 96px);
-  height: clamp(64px, 8vw, 96px);
+  width: var(--library-item-size, 120px);
+  height: var(--library-item-size, 120px);
+  padding: var(--library-item-padding, 10px);
+  box-sizing: border-box;
   position: relative;
   z-index: 100;
   margin: 0 auto;
+  /* Ensure transforms never clip inside the grid cell even when previews scale up */
+  overflow: visible;
 }
 
 /* Override @dnd-kit library cursor styles to ensure consistent cursor behavior */

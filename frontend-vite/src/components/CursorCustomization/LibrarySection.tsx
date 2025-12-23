@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import { LibraryCursor } from './LibraryCursor';
 import { LibraryHeader } from './LibraryHeader';
@@ -36,10 +37,30 @@ export function LibrarySection({
   const [showCustomizePanel, setShowCustomizePanel] = React.useState(false);
   const [showMoreOptions, setShowMoreOptions] = React.useState(false);
   const [resetLibraryDialogOpen, setResetLibraryDialogOpen] = React.useState(false);
+  const scaleMin = 0.6;
+  const scaleMax = 3;
+
+  const [libraryPreviewScale, setLibraryPreviewScale] = React.useState<number>(() => {
+    if (typeof window === 'undefined') return 1;
+    const raw = window.localStorage.getItem('library-preview-scale');
+    const parsed = raw ? Number(raw) : 1;
+    if (Number.isFinite(parsed) && parsed >= scaleMin && parsed <= scaleMax) return parsed;
+    return 1;
+  });
+
   const handleToggleCustomizePanel = React.useCallback(() => {
     setShowMoreOptions(false);
     setShowCustomizePanel((prev) => !prev);
   }, []);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem('library-preview-scale', String(libraryPreviewScale));
+    } catch (error) {
+      logger.error('Failed to save library preview scale:', error);
+    }
+  }, [libraryPreviewScale]);
 
   const handleOpenFolder = async () => {
     try {
@@ -77,6 +98,30 @@ export function LibrarySection({
     onLibraryOrderChange
   });
 
+  const gridStyle = React.useMemo<React.CSSProperties>(() => {
+    // Dynamically size cards and gaps based on preview scale so smaller previews show more columns.
+    const normalized = Math.min(1, Math.max(0, (libraryPreviewScale - scaleMin) / (scaleMax - scaleMin))); // 0 at min, 1 at max
+    const cardSize = Math.round(78 + normalized * 102); // 78px at min, ~180px at max to keep mid-range 3-up
+    const padding = Math.max(5, Math.round(cardSize * 0.05));
+    const gapValue = 4 + normalized * 8; // 4px at min, 12px at max
+
+    const gap = `${gapValue}px`;
+
+    return {
+      '--cursor-grid-template': `repeat(auto-fill, minmax(${cardSize}px, ${cardSize}px))`,
+      '--cursor-grid-min': `${cardSize}px`,
+      '--library-item-size': `${cardSize}px`,
+      '--library-item-padding': `${padding}px`,
+      '--cursor-grid-gap': gap,
+      gap,
+      gridTemplateColumns: `repeat(auto-fill, minmax(${cardSize}px, ${cardSize}px))`,
+      gridAutoRows: `${cardSize}px`,
+      gridAutoFlow: 'row',
+      justifyContent: 'center',
+      justifyItems: 'center'
+    } as React.CSSProperties;
+  }, [libraryPreviewScale]);
+
   return (
     <section
       id={id}
@@ -105,6 +150,8 @@ export function LibrarySection({
           sortDirections={sortDirections}
           onToggleMoreOptions={() => setShowMoreOptions((prev) => !prev)}
           onSortSelection={handleSortSelection}
+          previewScale={libraryPreviewScale}
+          onPreviewScaleChange={setLibraryPreviewScale}
           onOpenFolder={handleOpenFolder}
           onResetLibraryDialogChange={setResetLibraryDialogOpen}
           onResetLibrary={handleResetLibrary}
@@ -119,7 +166,12 @@ export function LibrarySection({
           overflow: 'auto',
           flex: 1
         }}>
-          <div id="library-grid" className={`cursor-grid ${pendingLibraryCursor ? 'dimmed' : ''}`}>
+          <div
+            id="library-grid"
+            className={`cursor-grid ${pendingLibraryCursor ? 'dimmed' : ''}`}
+            style={gridStyle}
+          >
+
             {displayLibrary && displayLibrary.length > 0 ? (
               <SortableContext items={displayLibrary.map(l => l.id)} strategy={rectSortingStrategy}>
                 {displayLibrary.map((lib, index) => (
@@ -127,6 +179,7 @@ export function LibrarySection({
                     key={lib.id}
                     displayOrderIds={displayLibrary.map(item => item.id)}
                     item={lib}
+                    previewScale={libraryPreviewScale}
                     selectionMode={Boolean(selectingFromLibrary && selectedCursor)}
                     isSelected={pendingLibraryCursor?.id === lib.id}
                     isHighlighted={selectedLibraryCursor?.id === lib.id}

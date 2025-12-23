@@ -37,6 +37,7 @@ import {
  * @property {number} [animationIndex=0] - For staggered pulse delays
  * @property {boolean} [enablePulseAnimation=true] - Whether to enable the pulse animation
  * @property {number} [staggerInterval=0.2] - Custom stagger interval between items
+ * @property {number} [previewScale=1] - Preview scale
  */
 
 interface LibraryCursorProps {
@@ -47,11 +48,13 @@ interface LibraryCursorProps {
   selectionMode?: boolean;
   isSelected?: boolean;
   isHighlighted?: boolean;
+  previewScale?: number;
 
   onClickPointEdit?: (filePath: string, id: string) => void;
   onApply?: (item: LibraryCursorItem) => void;
   onEdit?: (item: LibraryCursorItem) => void;
   onDelete?: (id: string) => void;
+
   animationIndex?: number;
   enablePulseAnimation?: boolean;
   staggerInterval?: number;
@@ -72,7 +75,8 @@ export function LibraryCursor({
   onDelete: onDeleteProp,
   animationIndex = 0,
   enablePulseAnimation = true,
-  staggerInterval = 0.2
+  staggerInterval = 0.2,
+  previewScale = 1
 }: LibraryCursorProps) {
   const { invoke } = useApp();
   const loadLibraryCursors = useAppStore((s) => s.operations.loadLibraryCursors);
@@ -215,12 +219,38 @@ export function LibraryCursor({
   // Generate CSS custom properties for animation
   const animationCSSProperties = useAnimationCSSProperties(animationConfig);
 
+  // Match the card sizing logic used in LibrarySection gridStyle so items and grid stay aligned.
+  const scaleMin = 0.6;
+  const scaleMax = 3;
+  const normalizedScale = Math.min(1, Math.max(0, (previewScale - scaleMin) / (scaleMax - scaleMin))); // 0 at min, 1 at max
+  const cardSize = Math.round(80 + normalizedScale * 110); // 80px at min, 190px at max (matches grid)
+  const padding = Math.max(6, Math.round(cardSize * 0.06));
+
   const style = {
     transform: transform ? `translate(${transform.x}px, ${transform.y}px)` : undefined,
     transition,
     opacity: isDragging ? 0.5 : 1,
     cursor: selectionMode ? 'pointer' : 'pointer !important',
+    width: `${cardSize}px`,
+    height: `${cardSize}px`,
     ...animationCSSProperties
+  };
+
+  const previewScaleClamped = Math.min(scaleMax, Math.max(scaleMin, previewScale));
+
+  const availableSize = cardSize - padding * 2; // aligns with --library-item-size and --library-item-padding
+
+  const baseSize = 60; // minimum visible preview
+  const maxSize = availableSize; // fill the padded area at max scale
+  const previewSize = Math.round(
+    Math.max(baseSize, Math.min(maxSize, baseSize + (previewScaleClamped - scaleMin) * ((maxSize - baseSize) / (scaleMax - scaleMin))))
+  );
+
+  const previewStyle: React.CSSProperties = {
+    width: `${previewSize}px`,
+    height: `${previewSize}px`,
+    maxWidth: `${availableSize}px`,
+    maxHeight: `${availableSize}px`
   };
 
   return (
@@ -235,7 +265,7 @@ export function LibraryCursor({
         onContextMenu={handleContextMenu}
         style={style}
       >
-        <div className="cursor-preview has-custom-cursor">
+        <div className="cursor-preview has-custom-cursor" style={previewStyle}>
           {loading ? (
             <LoaderCircle className="w-8 h-8 animate-spin text-muted-foreground" />
           ) : isAniFile && aniData ? (

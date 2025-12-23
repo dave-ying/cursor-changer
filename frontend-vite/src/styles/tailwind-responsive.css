@@ -97,8 +97,8 @@
 /* Advanced mode - fixed 5 columns, responsive gap and sizing */
 @media (min-width: 640px) {
   .cursor-grid:not(.cursor-grid--advanced) {
-    grid-template-columns: repeat(auto-fit, minmax(clamp(90px, 12vw, 120px), 1fr));
-    gap: clamp(16px, 2vw, 24px);
+    grid-template-columns: var(--cursor-grid-template, repeat(auto-fit, minmax(var(--cursor-grid-min, clamp(90px, 12vw, 120px)), 1fr)));
+    gap: var(--cursor-grid-gap, clamp(16px, 2vw, 24px));
   }
   
   .cursor-grid.cursor-grid--advanced {
@@ -110,8 +110,8 @@
 
 @media (min-width: 1024px) {
   .cursor-grid:not(.cursor-grid--advanced) {
-    grid-template-columns: repeat(auto-fit, minmax(clamp(100px, 14vw, 140px), 1fr));
-    gap: clamp(20px, 3vw, 32px);
+    grid-template-columns: var(--cursor-grid-template, repeat(auto-fit, minmax(var(--cursor-grid-min, clamp(100px, 14vw, 140px)), 1fr)));
+    gap: var(--cursor-grid-gap, clamp(20px, 3vw, 32px));
   }
   
   .cursor-grid.cursor-grid--advanced {
