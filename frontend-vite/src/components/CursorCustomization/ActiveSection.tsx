@@ -115,7 +115,7 @@ export function ActiveSection({
       {!pendingLibraryCursor && (
         <div
           className={cn(
-            'px-6 pb-4 border-b border-border/50 overflow-hidden transition-[max-height,opacity] duration-300 ease-out',
+            'px-6 pb-4 border-b border-border/50 bg-muted/30 overflow-hidden transition-[max-height,opacity] duration-300 ease-out',
             showModeToggle ? 'opacity-100' : 'opacity-0'
           )}
           style={{ maxHeight: showModeToggle ? '240px' : '0px' }}

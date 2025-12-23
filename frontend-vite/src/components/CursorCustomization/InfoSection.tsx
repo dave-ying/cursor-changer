@@ -33,9 +33,6 @@ export function InfoSection() {
     >
       <div className="px-6 pt-4 pb-3 border-b border-border/50 bg-muted/60 rounded-t-lg">
         <h1 className="text-2xl font-bold">About</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Learn more about Cursor Changer and how to support this project.
-        </p>
       </div>
 
       <div className="flex-1 overflow-auto px-6 py-6 pb-8">
@@ -44,7 +41,7 @@ export function InfoSection() {
             <div className="space-y-1">
               <p className="text-sm font-medium text-card-foreground">Support this project</p>
               <p className="text-sm text-muted-foreground">
-                If you find Cursor Changer helpful, you can support it or star the repo.
+                Love Cursor Changer? Here’s how you can support the project.
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 items-stretch">
@@ -65,7 +62,7 @@ export function InfoSection() {
                         await openLink('https://buymeacoffee.com/daveying');
                       }}
                     >
-                      support this project
+                      <span className="font-semibold">support this project</span>
                     </a>
                     <br />
                     and buy me a coffee.
@@ -109,7 +106,7 @@ export function InfoSection() {
                         await openLink('https://github.com/dave-ying/cursor-changer');
                       }}
                     >
-                      GitHub
+                      <span className="font-semibold">GitHub</span>
                     </a>.
                   </p>
                 </div>
