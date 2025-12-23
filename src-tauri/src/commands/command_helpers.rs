@@ -18,6 +18,7 @@ fn build_payload_and_config(
             accent_color: Some(guard.prefs.accent_color.clone()),
             theme_mode: Some(guard.prefs.theme_mode),
             default_cursor_style: Some(guard.prefs.default_cursor_style),
+            customization_mode: Some(guard.modes.customization_mode),
         })
     } else {
         None

@@ -208,9 +208,11 @@ pub fn setup_app(app: &mut tauri::App) -> tauri::Result<()> {
         shortcut_enabled,
     );
 
-    crate::window_setup::initialize_main_window(&app_handle);
+    // Ensure default cursor paths are loaded before the frontend requests available cursors.
+    // This avoids empty previews on initial load/refresh.
+    crate::startup_config::load_default_cursors(app_handle.clone(), state.clone());
 
-    crate::startup_config::load_default_cursors(app_handle, state);
+    crate::window_setup::initialize_main_window(&app_handle);
 
     Ok(())
 }

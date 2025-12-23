@@ -97,53 +97,52 @@ export function Settings({ isModal = false, onClose = null, initialTab = DEFAULT
 
   return (
     <div id="section-settings" className="flex flex-col flex-1 min-h-0 w-full bg-card rounded-lg border text-card-foreground shadow-sm">
-      <div className="px-6 pt-4 pb-3 border-b border-border/50">
+      <div className="px-6 pt-4 pb-3 border-b border-border/50 bg-muted/60 rounded-t-lg">
         <h1 className="text-2xl font-bold">Settings</h1>
         <p className="text-sm text-muted-foreground mt-1">Customize your cursor preferences and application behavior</p>
-
-        {/* Top navigation for settings sections (Cursor | Interface | General | Keyboard Shortcuts) */}
-        <div className="mt-4 flex justify-center">
-          <ToggleGroup
-            type="single"
-            value={activeTab}
-            onValueChange={(v) => {
-              // Only change tab if the value is different and not empty
-              if (v && v !== activeTab) {
-                setActiveTab(isValidTab(v) ? v : DEFAULT_TAB);
-              }
-            }}
-            className="bg-muted rounded-full p-1"
-            aria-label="Settings Sections"
-          >
-            <ToggleGroupItem
-              value="cursor"
-              className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-            >
-              Cursor
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="interface"
-              className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-            >
-              Interface
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="shortcuts"
-              className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-            >
-              Keyboard Shortcuts
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="general"
-              className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-            >
-              General
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
       </div>
       <div className="flex-1 overflow-auto px-6 py-6 pb-8">
         <div className="max-w-[900px] mx-auto space-y-6">
+          {/* Top navigation for settings sections (Cursor | Interface | General | Keyboard Shortcuts) */}
+          <div className="flex justify-center">
+            <ToggleGroup
+              type="single"
+              value={activeTab}
+              onValueChange={(v) => {
+                // Only change tab if the value is different and not empty
+                if (v && v !== activeTab) {
+                  setActiveTab(isValidTab(v) ? v : DEFAULT_TAB);
+                }
+              }}
+              className="bg-muted rounded-full p-1"
+              aria-label="Settings Sections"
+            >
+              <ToggleGroupItem
+                value="cursor"
+                className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              >
+                Cursor
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="interface"
+                className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              >
+                Interface
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="shortcuts"
+                className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              >
+                Keyboard Shortcuts
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="general"
+                className="rounded-full px-4 py-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              >
+                General
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
           {settingsContent}
         </div>
       </div>

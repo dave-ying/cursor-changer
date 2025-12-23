@@ -58,6 +58,7 @@ export const useAppStore = create<AppState>()(
       const dataLoadingOps = createDataLoadingOperations(
         getTauriFunc,
         (updates) => get().updateCursorState(updates),
+        (mode) => get().setCustomizationMode(mode),
         (cursors) => get().setAvailableCursors(cursors),
         (cursors) => get().setLibraryCursors(cursors),
         (maximized) => get().setIsMaximized(maximized),

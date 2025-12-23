@@ -117,6 +117,24 @@ pub(super) fn apply_default_cursor_style_config(
     }
 }
 
+pub(super) fn apply_customization_mode_config(
+    guard: &mut crate::state::app_state::AppStateWriteGuard<'_>,
+    config: &PersistedConfig,
+) {
+    if let Some(mode) = &config.customization_mode {
+        cc_debug!(
+            "[CursorChanger] Applying persisted customization_mode={} to state",
+            mode.as_str()
+        );
+        guard.modes.customization_mode = *mode;
+    } else {
+        cc_debug!(
+            "[CursorChanger] No persisted customization_mode value; using state default={}",
+            guard.modes.customization_mode.as_str()
+        );
+    }
+}
+
 pub(super) fn apply_run_on_startup_config(
     guard: &mut crate::state::app_state::AppStateWriteGuard<'_>,
     config: &PersistedConfig,
@@ -147,5 +165,6 @@ pub(super) fn snapshot_persisted_config_from_state(
         accent_color: Some(state.prefs.accent_color.clone()),
         theme_mode: Some(state.prefs.theme_mode),
         default_cursor_style: Some(state.prefs.default_cursor_style),
+        customization_mode: Some(state.modes.customization_mode),
     }
 }

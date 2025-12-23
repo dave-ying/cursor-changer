@@ -321,14 +321,6 @@ export function ActiveCursor({
         </div>
         <div className="cursor-name">
           <span>{displayName}</span>
-          {hasCustom && (
-            <span
-              className="cursor-custom-indicator"
-              data-testid={`cursor-custom-indicator-${cursor.name}`}
-            >
-              Custom
-            </span>
-          )}
           {typeof hotspotX === 'number' && typeof hotspotY === 'number' && (
             <div className="cursor-hotspot">Hotspot: ({hotspotX}, {hotspotY})</div>
           )}

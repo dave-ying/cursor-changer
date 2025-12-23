@@ -6,6 +6,7 @@ export function AppBootstrapProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isReady) return;
+    operations.loadCustomizationMode();
     operations.loadStatus();
     operations.loadAvailableCursors();
     operations.loadLibraryCursors();

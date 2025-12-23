@@ -14,6 +14,7 @@ import { logger } from '../../utils/logger';
 
 export interface DataLoadingOperations {
     loadStatus: () => Promise<void>;
+    loadCustomizationMode: () => Promise<void>;
     loadAvailableCursors: () => Promise<void>;
     loadLibraryCursors: () => Promise<void>;
     updateMaximizeState: () => Promise<void>;
@@ -22,6 +23,7 @@ export interface DataLoadingOperations {
 export const createDataLoadingOperations = (
     getTauri: () => TauriFunctions,
     updateCursorState: (updates: Partial<CursorState>) => void,
+    setCustomizationMode: (mode: 'simple' | 'advanced') => void,
     setAvailableCursors: (cursors: CursorInfo[]) => void,
     setLibraryCursors: (cursors: LibraryCursor[]) => void,
     setIsMaximized: (maximized: boolean) => void,
@@ -47,6 +49,27 @@ export const createDataLoadingOperations = (
         // Apply theme and accent color
         applyTheme(mappedState.themeMode);
         applyAccentColor(mappedState.accentColor);
+    },
+
+    loadCustomizationMode: async () => {
+        let tauri = getTauri();
+        if (!tauri.invoke && typeof window !== 'undefined') {
+            const runtime = (window as any).__TAURI__;
+            if (runtime?.core?.invoke) {
+                tauri = { ...tauri, invoke: runtime.core.invoke };
+            }
+        }
+        if (!tauri.invoke) return;
+
+        const result = await invokeWithFeedback(tauri.invoke, Commands.getCustomizationMode, {
+            logLabel: 'Failed to load customization mode:'
+        });
+
+        if (result.status !== 'success') return;
+        const mode = result.value;
+        if (mode === 'simple' || mode === 'advanced') {
+            setCustomizationMode(mode);
+        }
     },
 
     loadAvailableCursors: async () => {

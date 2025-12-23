@@ -31,7 +31,7 @@ export function InfoSection() {
       id="section-info"
       className="flex flex-col flex-1 min-h-0 w-full bg-card rounded-lg border text-card-foreground shadow-sm"
     >
-      <div className="px-6 pt-4 pb-3 border-b border-border/50">
+      <div className="px-6 pt-4 pb-3 border-b border-border/50 bg-muted/60 rounded-t-lg">
         <h1 className="text-2xl font-bold">About</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Learn more about Cursor Changer and how to support this project.

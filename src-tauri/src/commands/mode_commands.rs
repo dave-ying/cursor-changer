@@ -93,7 +93,7 @@ pub fn switch_customization_mode(
     let new_simple_for_state = new_simple_mode_cursor_paths.clone();
     let new_advanced_for_state = new_advanced_mode_cursor_paths.clone();
     let mode_for_state = mode;
-    let _ = command_helpers::update_state_and_emit(&app, &state, false, |guard| {
+    let _ = command_helpers::update_state_and_emit(&app, &state, true, |guard| {
         guard.modes.customization_mode = mode_for_state;
         guard.cursor.cursor_paths = merged_cursor_paths_for_state.clone();
         guard.modes.simple_mode_cursor_paths = new_simple_for_state;

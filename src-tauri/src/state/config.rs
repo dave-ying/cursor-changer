@@ -1,5 +1,5 @@
 use super::app_state::AppState;
-use super::models::{DefaultCursorStyle, ThemeMode};
+use super::models::{CustomizationMode, DefaultCursorStyle, ThemeMode};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
 use tauri::{AppHandle, Manager};
@@ -16,6 +16,8 @@ pub struct PersistedConfig {
     pub theme_mode: Option<ThemeMode>,
     #[serde(default, deserialize_with = "deserialize_default_cursor_style_opt")]
     pub default_cursor_style: Option<DefaultCursorStyle>,
+    #[serde(default, deserialize_with = "deserialize_customization_mode_opt")]
+    pub customization_mode: Option<CustomizationMode>,
 }
 
 fn deserialize_theme_mode_opt<'de, D>(deserializer: D) -> Result<Option<ThemeMode>, D::Error>
@@ -36,9 +38,20 @@ where
     Ok(opt.map(|s| DefaultCursorStyle::from_str(&s).unwrap_or_default()))
 }
 
+fn deserialize_customization_mode_opt<'de, D>(
+    deserializer: D,
+) -> Result<Option<CustomizationMode>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let opt = Option::<String>::deserialize(deserializer)?;
+    Ok(opt.map(|s| CustomizationMode::from_str(&s).unwrap_or_default()))
+}
+
 impl From<&AppState> for PersistedConfig {
     fn from(state: &AppState) -> Self {
         let prefs = state.prefs.read().expect("Application state poisoned");
+        let modes = state.modes.read().expect("Application state poisoned");
         PersistedConfig {
             shortcut: prefs.shortcut.clone(),
             shortcut_enabled: Some(prefs.shortcut_enabled),
@@ -48,6 +61,7 @@ impl From<&AppState> for PersistedConfig {
             accent_color: Some(prefs.accent_color.clone()),
             theme_mode: Some(prefs.theme_mode),
             default_cursor_style: Some(prefs.default_cursor_style),
+            customization_mode: Some(modes.customization_mode),
         }
     }
 }
