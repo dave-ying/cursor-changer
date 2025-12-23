@@ -9,6 +9,7 @@ interface UseCursorFileHandlerProps {
     filePath: string | null;
     itemId: string | null;
     filename: string;
+    originalName?: string;
     hotspot: Hotspot;
     targetSize: number;
     imageTransform: ImageTransform;
@@ -32,6 +33,7 @@ export function useCursorFileHandler({
     filePath,
     itemId,
     filename,
+    originalName,
     hotspot,
     targetSize,
     imageTransform,
@@ -89,6 +91,15 @@ export function useCursorFileHandler({
                     if (!itemId) {
                         throw new Error('Missing itemId for existing library cursor');
                     }
+
+                    // Rename if the desired name differs
+                    if (filename && originalName && filename.trim() !== originalName.trim()) {
+                        await invokeCommand(invoke, Commands.renameCursorInLibrary, {
+                            id: itemId,
+                            new_name: filename,
+                        });
+                    }
+
                     await invokeCommand(invoke, Commands.updateLibraryCursorClickPoint, {
                         id: itemId,
                         click_point_x: hotspot.x,

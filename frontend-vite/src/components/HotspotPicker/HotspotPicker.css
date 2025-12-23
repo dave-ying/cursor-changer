@@ -50,6 +50,131 @@
     text-align: center;
 }
 
+.cursor-filename {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: left;
+    flex: 1 1 auto;
+    max-width: calc(100% - 110px); /* Leave room for label + gap so row matches preview width */
+
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    word-break: break-word;
+    margin-bottom: 0.35rem;
+    border: 1px solid var(--border-muted);
+    border-radius: 0.85rem;
+    padding: 0.55rem 0.75rem;
+    min-height: 44px;
+    background: rgba(255, 255, 255, 0.04);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+/* Edit mode styling - change color of hit area when editing */
+.cursor-filename.is-editing {
+    border-color: var(--accent-color, #7c3aed);
+    background: rgba(124, 58, 237, 0.08);
+    box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.2), 0 0 8px rgba(124, 58, 237, 0.15);
+}
+
+
+
+.cursor-name-input {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--text-primary);
+    font-weight: 600;
+    caret-color: var(--accent-color, #7c3aed);
+}
+
+.cursor-name-input:focus {
+    outline: none;
+}
+
+.cursor-name-icon {
+    width: 1rem;
+    height: 1rem;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    opacity: 0.8;
+    background: transparent;
+    border: none;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.cursor-name-icon:hover {
+    opacity: 1;
+    color: var(--accent-color, #7c3aed);
+    background: rgba(124, 58, 237, 0.1);
+    border-radius: 0.25rem;
+    transform: scale(1.1);
+}
+
+.cursor-name-icon svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.cursor-name-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.cursor-name-buttons {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: auto;
+    min-width: 2.8rem; /* Reserve space so input width stays stable */
+    justify-content: flex-end;
+}
+
+.cursor-name-sanitization-hint {
+    margin-top: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 0.375rem;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-2px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.cursor-name-save.is-hidden {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.cursor-name-label {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.cursor-name-block {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 340px; /* Align with preview canvas column width */
+}
+
 .controls-column {
     flex: 1;
     display: flex;

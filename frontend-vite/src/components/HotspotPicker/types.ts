@@ -163,6 +163,9 @@ export interface UseHotspotLogicReturn {
     imageTransform: ImageTransform;
     setImageTransform: React.Dispatch<React.SetStateAction<ImageTransform>>;
     filename: string;
+    cursorDisplayName: string;
+    editableCursorName: string;
+    setEditableCursorName: React.Dispatch<React.SetStateAction<string>>;
     isRemovingBackground: boolean;
 
     // Refs

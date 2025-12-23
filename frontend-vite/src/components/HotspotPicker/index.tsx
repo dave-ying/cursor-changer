@@ -1,8 +1,11 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { INVALID_FILENAME_CHARS, sanitizeCursorName } from '../../utils/fileNameUtils';
+
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { InfoCardIcon } from './InfoCardIcon';
-import { WandSparkles, LoaderCircle } from 'lucide-react';
+import { WandSparkles, LoaderCircle, SquarePen, Check, X } from 'lucide-react';
+
 import { ModalButtonGroup } from '@/components/ui/ModalButtonGroup';
 // Separator is used inside HotspotControls, not needed in index
 import { ImageCanvas } from './ImageCanvas';
@@ -27,6 +30,24 @@ export function HotspotPicker(props: HotspotPickerProps) {
     const logic = useHotspotLogic(props);
     const cursorState = useAppStore((s) => s.cursorState);
     const [activeTab, setActiveTab] = useState<'hotspot' | 'resize'>('hotspot');
+    const [isNameEditing, setIsNameEditing] = useState(false);
+    const [nameSnapshot, setNameSnapshot] = useState('');
+    const [rawNameInput, setRawNameInput] = useState(logic.editableCursorName); // Track original input for sanitization feedback
+    const nameInputRef = useRef<HTMLInputElement>(null);
+
+    // Reset name editing mode when the source cursor changes (new file or different library item)
+    useEffect(() => {
+        setIsNameEditing(false);
+        setNameSnapshot('');
+        setRawNameInput(logic.editableCursorName);
+    }, [props.filePath, props.file?.name, props.itemId, logic.editableCursorName]);
+
+    // Keep raw input aligned with latest editable name when not actively editing
+    useEffect(() => {
+        if (!isNameEditing) {
+            setRawNameInput(logic.editableCursorName);
+        }
+    }, [logic.editableCursorName, isNameEditing]);
 
     // Track mouse down position to detect drags vs clicks
     const mouseDownPosRef = useRef<{ x: number; y: number } | null>(null);
@@ -65,6 +86,16 @@ export function HotspotPicker(props: HotspotPickerProps) {
         }
         // If it was a drag that ended on the backdrop, do nothing - don't close
     }, [onCancel]);
+
+    // Helper to avoid stateful RegExp.test on a global pattern
+    const hasInvalidFilenameChars = useCallback((value: string) => {
+        INVALID_FILENAME_CHARS.lastIndex = 0;
+        return INVALID_FILENAME_CHARS.test(value);
+    }, []);
+
+    const sanitizedRawName = sanitizeCursorName(rawNameInput);
+    const showSanitizationHint =
+        isNameEditing && rawNameInput && sanitizedRawName !== rawNameInput && hasInvalidFilenameChars(rawNameInput);
 
     return (
         <div
@@ -108,6 +139,99 @@ export function HotspotPicker(props: HotspotPickerProps) {
                         setHotspot={logic.setHotspot}
                         onPick={logic.handlePick}
                     />
+
+                    {/* Cursor filename (final cursor file name) */}
+                    <div className="cursor-name-block">
+                        <span className="cursor-name-label">Cursor Name:</span>
+                        <div className={`cursor-filename ${isNameEditing ? 'is-editing' : ''}`} aria-label="cursor filename">
+                            <input
+                                type="text"
+                                ref={nameInputRef}
+                                value={logic.editableCursorName}
+                                onChange={(e) => {
+                                    const rawInput = e.target.value;
+                                    setRawNameInput(rawInput);
+                                    logic.setEditableCursorName(rawInput);
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && isNameEditing) {
+                                        e.preventDefault();
+                                        setIsNameEditing(false);
+                                        // Persist rename immediately for existing cursors
+                                        if (props.filePath) {
+                                            logic.handleConfirm();
+                                        }
+                                        return;
+                                    }
+
+                                    // Block Windows-invalid filename characters
+                                    INVALID_FILENAME_CHARS.lastIndex = 0;
+                                    if (e.key.length === 1 && INVALID_FILENAME_CHARS.test(e.key)) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                onPaste={(e) => {
+                                    // Sanitize pasted content instead of allowing invalid characters
+                                    e.preventDefault();
+                                    const pasted = e.clipboardData.getData('text');
+                                    const sanitized = sanitizeCursorName(pasted);
+                                    const input = e.currentTarget;
+                                    const start = input.selectionStart ?? input.value.length;
+                                    const end = input.selectionEnd ?? start;
+                                    const nextValue = input.value.slice(0, start) + sanitized + input.value.slice(end);
+                                    setRawNameInput(nextValue);
+                                    logic.setEditableCursorName(nextValue);
+                                }}
+                                readOnly={!isNameEditing}
+                                aria-label="cursor name input"
+                                className="cursor-name-input"
+                            />
+
+                            {/* Show sanitization feedback when input differs from sanitized version */}
+                            {showSanitizationHint && (
+                                <div className="cursor-name-sanitization-hint">
+                                    <span className="text-xs text-amber-600 dark:text-amber-400">
+                                        ⚠ Invalid characters removed for Windows compatibility
+                                    </span>
+                                </div>
+                            )}
+                            <div className="cursor-name-buttons">
+                                <button
+                                    type="button"
+                                    className={`cursor-name-icon cursor-name-save ${isNameEditing ? '' : 'is-hidden'}`}
+                                    aria-label="Save cursor name"
+                                    onClick={async () => {
+                                        if (!isNameEditing) return;
+                                        setIsNameEditing(false);
+                                        // Persist rename immediately for existing cursors
+                                        if (props.filePath) {
+                                            await logic.handleConfirm();
+                                        }
+                                    }}
+                                    disabled={!isNameEditing}
+                                >
+                                    <Check aria-hidden="true" />
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`cursor-name-icon ${isNameEditing ? 'cursor-name-cancel' : 'cursor-name-edit'}`}
+                                    aria-label={isNameEditing ? 'Cancel cursor name edit' : 'Edit cursor name'}
+                                    onClick={() => {
+                                        if (isNameEditing) {
+                                            logic.setEditableCursorName(nameSnapshot || logic.cursorDisplayName);
+                                            setIsNameEditing(false);
+                                        } else {
+                                            setNameSnapshot(logic.editableCursorName);
+                                            setIsNameEditing(true);
+                                            queueMicrotask(() => nameInputRef.current?.focus());
+                                        }
+                                    }}
+                                >
+                                    {isNameEditing ? <X aria-hidden="true" /> : <SquarePen aria-hidden="true" />}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Background Removal Button - Only for new uploads */}
                     {!props.filePath && (

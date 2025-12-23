@@ -36,6 +36,11 @@ export function ActiveSection({
   const [showModeToggle, setShowModeToggle] = React.useState(false);
   const [showMoreOptions, setShowMoreOptions] = React.useState(false);
 
+  const handleToggleCustomizePanel = React.useCallback(() => {
+    setShowMoreOptions(false);
+    setShowModeToggle((prev) => !prev);
+  }, []);
+
   if (!Array.isArray(visibleCursors)) {
     logger.warn(
       '[ActiveSection] visibleCursors is not an array; received:',
@@ -101,7 +106,7 @@ export function ActiveSection({
               <ActionPillButton
                 icon={<SlidersHorizontal />}
                 variant="secondary"
-                onClick={() => setShowModeToggle((prev) => !prev)}
+                onClick={handleToggleCustomizePanel}
                 aria-label="Toggle customization mode options"
               >
                 Customize

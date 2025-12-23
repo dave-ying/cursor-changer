@@ -2,6 +2,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs;
+use std::path::{Path, PathBuf};
 use tauri::AppHandle;
 
 mod ani;
@@ -150,12 +151,65 @@ pub fn rename_cursor_in_library(
 ) -> Result<(), String> {
     let mut library = load_library(&app)?;
 
-    if let Some(cursor) = library.cursors.iter_mut().find(|c| c.id == id) {
-        cursor.name = new_name;
-        save_library(&app, &library)?;
-        Ok(())
-    } else {
-        Err(format!("Cursor with id {} not found", id))
+    let cursor = library
+        .cursors
+        .iter_mut()
+        .find(|c| c.id == id)
+        .ok_or_else(|| format!("Cursor with id {} not found", id))?;
+
+    let current_path = PathBuf::from(&cursor.file_path);
+    let parent_dir = current_path
+        .parent()
+        .map(Path::to_path_buf)
+        .or_else(|| crate::paths::cursors_dir().ok())
+        .ok_or_else(|| "Failed to resolve cursor directory".to_string())?;
+
+    let ext = current_path
+        .extension()
+        .and_then(|s| s.to_str())
+        .unwrap_or("cur");
+
+    let safe_base = sanitize_filename(&new_name);
+    let target_path = generate_unique_path(&parent_dir, &safe_base, ext);
+
+    // If the resolved path matches the current one, just update the name in metadata
+    if target_path != current_path {
+        if let Some(parent) = target_path.parent() {
+            fs::create_dir_all(parent)
+                .map_err(|e| format!("Failed to prepare cursor directory: {}", e))?;
+        }
+        fs::rename(&current_path, &target_path)
+            .map_err(|e| format!("Failed to rename cursor file: {}", e))?;
+        cursor.file_path = target_path.to_string_lossy().to_string();
+    }
+
+    cursor.name = new_name;
+    save_library(&app, &library)?;
+    Ok(())
+}
+
+/// Replace characters that are invalid in filenames with an underscore
+fn sanitize_filename(name: &str) -> String {
+    const INVALID: [char; 9] = ['<', '>', ':', '"', '/', '\\', '|', '?', '*'];
+    name.chars()
+        .map(|c| if c.is_control() || INVALID.contains(&c) { '_' } else { c })
+        .collect()
+}
+
+/// Generate a unique file path by appending a numeric suffix when needed
+fn generate_unique_path(dir: &Path, base: &str, ext: &str) -> PathBuf {
+    let mut attempt = 0;
+    loop {
+        let file_name = if attempt == 0 {
+            format!("{}.{}", base, ext)
+        } else {
+            format!("{} ({attempt}).{}", base, ext)
+        };
+        let candidate = dir.join(file_name);
+        if !candidate.exists() {
+            return candidate;
+        }
+        attempt += 1;
     }
 }
 

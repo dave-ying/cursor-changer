@@ -8,6 +8,7 @@ import { MAX_CURSOR_SIZE } from '../../constants/cursorConstants';
 import type { HotspotPickerProps, Hotspot, CursorInfo, BackgroundType, HotspotMode, HotspotColor, UseHotspotLogicReturn } from './types';
 import { useImageScaler } from './hooks/useImageScaler';
 import { useCursorFileHandler } from './hooks/useCursorFileHandler';
+import { sanitizeCursorName } from '../../utils/fileNameUtils';
 
 /**
  * Custom hook that encapsulates all HotspotPicker business logic
@@ -59,11 +60,54 @@ export function useHotspotLogic({
         cursorInfo
     });
 
-    const filename = useMemo(() => {
-        if (file) return file.name || 'image';
-        if (filePath) return filePath.split('\\').pop() || filePath.split('/').pop() || 'cursor';
-        return 'image';
+    const { baseName, extension } = useMemo(() => {
+        const fallbackName = 'cursor';
+        const extractParts = (name: string) => {
+            const ext = (name.split('.').pop() || '').toLowerCase();
+            const stem = name.replace(/\.[^/.]+$/, '') || fallbackName;
+            if (ext === 'cur' || ext === 'ani') {
+                return { baseName: stem, extension: ext };
+            }
+            return { baseName: stem, extension: 'cur' };
+        };
+
+        if (file) {
+            const name = file.name || fallbackName;
+            return extractParts(name);
+        }
+
+        if (filePath) {
+            const last = filePath.split(/[/\\]/).pop() || fallbackName;
+            return extractParts(last);
+        }
+
+        return { baseName: fallbackName, extension: 'cur' };
     }, [file, filePath]);
+
+    const [editableCursorName, setEditableCursorName] = useState(sanitizeCursorName(baseName));
+
+    // Keep editable name in sync when a new file/path is loaded
+    useEffect(() => {
+        setEditableCursorName(sanitizeCursorName(baseName));
+    }, [baseName]);
+
+    // Create a sanitized version of the editable cursor name setter
+    const setEditableCursorNameSanitized = (newName: React.SetStateAction<string>) => {
+        setEditableCursorName((prev) => {
+            const nameToSanitize = typeof newName === 'function' ? (newName as (prev: string) => string)(prev) : newName;
+            return sanitizeCursorName(nameToSanitize);
+        });
+    };
+
+    const filename = useMemo(() => {
+        const safeBase = (editableCursorName || '').trim() || sanitizeCursorName(baseName) || 'cursor';
+        return `${safeBase}.${extension}`;
+    }, [editableCursorName, baseName, extension]);
+
+    // User-facing cursor name shown in the modal (without extension)
+    const cursorDisplayName = useMemo(() => {
+        return (editableCursorName || '').trim() || baseName || 'cursor';
+    }, [editableCursorName, baseName]);
 
     const {
         busy,
@@ -76,6 +120,7 @@ export function useHotspotLogic({
         filePath: filePath ?? null,
         itemId: itemId ?? null,
         filename,
+        originalName: `${baseName}.${extension}`,
         hotspot,
         targetSize,
         imageTransform,
@@ -245,6 +290,9 @@ export function useHotspotLogic({
         imageTransform,
         setImageTransform,
         filename,
+        cursorDisplayName,
+        editableCursorName,
+        setEditableCursorName: setEditableCursorNameSanitized,
         isRemovingBackground,
 
         // Refs

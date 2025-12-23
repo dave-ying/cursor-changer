@@ -36,6 +36,10 @@ export function LibrarySection({
   const [showCustomizePanel, setShowCustomizePanel] = React.useState(false);
   const [showMoreOptions, setShowMoreOptions] = React.useState(false);
   const [resetLibraryDialogOpen, setResetLibraryDialogOpen] = React.useState(false);
+  const handleToggleCustomizePanel = React.useCallback(() => {
+    setShowMoreOptions(false);
+    setShowCustomizePanel((prev) => !prev);
+  }, []);
 
   const handleOpenFolder = async () => {
     try {
@@ -89,7 +93,7 @@ export function LibrarySection({
         pendingLibraryCursor={pendingLibraryCursor}
         onAddCursor={onAddCursor}
         onSelectFromLibrary={onSelectFromLibrary}
-        onToggleCustomizePanel={() => setShowCustomizePanel((prev) => !prev)}
+        onToggleCustomizePanel={handleToggleCustomizePanel}
       />
 
       {!selectingFromLibrary && !pendingLibraryCursor && (
