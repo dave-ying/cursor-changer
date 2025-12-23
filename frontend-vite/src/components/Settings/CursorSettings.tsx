@@ -5,7 +5,6 @@ import { useAppStore } from '../../store/useAppStore';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 
-import { useThrottle } from '../../hooks/safe/useThrottle';
 import { Commands } from '../../tauri/commands';
 import { MAX_CURSOR_SIZE } from '@/constants/cursorConstants';
 import { logger } from '../../utils/logger';
@@ -52,11 +51,6 @@ export function CursorSettings() {
             await loadAvailableCursors();
         }
     }, [invoke, loadAvailableCursors]);
-
-    // Throttle utility function for real-time cursor updates during drag
-    const { throttle, cleanup } = useThrottle();
-
-    useEffect(() => cleanup, [cleanup]);
 
     // Sync local state with context state when it changes from external sources
     // BUT NOT while the user is actively dragging (prevents feedback loop/jitter)
@@ -106,14 +100,34 @@ export function CursorSettings() {
         };
     }, [normalCursor, invoke]);
 
-    // Throttled function to update cursor size in real-time while dragging
-    // Uses 50ms interval for responsive feedback while preventing excessive backend calls
-    const throttledSetCursorSize = useMemo(
-        () => throttle((size: number) => {
-            setCursorSize(String(size));
-            lastCommittedSize.current = size;
-        }, 50),
-        [throttle, setCursorSize]
+    // Coalesce rapid drag updates so only the latest size is applied as soon as possible.
+    // Avoids piling up many backend invocations that cause visible lag.
+    const pendingSizeRef = useRef<number | null>(null);
+    const isApplyingRef = useRef(false);
+    const applyLatestSize = useCallback(() => {
+        if (isApplyingRef.current) return;
+        const next = pendingSizeRef.current;
+        if (next === null) return;
+        pendingSizeRef.current = null;
+        isApplyingRef.current = true;
+
+        // Fire and forget; when done, immediately apply any newer queued size.
+        setCursorSize(String(next)).finally(() => {
+            lastCommittedSize.current = next;
+            isApplyingRef.current = false;
+            // If another size arrived while we were applying, process it immediately.
+            if (pendingSizeRef.current !== null) {
+                applyLatestSize();
+            }
+        });
+    }, [setCursorSize]);
+
+    const throttledSetCursorSize = useCallback(
+        (size: number) => {
+            pendingSizeRef.current = size;
+            applyLatestSize();
+        },
+        [applyLatestSize]
     );
 
     // Handle value changes during dragging - updates local state immediately
