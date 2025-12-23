@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { ToastContainer } from './toast/ToastContainer';
 import { useToast } from '../../hooks/useToast';
 import { logger } from '../../utils/logger';
@@ -44,23 +44,6 @@ export function GlobalToastProvider({ children }: GlobalToastProviderProps) {
 
   // Show toast container only if there are toasts
   const shouldShowToast = toasts && toasts.length > 0;
-
-  const prevToastLengthRef = useRef<number | undefined>(undefined);
-  const prevShouldShowToastRef = useRef<boolean | undefined>(undefined);
-
-  useEffect(() => {
-    const toastLength = toasts?.length ?? 0;
-
-    if (prevToastLengthRef.current !== toastLength) {
-      logger.debug('[GlobalToastProvider] Toasts changed. toasts.length:', toastLength);
-      prevToastLengthRef.current = toastLength;
-    }
-
-    if (prevShouldShowToastRef.current !== shouldShowToast) {
-      logger.debug('[GlobalToastProvider] Should show toast:', shouldShowToast);
-      prevShouldShowToastRef.current = shouldShowToast;
-    }
-  }, [toasts, shouldShowToast]);
 
   return (
     <>
