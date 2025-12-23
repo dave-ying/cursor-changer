@@ -35,8 +35,8 @@ export function LibraryCustomizePanel({
     <div
       className={`px-6 pb-4 border-b border-border/50 bg-muted/30 overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${showCustomizePanel ? 'opacity-100' : 'opacity-0'}`}
       style={{
-        maxHeight: showCustomizePanel ? '280px' : '0px',
-        overflowY: showCustomizePanel ? 'auto' : 'hidden'
+        maxHeight: showCustomizePanel ? '260px' : '0px',
+        overflow: 'hidden'
       }}
       aria-expanded={showCustomizePanel}
     >

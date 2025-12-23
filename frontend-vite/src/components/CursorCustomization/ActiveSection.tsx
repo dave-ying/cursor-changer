@@ -118,7 +118,10 @@ export function ActiveSection({
             'px-6 pb-4 border-b border-border/50 bg-muted/30 overflow-hidden transition-[max-height,opacity] duration-300 ease-out',
             showModeToggle ? 'opacity-100' : 'opacity-0'
           )}
-          style={{ maxHeight: showModeToggle ? '240px' : '0px' }}
+          style={{
+            maxHeight: showModeToggle ? '260px' : '0px',
+            overflow: 'hidden'
+          }}
           aria-expanded={showModeToggle}
         >
           <div className="pt-4 space-y-4">
