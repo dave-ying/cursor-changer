@@ -102,7 +102,6 @@ export function HotspotPicker(props: HotspotPickerProps) {
 
     // Track mouse down position to detect drags vs clicks
     const mouseDownPosRef = useRef<{ x: number; y: number } | null>(null);
-    const [shakeAnimation, setShakeAnimation] = useState(false);
 
     const handleConfirmAndClose = async () => {
         await logic.handleConfirm();
@@ -116,28 +115,18 @@ export function HotspotPicker(props: HotspotPickerProps) {
         if (!isNameEditing) return;
 
         // Check if click is inside the cursor name field or its buttons
-        const cursorNameField = document.querySelector('.cursor-filename') as HTMLElement;
-        const clickedOnCursorNameField = cursorNameField?.contains(e.target as Node);
+        const cursorNameField = document.querySelector('.cursor-filename') as HTMLElement | null;
+        if (cursorNameField?.contains(e.target as Node)) return;
 
-        if (!clickedOnCursorNameField) {
-            // Check if any changes were made to the cursor name
-            const originalName = nameSnapshot || logic.cursorDisplayName;
-            const hasChanges = logic.editableCursorName !== originalName;
+        const originalName = nameSnapshot || logic.cursorDisplayName;
+        const hasChanges = logic.editableCursorName !== originalName;
 
-            if (hasChanges) {
-                // If changes were made, prevent closing and show shake animation
-                e.stopPropagation();
-                e.preventDefault();
+        setIsNameEditing(false);
 
-                // Trigger shake animation
-                setShakeAnimation(true);
-                setTimeout(() => setShakeAnimation(false), 500);
-            } else {
-                // If no changes were made, just exit edit mode normally
-                setIsNameEditing(false);
-            }
+        if (hasChanges && props.filePath) {
+            void logic.handleConfirm();
         }
-    }, [isNameEditing, logic.editableCursorName, logic.cursorDisplayName, nameSnapshot]);
+    }, [isNameEditing, logic.cursorDisplayName, logic.editableCursorName, logic.handleConfirm, nameSnapshot, props.filePath]);
 
     // Add event listener for click outside detection
     useEffect(() => {
@@ -149,36 +138,6 @@ export function HotspotPicker(props: HotspotPickerProps) {
         };
     }, [isNameEditing, handleCursorNameClickOutside]);
 
-    /**
-     * Handle backdrop mouse down - record position to detect drags
-     */
-    const handleBackdropMouseDown = useCallback((e: React.MouseEvent) => {
-        mouseDownPosRef.current = { x: e.clientX, y: e.clientY };
-    }, []);
-
-    /**
-     * Handle backdrop click - only close if it was a true click (not a drag)
-     * A drag is detected if the mouse moved more than DRAG_THRESHOLD pixels
-     */
-    const handleBackdropClick = useCallback((e: React.MouseEvent) => {
-        // If we don't have a recorded mousedown position, ignore (shouldn't happen)
-        if (!mouseDownPosRef.current) {
-            return;
-        }
-
-        const dx = Math.abs(e.clientX - mouseDownPosRef.current.x);
-        const dy = Math.abs(e.clientY - mouseDownPosRef.current.y);
-
-        // Reset the tracked position
-        mouseDownPosRef.current = null;
-
-        // Only close if it wasn't a drag (mouse didn't move significantly)
-        if (dx <= DRAG_THRESHOLD && dy <= DRAG_THRESHOLD) {
-            onCancel();
-        }
-        // If it was a drag that ended on the backdrop, do nothing - don't close
-    }, [onCancel]);
-
     // Helper to avoid stateful RegExp.test on a global pattern
     const hasInvalidFilenameChars = useCallback((value: string) => {
         INVALID_FILENAME_CHARS.lastIndex = 0;
@@ -188,8 +147,9 @@ export function HotspotPicker(props: HotspotPickerProps) {
     const sanitizedRawName = sanitizeCursorName(rawNameInput);
     const showSanitizationHint =
         isNameEditing && rawNameInput && sanitizedRawName !== rawNameInput && hasInvalidFilenameChars(rawNameInput);
+    const activeNameLength = (isNameEditing ? rawNameInput?.length : logic.editableCursorName?.length) ?? 0;
     const cursorNameInputSize = Math.min(
-        Math.max((logic.editableCursorName?.length ?? 0) + 2, 12),
+        Math.max(activeNameLength + 2, 12),
         CURSOR_NAME_MAX_LENGTH + 2
     );
 
@@ -198,8 +158,27 @@ export function HotspotPicker(props: HotspotPickerProps) {
             id="cursor-modal"
             data-testid="hotspot-picker"
             className="modal-backdrop"
-            onMouseDown={handleBackdropMouseDown}
-            onClick={handleBackdropClick}
+            onMouseDown={(e) => {
+                mouseDownPosRef.current = { x: e.clientX, y: e.clientY };
+            }}
+            onClick={(e) => {
+                // If we don't have a recorded mousedown position, ignore (shouldn't happen)
+                if (!mouseDownPosRef.current) {
+                    return;
+                }
+
+                const dx = Math.abs(e.clientX - mouseDownPosRef.current.x);
+                const dy = Math.abs(e.clientY - mouseDownPosRef.current.y);
+
+                // Reset the tracked position
+                mouseDownPosRef.current = null;
+
+                // Only close if it wasn't a drag (mouse didn't move significantly)
+                if (dx <= DRAG_THRESHOLD && dy <= DRAG_THRESHOLD) {
+                    onCancel();
+                }
+                // If it was a drag that ended on the backdrop, do nothing - don't close
+            }}
             style={{ zIndex: 20000 }}
         >
             <div className="modal-panel scroll-area hotspot-picker-grid" onClick={(e) => e.stopPropagation()}>
@@ -219,7 +198,7 @@ export function HotspotPicker(props: HotspotPickerProps) {
                         <label className="cursor-name-label" htmlFor="cursor-name-input">
                             {props.filePath ? 'Editing Cursor:' : 'Creating Cursor:'}
                         </label>
-                        <div className={`cursor-filename ${isNameEditing ? 'is-editing' : ''} ${shakeAnimation ? 'shake' : ''}`} aria-label="cursor filename">
+                        <div className={`cursor-filename ${isNameEditing ? 'is-editing' : ''}`} aria-label="cursor filename">
                             <input
                                 type="text"
                                 ref={nameInputRef}
@@ -294,35 +273,55 @@ export function HotspotPicker(props: HotspotPickerProps) {
                                         setIsNameEditing(false);
                                         // Persist rename immediately for existing cursors
                                         if (props.filePath) {
-                                            await logic.handleConfirm();
-                                        }
-                                    }}
-                                    disabled={!isNameEditing}
-                                >
-                                    <Check aria-hidden="true" />
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`cursor-name-icon ${isNameEditing ? 'cursor-name-cancel' : 'cursor-name-edit'}`}
-                                    aria-label={isNameEditing ? 'Cancel cursor name edit' : 'Edit cursor name'}
-                                    onClick={() => {
-                                        if (isNameEditing) {
-                                            logic.setEditableCursorName(nameSnapshot || logic.cursorDisplayName);
-                                            setIsNameEditing(false);
-                                        } else {
-                                            setNameSnapshot(logic.editableCursorName);
-                                            setIsNameEditing(true);
-                                            queueMicrotask(() => nameInputRef.current?.focus());
-                                        }
-                                    }}
-                                >
-                                    {isNameEditing ? <X aria-hidden="true" /> : <SquarePen aria-hidden="true" />}
-                                </button>
                             </div>
+                        )}
+                        <div className="cursor-name-buttons">
+                            <button
+                                type="button"
+                                className={`cursor-name-icon cursor-name-save ${isNameEditing ? '' : 'is-hidden'}`}
+                                aria-label="Save cursor name"
+                                onClick={async () => {
+                                    if (!isNameEditing) return;
+                                    setIsNameEditing(false);
+                                    // Persist rename immediately for existing cursors
+                                    if (props.filePath) {
+                                        await logic.handleConfirm();
+                                    }
+                                }}
+                                disabled={!isNameEditing}
+                            >
+                                <Check aria-hidden="true" strokeWidth={2.5} />
+
+                            </button>
+                            <button
+                                type="button"
+                                className={`cursor-name-icon ${isNameEditing ? 'cursor-name-cancel' : 'cursor-name-edit'}`}
+                                aria-label={isNameEditing ? 'Cancel cursor name edit' : 'Edit cursor name'}
+                                onClick={() => {
+                                    if (isNameEditing) {
+                                        logic.setEditableCursorName(nameSnapshot || logic.cursorDisplayName);
+                                        setIsNameEditing(false);
+                                    } else {
+                                        setNameSnapshot(logic.editableCursorName);
+                                        setIsNameEditing(true);
+                                        queueMicrotask(() => nameInputRef.current?.focus());
+                                    }
+                                }}
+                            >
+                                {isNameEditing ? (
+                                    <X aria-hidden="true" strokeWidth={2.5} />
+                                ) : (
+                                    <SquarePen aria-hidden="true" strokeWidth={2} />
+                                )}
+                            </button>
                         </div>
                     </div>
                 </div>
+            </div>
 
+            {/* Preview Column */}
+            <div className="preview-column">
+                <h3 className="preview-title">Cursor Preview</h3>
                 {/* Preview Column */}
                 <div className="preview-column">
                     <h3 className="preview-title">Cursor Preview</h3>

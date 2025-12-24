@@ -177,12 +177,29 @@ section[aria-label="Library"] {
 /* Note: Visual highlighting removed - only pulse animation remains for clean UX */
 
 .cursor-name {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
   font-size: 0.875rem;
+  font-weight: 500;
   text-align: center;
   color: var(--text-primary);
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: background 0.2s ease;
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--border-default) 75%, transparent);
+  background: color-mix(in srgb, var(--bg-hover) 88%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  min-height: 28px;
+  align-self: center;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cursor-card .cursor-name span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 12ch;
 }
 
 /* Ensure separators don't cover scaled library items */
