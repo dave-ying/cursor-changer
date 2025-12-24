@@ -4,20 +4,22 @@
 
 Instead of navigating through complex system settings, use Cursor Changer to personalize your desktop experience in seconds.
 
-> 📄 See the full [Changelog](CHANGELOG.md).
-
 ## ✨ Features
 
--   **🖼️ Instant Conversion**: Automatically turn any image (PNG or JPG) into a functional cursor. No external tools needed.
--   **💎 High Definition**: Cursors appear crisp and sharp on all screens, including 4K displays.
+-   **�️ Full Cursor Control**: Change your Windows cursor theme in seconds, with easy access to customize all 15 pointer styles the OS supports.
+-   **�️ Instant Cursor Creation**: Automatically turn any image (PNG or JPG) into a functional cursor at the maximum 256×256 resolution with full alpha transparency—no external tools needed.
 -   **📂 Personal Library**: Store and organize all your custom cursors in one convenient location.
--   **🎯 Precise Accuracy**: Easily adjust the exact "click point" of your cursor for perfect control.
+-   **🎯 Precise Accuracy**: Easily adjust your cursor’s click point (cursor hotspot) for perfect control.
+-   **🍏 Mac Cursor Presets**: Swap Windows defaults for a full macOS-style cursor set in one click.
 -   **🚀 Performance Focused**: Runs efficiently in the background without slowing down your computer.
--   **🎨 Modern Interface**: Enjoy a sleek, dark-themed design that fits your modern workflow.
 -   **⚡ Real-Time Updates**: Apply new cursors immediately without restarting your computer.
 -   **⌨️ Quick Toggle**: Switch your custom cursor on or off instantly with a keyboard shortcut (Default: `Ctrl` + `Shift` + `X`).
--   **📏 Adjustable Size**: Scale your cursor to be as large or small as you need.
+-   **📏 Adjustable Size**: Make cursors as tiny or as large as you'd like (up to 256 px)
 -   **🛡️ One-Click Reset**: Revert to the default Windows cursor instantly at any time.
+
+## 📄 Changelog
+
+See the full [CHANGELOG.md](CHANGELOG.md) document for release details, fixes, and improvements.
 
 ---
 
