@@ -56,7 +56,7 @@
   /* Layout sizing (should not change with theme) */
   --titlebar-height: 40px;
   --titlebar-icon-color: rgb(142, 142, 147);
-  --sidebar-width: clamp(230px, 18vw, 320px);
+  --sidebar-width: 20vw;
   --sidebar-icon-size: clamp(24px, 2vw, 44px);
   --sidebar-icon-inner: calc(var(--sidebar-icon-size) * 0.56);
 }

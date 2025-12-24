@@ -61,11 +61,19 @@ export function sanitizeFilename(filename: string, replacement: string = '_'): s
 }
 
 /**
+ * Maximum allowed length for cursor names
+ */
+export const CURSOR_NAME_MAX_LENGTH = 60;
+
+/**
  * Sanitizes cursor names specifically, preserving the file extension
  * @param cursorName - The cursor name to sanitize (without extension)
  * @param replacement - Character to replace invalid characters with (default: '_')
  * @returns Sanitized cursor name
  */
 export function sanitizeCursorName(cursorName: string, replacement: string = '_'): string {
-    return sanitizeFilename(cursorName, replacement);
+    const sanitized = sanitizeFilename(cursorName, replacement);
+    return sanitized.length > CURSOR_NAME_MAX_LENGTH
+        ? sanitized.slice(0, CURSOR_NAME_MAX_LENGTH)
+        : sanitized;
 }

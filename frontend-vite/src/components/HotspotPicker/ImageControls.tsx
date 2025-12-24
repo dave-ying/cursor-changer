@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { RotateCcw } from 'lucide-react';
 import type { ImageControlsProps } from './types';
 
 // Debounce utility function
@@ -77,6 +78,14 @@ export function ImageControls({
         }, 50);
     }, [setImageTransform]);
 
+    const handleScaleReset = useCallback(() => {
+        const defaultScale = 1;
+        setLocalScale(defaultScale);
+        lastCommittedScale.current = defaultScale;
+        isDragging.current = false;
+        setImageTransform(prev => ({ ...prev, scale: defaultScale }));
+    }, [setImageTransform]);
+
     const createHoldHandlers = useCallback(
         (action: () => void) => {
             return {
@@ -100,10 +109,10 @@ export function ImageControls({
         <>
             {/* Scale Control */}
             <div>
-                <label htmlFor="scale-slider" className="block mb-2">
-                    <span className="text-sm font-medium text-foreground">Scale</span>
-                </label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span className="text-sm font-medium text-foreground min-w-[52px]">
+                        Scale
+                    </span>
                     <div style={{ flex: 1 }}>
                         <Slider
                             id="scale-slider"
@@ -116,15 +125,25 @@ export function ImageControls({
                             className="w-full"
                         />
                     </div>
-                    <span className="text-sm font-mono text-muted-foreground min-w-[45px] text-right">
+                    <span className="text-sm font-semibold text-muted-foreground min-w-[45px] text-right">
                         {(localScale * 100).toFixed(0)}%
                     </span>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Reset scale to 100%"
+                        onClick={handleScaleReset}
+                        disabled={Math.abs(localScale - 1) < 0.001}
+                    >
+                        <RotateCcw className="w-4 h-4" />
+                    </Button>
                 </div>
             </div>
 
             {/* Position Control */}
             <div>
-                <label style={{ display: 'block', fontSize: 12, color: '#aaa', marginBottom: '0.25rem' }}>Position</label>
+                <label className="text-sm font-medium text-foreground block mb-2">Position</label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px', width: '120px', margin: '0 auto' }}>
                     <div></div>
                     <Button
