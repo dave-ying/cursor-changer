@@ -144,6 +144,14 @@ export function HotspotPicker(props: HotspotPickerProps) {
         return INVALID_FILENAME_CHARS.test(value);
     }, []);
 
+    const handleCancelNameEdit = useCallback(() => {
+        if (!isNameEditing) return;
+        const originalName = nameSnapshot || logic.cursorDisplayName;
+        logic.setEditableCursorName(originalName);
+        setRawNameInput(originalName);
+        setIsNameEditing(false);
+    }, [isNameEditing, logic, logic.cursorDisplayName, nameSnapshot]);
+
     const sanitizedRawName = sanitizeCursorName(rawNameInput);
     const showSanitizationHint =
         isNameEditing && rawNameInput && sanitizedRawName !== rawNameInput && hasInvalidFilenameChars(rawNameInput);
@@ -212,6 +220,12 @@ export function HotspotPicker(props: HotspotPickerProps) {
                                     logic.setEditableCursorName(rawInput);
                                 }}
                                 onKeyDown={(e) => {
+                                    if (e.key === 'Escape' && isNameEditing) {
+                                        e.preventDefault();
+                                        handleCancelNameEdit();
+                                        return;
+                                    }
+
                                     if (e.key === 'Enter' && isNameEditing) {
                                         e.preventDefault();
                                         setIsNameEditing(false);
@@ -273,221 +287,205 @@ export function HotspotPicker(props: HotspotPickerProps) {
                                         setIsNameEditing(false);
                                         // Persist rename immediately for existing cursors
                                         if (props.filePath) {
-                            </div>
-                        )}
-                        <div className="cursor-name-buttons">
-                            <button
-                                type="button"
-                                className={`cursor-name-icon cursor-name-save ${isNameEditing ? '' : 'is-hidden'}`}
-                                aria-label="Save cursor name"
-                                onClick={async () => {
-                                    if (!isNameEditing) return;
-                                    setIsNameEditing(false);
-                                    // Persist rename immediately for existing cursors
-                                    if (props.filePath) {
-                                        await logic.handleConfirm();
-                                    }
-                                }}
-                                disabled={!isNameEditing}
-                            >
-                                <Check aria-hidden="true" strokeWidth={2.5} />
+                                            await logic.handleConfirm();
+                                        }
+                                    }}
+                                    disabled={!isNameEditing}
+                                >
+                                    <Check aria-hidden="true" strokeWidth={2.5} />
 
-                            </button>
-                            <button
-                                type="button"
-                                className={`cursor-name-icon ${isNameEditing ? 'cursor-name-cancel' : 'cursor-name-edit'}`}
-                                aria-label={isNameEditing ? 'Cancel cursor name edit' : 'Edit cursor name'}
-                                onClick={() => {
-                                    if (isNameEditing) {
-                                        logic.setEditableCursorName(nameSnapshot || logic.cursorDisplayName);
-                                        setIsNameEditing(false);
-                                    } else {
-                                        setNameSnapshot(logic.editableCursorName);
-                                        setIsNameEditing(true);
-                                        queueMicrotask(() => nameInputRef.current?.focus());
-                                    }
-                                }}
-                            >
-                                {isNameEditing ? (
-                                    <X aria-hidden="true" strokeWidth={2.5} />
-                                ) : (
-                                    <SquarePen aria-hidden="true" strokeWidth={2} />
-                                )}
-                            </button>
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`cursor-name-icon ${isNameEditing ? 'cursor-name-cancel' : 'cursor-name-edit'}`}
+                                    aria-label={isNameEditing ? 'Cancel cursor name edit' : 'Edit cursor name'}
+                                    onClick={() => {
+                                        if (isNameEditing) {
+                                            handleCancelNameEdit();
+                                        } else {
+                                            setNameSnapshot(logic.editableCursorName);
+                                            setIsNameEditing(true);
+                                            queueMicrotask(() => nameInputRef.current?.focus());
+                                        }
+                                    }}
+                                >
+                                    {isNameEditing ? (
+                                        <X aria-hidden="true" strokeWidth={2.5} />
+                                    ) : (
+                                        <SquarePen aria-hidden="true" strokeWidth={2} />
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Preview Column */}
-            <div className="preview-column">
-                <h3 className="preview-title">Cursor Preview</h3>
                 {/* Preview Column */}
                 <div className="preview-column">
-                    <h3 className="preview-title">Cursor Preview</h3>
 
-                    <ImageCanvas
-                        objectUrl={logic.objectUrl}
-                        filename={logic.filename}
-                        overlayRef={logic.overlayRef}
-                        imgRef={logic.imgRef}
-                        previewBg={logic.previewBg}
-                        imageTransform={logic.imageTransform}
-                        hotspot={logic.hotspot}
-                        targetSize={logic.targetSize}
-                        hotspotMode={logic.hotspotMode}
-                        hotspotColor={logic.hotspotColor}
-                        accentColorValue={cursorState.accentColor || '#7c3aed'}
-                        activeTab={activeTab}
-                        setImageTransform={logic.setImageTransform}
-                        setHotspot={logic.setHotspot}
-                        onPick={logic.handlePick}
-                    />
+                <h3 className="preview-title">Cursor Preview</h3>
 
-                    {/* Background Removal Button - Only for new uploads */}
-                    {!props.filePath && (
-                        <Button
-                            onClick={logic.handleRemoveBackground}
-                            disabled={logic.isRemovingBackground || logic.busy}
-                            variant="outline"
-                            size="default"
-                            className="bg-removal-button"
-                        >
-                            {logic.isRemovingBackground ? (
-                                <>
-                                    <LoaderCircle className="w-4 h-4 animate-spin" />
-                                    Removing Background...
-                                </>
-                            ) : (
-                                <>
-                                    <WandSparkles className="w-4 h-4" />
-                                    Remove Background
-                                </>
-                            )}
-                        </Button>
-                    )}
-                </div>
+                <ImageCanvas
+                    objectUrl={logic.objectUrl}
+                    filename={logic.filename}
+                    overlayRef={logic.overlayRef}
+                    imgRef={logic.imgRef}
+                    previewBg={logic.previewBg}
+                    imageTransform={logic.imageTransform}
+                    hotspot={logic.hotspot}
+                    targetSize={logic.targetSize}
+                    hotspotMode={logic.hotspotMode}
+                    hotspotColor={logic.hotspotColor}
+                    accentColorValue={cursorState.accentColor || '#7c3aed'}
+                    activeTab={activeTab}
+                    setImageTransform={logic.setImageTransform}
+                    setHotspot={logic.setHotspot}
+                    onPick={logic.handlePick}
+                />
 
-                {/* Controls Column */}
-                <div className="controls-column">
-                    {/* Tabs */}
-                    <ModalButtonGroup
-                        activeTab={activeTab}
-                        setActiveTab={setActiveTab}
-                        accentColor={cursorState.accentColor}
-                        showResizeTab={!props.filePath}
-                    />
-
-                    {/* Tab Content */}
-                    <div
-                        className="tab-content"
-                        ref={tabContentRef}
-                        style={maxTabHeight ? { minHeight: `${Math.ceil(maxTabHeight)}px` } : undefined}
+                {/* Background Removal Button - Only for new uploads */}
+                {!props.filePath && (
+                    <Button
+                        onClick={logic.handleRemoveBackground}
+                        disabled={logic.isRemovingBackground || logic.busy}
+                        variant="outline"
+                        size="default"
+                        className="bg-removal-button"
                     >
-                        {activeTab === 'hotspot' ? (
+                        {logic.isRemovingBackground ? (
                             <>
-                                {/* First Row: Info card + HotspotControls */}
-                                <div id="cursor-modal-controls-section-row1" className="controls-section-row">
-                                    <Card className="info-card" aria-label="Hotspot instructions card">
-                                        <div className="info-card-icon">
-                                            <InfoCardIcon size="sm" />
-                                        </div>
-                                        <div className="info-card-content">
-                                            <div className="instruction-text">
-                                                Click anywhere on the 'Cursor Preview' on the left,
-                                            </div>
-                                            <div className="instruction-text">
-                                                to choose the point where your cursor actually clicks.
-                                            </div>
-                                            <div className="instruction-hint">Use arrow keys (↑, ↓, ←, →) to fine tune</div>
-                                        </div>
-                                    </Card>
-
-                                    <HotspotControls
-                                        hotspot={logic.hotspot}
-                                        setHotspot={logic.setHotspot}
-                                        targetSize={logic.targetSize}
-                                        hotspotMode={logic.hotspotMode}
-                                        setHotspotMode={logic.setHotspotMode}
-                                        hotspotColor={logic.hotspotColor}
-                                        setHotspotColor={logic.setHotspotColor}
-                                        accentColorValue={cursorState.accentColor || '#7c3aed'}
-                                        previewBg={logic.previewBg}
-                                        setPreviewBg={logic.setPreviewBg}
-                                        onCustomColorPick={(color) => logic.setPreviewBg(color)}
-                                        startHoldAction={logic.startHoldAction}
-                                        stopHoldAction={logic.stopHoldAction}
-                                        onConfirm={handleConfirmAndClose}
-                                        isBusy={logic.busy}
-                                        isEditMode={Boolean(props.filePath)}
-                                    />
-                                </div>
-
-                                {/* Second Row: Create Cursor/Save Click Position Button */}
-                                <div id="cursor-modal-controls-section-row2" className="controls-section-row">
-                                    {/* Create Cursor Button - Only for new uploads */}
-                                    {!props.filePath && (
-                                        <Button
-                                            onClick={handleConfirmAndClose}
-                                            disabled={logic.busy || logic.isRemovingBackground}
-                                            size="lg"
-                                            className="create-button"
-                                        >
-                                            {logic.busy ? 'Adding…' : 'Create Cursor'}
-                                        </Button>
-                                    )}
-
-                                    {/* Save Click Position Button - Only for editing existing cursors */}
-                                    {props.filePath && (
-                                        <Button
-                                            onClick={handleConfirmAndClose}
-                                            disabled={logic.busy}
-                                            size="lg"
-                                            className="create-button"
-                                        >
-                                            {logic.busy ? 'Saving…' : 'Save Click Point'}
-                                        </Button>
-                                    )}
-                                </div>
+                                <LoaderCircle className="w-4 h-4 animate-spin" />
+                                Removing Background...
                             </>
                         ) : (
                             <>
-                                {/* First Row: Image Controls Card */}
-                                <div id="cursor-modal-controls-section-row1" className="controls-section-row">
-                                    <Card className="image-controls-card">
-                                        <ImageControls
-                                            imageTransform={logic.imageTransform}
-                                            setImageTransform={logic.setImageTransform}
-                                            onReset={() => {
-                                                // Reset to 100% scale (1.0) and center position
-                                                logic.setImageTransform({ scale: 1.0, offsetX: 0, offsetY: 0 });
-                                            }}
-                                            startHoldAction={logic.startHoldAction}
-                                            stopHoldAction={logic.stopHoldAction}
-                                        />
-                                    </Card>
-                                </div>
-
-                                {/* Second Row: Create Cursor Button */}
-                                <div id="cursor-modal-controls-section-row2" className="controls-section-row">
-                                    {/* Create Cursor Button - Only for new uploads */}
-                                    {!props.filePath && (
-                                        <Button
-                                            onClick={handleConfirmAndClose}
-                                            disabled={logic.busy || logic.isRemovingBackground}
-                                            size="lg"
-                                            className="create-button"
-                                        >
-                                            {logic.busy ? 'Adding…' : 'Create Cursor'}
-                                        </Button>
-                                    )}
-                                </div>
+                                <WandSparkles className="w-4 h-4" />
+                                Remove Background
                             </>
                         )}
-                    </div>
+                    </Button>
+                )}
+            </div>
 
+            {/* Controls Column */}
+            <div className="controls-column">
+                {/* Tabs */}
+                <ModalButtonGroup
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    accentColor={cursorState.accentColor}
+                    showResizeTab={!props.filePath}
+                />
+
+                {/* Tab Content */}
+                <div
+                    className="tab-content"
+                    ref={tabContentRef}
+                    style={maxTabHeight ? { minHeight: `${Math.ceil(maxTabHeight)}px` } : undefined}
+                >
+                    {activeTab === 'hotspot' ? (
+                        <>
+                            {/* First Row: Info card + HotspotControls */}
+                            <div id="cursor-modal-controls-section-row1" className="controls-section-row">
+                                <Card className="info-card" aria-label="Hotspot instructions card">
+                                    <div className="info-card-icon">
+                                        <InfoCardIcon size="sm" />
+                                    </div>
+                                    <div className="info-card-content">
+                                        <div className="instruction-text">
+                                            Click anywhere on the 'Cursor Preview' on the left,
+                                        </div>
+                                        <div className="instruction-text">
+                                            to choose the point where your cursor actually clicks.
+                                        </div>
+                                        <div className="instruction-hint">Use arrow keys (↑, ↓, ←, →) to fine tune</div>
+                                    </div>
+                                </Card>
+
+                                <HotspotControls
+                                    hotspot={logic.hotspot}
+                                    setHotspot={logic.setHotspot}
+                                    targetSize={logic.targetSize}
+                                    hotspotMode={logic.hotspotMode}
+                                    setHotspotMode={logic.setHotspotMode}
+                                    hotspotColor={logic.hotspotColor}
+                                    setHotspotColor={logic.setHotspotColor}
+                                    accentColorValue={cursorState.accentColor || '#7c3aed'}
+                                    previewBg={logic.previewBg}
+                                    setPreviewBg={logic.setPreviewBg}
+                                    onCustomColorPick={(color) => logic.setPreviewBg(color)}
+                                    startHoldAction={logic.startHoldAction}
+                                    stopHoldAction={logic.stopHoldAction}
+                                    onConfirm={handleConfirmAndClose}
+                                    isBusy={logic.busy}
+                                    isEditMode={Boolean(props.filePath)}
+                                />
+                            </div>
+
+                            {/* Second Row: Create Cursor/Save Click Position Button */}
+                            <div id="cursor-modal-controls-section-row2" className="controls-section-row">
+                                {/* Create Cursor Button - Only for new uploads */}
+                                {!props.filePath && (
+                                    <Button
+                                        onClick={handleConfirmAndClose}
+                                        disabled={logic.busy || logic.isRemovingBackground}
+                                        size="lg"
+                                        className="create-button"
+                                    >
+                                        {logic.busy ? 'Adding…' : 'Create Cursor'}
+                                    </Button>
+                                )}
+
+                                {/* Save Click Position Button - Only for editing existing cursors */}
+                                {props.filePath && (
+                                    <Button
+                                        onClick={handleConfirmAndClose}
+                                        disabled={logic.busy}
+                                        size="lg"
+                                        className="create-button"
+                                    >
+                                        {logic.busy ? 'Saving…' : 'Save Click Point'}
+                                    </Button>
+                                )}
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            {/* First Row: Image Controls Card */}
+                            <div id="cursor-modal-controls-section-row1" className="controls-section-row">
+                                <Card className="image-controls-card">
+                                    <ImageControls
+                                        imageTransform={logic.imageTransform}
+                                        setImageTransform={logic.setImageTransform}
+                                        onReset={() => {
+                                            // Reset to 100% scale (1.0) and center position
+                                            logic.setImageTransform({ scale: 1.0, offsetX: 0, offsetY: 0 });
+                                        }}
+                                        startHoldAction={logic.startHoldAction}
+                                        stopHoldAction={logic.stopHoldAction}
+                                    />
+                                </Card>
+                            </div>
+
+                            {/* Second Row: Create Cursor Button */}
+                            <div id="cursor-modal-controls-section-row2" className="controls-section-row">
+                                {/* Create Cursor Button - Only for new uploads */}
+                                {!props.filePath && (
+                                    <Button
+                                        onClick={handleConfirmAndClose}
+                                        disabled={logic.busy || logic.isRemovingBackground}
+                                        size="lg"
+                                        className="create-button"
+                                    >
+                                        {logic.busy ? 'Adding…' : 'Create Cursor'}
+                                    </Button>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
-    );
+    </div>
+);
 }
