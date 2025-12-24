@@ -38,10 +38,16 @@ export function sanitizeFilename(filename: string, replacement: string = '_'): s
         return 'cursor';
     }
     
+    // Split into base + extension for reserved handling
+    const lastDotIndex = sanitized.lastIndexOf('.');
+    const baseName = lastDotIndex === -1 ? sanitized : sanitized.slice(0, lastDotIndex);
+    const extension = lastDotIndex === -1 ? '' : sanitized.slice(lastDotIndex);
+
     // Check for reserved names (case-insensitive)
-    const nameWithoutExtension = sanitized.split('.')[0]?.toUpperCase() || sanitized.toUpperCase();
-    if (RESERVED_FILENAMES.includes(nameWithoutExtension)) {
-        sanitized = `${sanitized}_cursor`;
+    const upperBaseName = baseName.toUpperCase();
+    if (RESERVED_FILENAMES.includes(upperBaseName)) {
+        const safeBaseName = `${upperBaseName}_cursor`;
+        sanitized = `${safeBaseName}${extension}`;
     }
     
     // Limit length to reasonable Windows limit (leave room for extension)

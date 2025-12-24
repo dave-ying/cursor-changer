@@ -21,6 +21,7 @@ describe('Data Loading Operations', () => {
   let mockGetAppWindow: ReturnType<typeof vi.fn>;
   let mockShowMessage: ReturnType<typeof vi.fn>;
   let mockUpdateCursorState: ReturnType<typeof vi.fn>;
+  let mockSetCustomizationMode: ReturnType<typeof vi.fn>;
   let mockSetAvailableCursors: ReturnType<typeof vi.fn>;
   let mockSetLibraryCursors: ReturnType<typeof vi.fn>;
   let mockSetIsMaximized: ReturnType<typeof vi.fn>;
@@ -31,6 +32,7 @@ describe('Data Loading Operations', () => {
     mockGetAppWindow = vi.fn();
     mockShowMessage = vi.fn();
     mockUpdateCursorState = vi.fn();
+    mockSetCustomizationMode = vi.fn();
     mockSetAvailableCursors = vi.fn();
     mockSetLibraryCursors = vi.fn();
     mockSetIsMaximized = vi.fn();
@@ -44,6 +46,7 @@ describe('Data Loading Operations', () => {
     operations = createDataLoadingOperations(
       getTauri,
       mockUpdateCursorState as unknown as (updates: Partial<CursorState>) => void,
+      mockSetCustomizationMode as unknown as (mode: 'simple' | 'advanced') => void,
       mockSetAvailableCursors as unknown as (cursors: any[]) => void,
       mockSetLibraryCursors as unknown as (cursors: any[]) => void,
       mockSetIsMaximized as unknown as (maximized: boolean) => void,

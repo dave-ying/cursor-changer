@@ -279,7 +279,10 @@ describe('Cursor Preview Cache Service', () => {
 
         await preloadCursorPreviews(cursors, mockInvoke);
 
-        expect(mockInvoke).toHaveBeenCalledWith('get_library_cursor_preview', { file_path: 'C:\\custom.cur' });
+        expect(mockInvoke).toHaveBeenCalledWith(
+          'get_library_cursor_preview',
+          expect.objectContaining({ file_path: 'C:\\custom.cur' })
+        );
       });
 
       it('skips already cached cursors', async () => {
@@ -310,9 +313,15 @@ describe('Cursor Preview Cache Service', () => {
         await preloadCursorPreviews(cursors, mockInvoke);
 
         // Should not call for ANI file with get_library_cursor_preview
-        expect(mockInvoke).not.toHaveBeenCalledWith('get_library_cursor_preview', { file_path: 'C:\\anim.ani' });
+        expect(mockInvoke).not.toHaveBeenCalledWith(
+          'get_library_cursor_preview',
+          expect.objectContaining({ file_path: 'C:\\anim.ani' })
+        );
         // Should call for static cursor
-        expect(mockInvoke).toHaveBeenCalledWith('get_library_cursor_preview', { file_path: 'C:\\static.cur' });
+        expect(mockInvoke).toHaveBeenCalledWith(
+          'get_library_cursor_preview',
+          expect.objectContaining({ file_path: 'C:\\static.cur' })
+        );
       });
 
       it('handles preload errors gracefully', async () => {

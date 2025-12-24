@@ -195,7 +195,7 @@ describe('CursorCustomization - Unit Tests - Cursor Cards', () => {
     await renderAndWaitForLoad();
 
     const normalCard = screen.getByTestId('cursor-card-Normal');
-    expect(within(normalCard).getByText('Custom')).toBeInTheDocument();
+    expect(normalCard.querySelector('.cursor-preview')).toHaveClass('has-custom-cursor');
   });
 
   it('should handle cursor card click', async () => {
