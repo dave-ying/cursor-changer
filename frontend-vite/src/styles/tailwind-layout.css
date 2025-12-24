@@ -89,11 +89,28 @@
     min-height: 0;
     /* Default: center vertically when toolbar is closed */
     align-content: center;
+    align-content: safe center;
+    height: auto;
 }
 
-/* Keep advanced mode centered by default too */
+/* When customization toolbar is open, grid should fill remaining space and center content */
+#active-cursors-section.active-section--toolbar-open #cursor-grid {
+    flex: 1 1 0%;
+    height: auto;
+    min-height: 0;
+    align-content: center;
+    align-content: safe center;
+}
+
+/* Keep advanced mode centered */
 #active-cursors-section #cursor-grid.cursor-grid--advanced {
     align-content: center;
+    align-content: safe center;
+}
+
+#active-cursors-section.active-section--toolbar-open #cursor-grid.cursor-grid--advanced {
+    align-content: center;
+    align-content: safe center;
 }
 
 .content-wrapper {

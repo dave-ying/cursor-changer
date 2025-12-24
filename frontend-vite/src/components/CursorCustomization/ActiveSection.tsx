@@ -124,8 +124,9 @@ export function ActiveSection({
             showModeToggle ? 'opacity-100' : 'opacity-0'
           )}
           style={{
-            maxHeight: showModeToggle ? '260px' : '0px',
-            overflow: 'hidden'
+            maxHeight: showModeToggle ? (showMoreOptions ? '400px' : '260px') : '0px',
+            overflow: 'hidden',
+            flexShrink: 0
           }}
           aria-expanded={showModeToggle}
         >
