@@ -12,6 +12,9 @@ import { useLibrarySorting } from './Library/useLibrarySorting';
 import { Commands, invokeCommand } from '../../tauri/commands';
 import { logger } from '../../utils/logger';
 import { cn } from '@/lib/utils';
+import { usePersistentBoolean } from '@/hooks/usePersistentBoolean';
+import { usePersistentState } from '@/hooks/usePersistentState';
+import { persistentKeys } from '@/constants/persistentKeys';
 
 import type { LibrarySectionProps } from './types';
 
@@ -34,33 +37,36 @@ export function LibrarySection({
   const { invoke } = useApp();
   const loadLibraryCursors = useAppStore((s) => s.operations.loadLibraryCursors);
   const { showMessage } = useMessage();
-  const [showCustomizePanel, setShowCustomizePanel] = React.useState(false);
-  const [showMoreOptions, setShowMoreOptions] = React.useState(false);
+  const [showCustomizePanel, setShowCustomizePanel] = usePersistentBoolean({
+    key: persistentKeys.library.showCustomizePanel,
+    defaultValue: false
+  });
+  const [showMoreOptions, setShowMoreOptions] = usePersistentBoolean({
+    key: persistentKeys.library.showMoreOptions,
+    defaultValue: false
+  });
+
   const [resetLibraryDialogOpen, setResetLibraryDialogOpen] = React.useState(false);
   const scaleMin = 0.6;
   const scaleMax = 3;
 
-  const [libraryPreviewScale, setLibraryPreviewScale] = React.useState<number>(() => {
-    if (typeof window === 'undefined') return 1;
-    const raw = window.localStorage.getItem('library-preview-scale');
-    const parsed = raw ? Number(raw) : 1;
-    if (Number.isFinite(parsed) && parsed >= scaleMin && parsed <= scaleMax) return parsed;
-    return 1;
+  const [libraryPreviewScale, setLibraryPreviewScale] = usePersistentState<number>({
+    key: persistentKeys.library.previewScale,
+    defaultValue: 1,
+    serialize: (value: number) => String(value),
+    deserialize: (stored: string) => {
+      const parsed = Number(stored);
+      if (!Number.isFinite(parsed)) return 1;
+      if (parsed < scaleMin) return scaleMin;
+      if (parsed > scaleMax) return scaleMax;
+      return parsed;
+    }
   });
 
   const handleToggleCustomizePanel = React.useCallback(() => {
     setShowMoreOptions(false);
     setShowCustomizePanel((prev) => !prev);
   }, []);
-
-  React.useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      window.localStorage.setItem('library-preview-scale', String(libraryPreviewScale));
-    } catch (error) {
-      logger.error('Failed to save library preview scale:', error);
-    }
-  }, [libraryPreviewScale]);
 
   const handleOpenFolder = async () => {
     try {

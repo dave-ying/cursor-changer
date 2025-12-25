@@ -8,6 +8,9 @@ import { ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { ActionPillButton } from './ActionPillButton';
 import { CollapsibleSection } from './CollapsibleSection';
 import { cn } from '@/lib/utils';
+import { Switch } from '@/components/ui/switch';
+import { usePersistentBoolean } from '@/hooks/usePersistentBoolean';
+import { persistentKeys } from '@/constants/persistentKeys';
 
 import type { ActiveSectionProps } from './types';
 
@@ -33,8 +36,18 @@ export function ActiveSection({
 }: ActiveSectionProps) {
   const safeVisibleCursors = Array.isArray(visibleCursors) ? visibleCursors : [];
 
-  const [showModeToggle, setShowModeToggle] = React.useState(false);
-  const [showMoreOptions, setShowMoreOptions] = React.useState(false);
+  const [showModeToggle, setShowModeToggle] = usePersistentBoolean({
+    key: persistentKeys.activeSection.showModeToggle,
+    defaultValue: false
+  });
+  const [showMoreOptions, setShowMoreOptions] = usePersistentBoolean({
+    key: persistentKeys.activeSection.showMoreOptions,
+    defaultValue: false
+  });
+  const [showCursorNames, setShowCursorNames] = usePersistentBoolean({
+    key: persistentKeys.activeSection.showCursorNames,
+    defaultValue: true
+  });
 
   const handleToggleCustomizePanel = React.useCallback(() => {
     setShowMoreOptions(false);
@@ -196,6 +209,18 @@ export function ActiveSection({
               <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-1">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-foreground">
+                    Show cursor names
+                  </p>
+                </div>
+                <Switch
+                  checked={showCursorNames}
+                  onCheckedChange={setShowCursorNames}
+                  aria-label="Toggle cursor name visibility"
+                />
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-1">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground">
                     Reset All Active Cursors to Default
                   </p>
                 </div>
@@ -223,13 +248,18 @@ export function ActiveSection({
           customizationMode === 'advanced' && 'cursor-grid--advanced'
         )}
         data-testid="cursor-grid"
-        style={{ flex: '1 1 0%', minHeight: 0 }}
+        style={{
+          flex: '1 1 0%',
+          minHeight: 0,
+          rowGap: showCursorNames ? undefined : '1.5rem'
+        }}
       >
         {safeVisibleCursors.map((cursor, index) => (
           <ActiveCursor
             key={cursor.name}
             cursor={cursor}
             onBrowse={onBrowse}
+            showNames={showCursorNames}
             // Highlight the card if it's the one being replaced (in selectingFromLibrary mode)
             isSelected={selectingFromLibrary && selectedCursor?.name === cursor.name}
             // Highlight as target if we have a pending library cursor

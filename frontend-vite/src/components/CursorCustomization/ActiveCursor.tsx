@@ -32,7 +32,8 @@ export function ActiveCursor({
   animationIndex = 0,
   enablePulseAnimation = false,
   loadAvailableCursors,
-  draggingLib
+  draggingLib,
+  showNames = true
 }: {
   cursor: CursorInfo;
   onBrowse: (cursor: CursorInfo) => void;
@@ -43,6 +44,7 @@ export function ActiveCursor({
   enablePulseAnimation?: boolean;
   loadAvailableCursors?: () => void | Promise<void>;
   draggingLib?: DraggedLibraryCursor | null;
+  showNames?: boolean;
 }) {
   const { invoke } = useApp();
   const showMessageTyped = useCallback(
@@ -319,12 +321,14 @@ export function ActiveCursor({
             </span>
           )}
         </div>
-        <div className="cursor-name">
-          <span>{displayName}</span>
-          {typeof hotspotX === 'number' && typeof hotspotY === 'number' && (
-            <div className="cursor-hotspot">Hotspot: ({hotspotX}, {hotspotY})</div>
-          )}
-        </div>
+        {showNames && (
+          <div className="cursor-name">
+            <span>{displayName}</span>
+            {typeof hotspotX === 'number' && typeof hotspotY === 'number' && (
+              <div className="cursor-hotspot">Hotspot: ({hotspotX}, {hotspotY})</div>
+            )}
+          </div>
+        )}
       </div>
 
       <ActiveCursorContextMenu

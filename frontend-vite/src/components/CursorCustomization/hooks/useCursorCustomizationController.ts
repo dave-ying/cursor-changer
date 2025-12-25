@@ -15,6 +15,8 @@ import { useFileUpload } from '../FileUpload/useFileUpload';
 import { useLibrary } from '../Library/useLibrary';
 import { usePreview } from '../Preview/usePreview';
 import { useSelectionStateMachine } from './useSelectionStateMachine';
+import { usePersistentBoolean } from '@/hooks/usePersistentBoolean';
+import { persistentKeys } from '@/constants/persistentKeys';
 
 export type CursorCustomizationController = ReturnType<typeof useCursorCustomizationController>;
 
@@ -54,8 +56,14 @@ export function useCursorCustomizationController() {
   );
 
   // Local UI state
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [showClickPointPicker, setShowClickPointPicker] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = usePersistentBoolean({
+    key: persistentKeys.modals.showSettings,
+    defaultValue: false
+  });
+  const [showClickPointPicker, setShowClickPointPicker] = usePersistentBoolean({
+    key: persistentKeys.modals.showClickPointPicker,
+    defaultValue: false
+  });
   const [clickPointItemId, setClickPointItemId] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<string>('cursors');
 
