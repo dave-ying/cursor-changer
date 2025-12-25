@@ -229,7 +229,7 @@ export function ActiveSection({
                   className="sm:w-auto rounded-full"
                   onClick={onResetCursors}
                 >
-                  Reset Cursors
+                  Reset Active Cursors
                 </Button>
               </div>
             </CollapsibleSection>

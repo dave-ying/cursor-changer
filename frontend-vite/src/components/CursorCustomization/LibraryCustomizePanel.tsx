@@ -109,7 +109,7 @@ export function LibraryCustomizePanel({
           openLabel="Hide options"
           maxHeight={300}
           className="space-y-2 mt-4"
-          contentClassName="pt-1 pb-1 space-y-2"
+          contentClassName="pt-1 pb-0 space-y-2"
         >
           <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-1">
             <div className="min-w-0">
@@ -124,7 +124,7 @@ export function LibraryCustomizePanel({
             </Button>
           </div>
           <Separator className="my-1" />
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-1">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-1 mt-2">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-foreground">Reset All Cursors in Library</p>
             </div>
