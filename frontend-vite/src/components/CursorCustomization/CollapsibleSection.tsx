@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface CollapsibleSectionProps {
   id: string;
@@ -26,16 +27,52 @@ export function CollapsibleSection({
 }: CollapsibleSectionProps) {
   const label = open ? openLabel : closedLabel;
   const contentRef = React.useRef<HTMLDivElement | null>(null);
-  const [measuredHeight, setMeasuredHeight] = React.useState<number>(maxHeight);
+  const [measuredHeight, setMeasuredHeight] = React.useState<number>(0);
 
-  // Measure once when content changes or opens to avoid layout thrash during animation
+  // Measure the content once mounted and whenever it resizes to keep the animation smooth.
   React.useLayoutEffect(() => {
-    const el = contentRef.current;
-    if (!el) return;
-    const next = el.scrollHeight;
-    // Clamp to provided maxHeight to preserve original look
-    setMeasuredHeight(Math.min(next, maxHeight));
-  }, [children, maxHeight, open]);
+    const node = contentRef.current;
+    if (!node) return;
+
+    let frame: number | null = null;
+
+    const measure = () => {
+      frame = null;
+      const next = node.scrollHeight;
+      setMeasuredHeight(Math.min(next, maxHeight));
+    };
+
+    measure();
+
+    const supportsResizeObserver =
+      typeof window !== 'undefined' && 'ResizeObserver' in window;
+
+    if (supportsResizeObserver) {
+      const observer = new ResizeObserver(() => {
+        if (frame != null) return;
+        frame = requestAnimationFrame(measure);
+      });
+      observer.observe(node);
+      return () => {
+        observer.disconnect();
+        if (frame) cancelAnimationFrame(frame);
+      };
+    }
+
+    const handleResize = () => {
+      if (frame != null) return;
+      frame = requestAnimationFrame(measure);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [maxHeight]);
+
+  const expandedHeight = open ? measuredHeight : 0;
+  const transitionTiming = 'cubic-bezier(0.33, 1, 0.68, 1)';
 
   return (
     <div className={className}>
@@ -49,21 +86,31 @@ export function CollapsibleSection({
         {label}
       </Button>
       <div
-        ref={contentRef}
         id={id}
-        className={`overflow-hidden ${!open ? '-mt-1' : contentClassName}`}
+        className={cn(
+          'relative overflow-hidden rounded-[calc(var(--radius-surface,12px)/4)] bg-transparent',
+          open ? 'pointer-events-auto' : 'pointer-events-none'
+        )}
         style={{
-          // Animate only height/opacity to avoid repeated full reflow of siblings
-          height: open ? `${measuredHeight}px` : '0px',
+          height: `${expandedHeight}px`,
           maxHeight: `${maxHeight}px`,
           opacity: open ? 1 : 0,
-          transition: 'height 240ms ease, opacity 200ms ease',
-          willChange: 'height, opacity',
+          transform: open ? 'translateY(0)' : 'translateY(-6px)',
+          transition: [
+            `height 260ms ${transitionTiming}`,
+            `opacity 200ms ease`,
+            `transform 260ms ${transitionTiming}`,
+            `margin-top 260ms ${transitionTiming}`
+          ].join(', '),
+          marginTop: open ? '0.75rem' : '0rem',
+          willChange: 'height, opacity, transform, margin-top',
           contain: 'layout paint'
         }}
         aria-hidden={!open}
       >
-        {children}
+        <div ref={contentRef} className={contentClassName}>
+          {children}
+        </div>
       </div>
     </div>
   );

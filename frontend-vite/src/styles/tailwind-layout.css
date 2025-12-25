@@ -87,6 +87,7 @@
     overflow-x: hidden;
     flex: 1;
     min-height: 0;
+    scrollbar-gutter: stable;
     /* Default: center vertically when toolbar is closed */
     align-content: center;
     align-content: safe center;
