@@ -169,7 +169,8 @@ pub fn rename_cursor_in_library(
         .and_then(|s| s.to_str())
         .unwrap_or("cur");
 
-    let safe_base = sanitize_filename(&new_name);
+    let desired_name = normalize_display_name(&new_name, ext);
+    let safe_base = sanitize_filename(&desired_name);
     let target_path = generate_unique_path(&parent_dir, &safe_base, ext);
 
     // If the resolved path matches the current one, just update the name in metadata
@@ -183,9 +184,32 @@ pub fn rename_cursor_in_library(
         cursor.file_path = target_path.to_string_lossy().to_string();
     }
 
-    cursor.name = new_name;
+    cursor.name = desired_name;
     save_library(&app, &library)?;
     Ok(())
+}
+
+/// Strip a redundant extension (e.g. ".cur") from user provided names so we don't end up with
+/// filenames like `pointer.cur.cur`, and fall back to the original input if no stem exists.
+fn normalize_display_name(new_name: &str, current_ext: &str) -> String {
+    let trimmed = new_name.trim();
+    if trimmed.is_empty() {
+        return "cursor".to_string();
+    }
+
+    let name_path = std::path::Path::new(trimmed);
+    if let Some(ext) = name_path.extension().and_then(|s| s.to_str()) {
+        if ext.eq_ignore_ascii_case(current_ext) {
+            if let Some(stem) = name_path.file_stem().and_then(|s| s.to_str()) {
+                let stem_trimmed = stem.trim();
+                if !stem_trimmed.is_empty() {
+                    return stem_trimmed.to_string();
+                }
+            }
+        }
+    }
+
+    trimmed.to_string()
 }
 
 /// Replace characters that are invalid in filenames with an underscore
