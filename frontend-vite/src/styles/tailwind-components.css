@@ -180,7 +180,7 @@ section[aria-label="Library"] {
 .cursor-name {
   display: block;
   width: 100%;
-  font-size: 0.875rem;
+  font-size: 0.81rem;
   font-weight: 500;
   text-align: center;
   color: var(--text-primary);
