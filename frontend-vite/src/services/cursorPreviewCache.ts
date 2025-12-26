@@ -185,7 +185,8 @@ export function createCursorPreviewCache(deps: CursorPreviewCacheDeps = {}) {
                     return (await invoke(Commands.getLibraryCursorPreview, { file_path: filePath, filePath })) as string;
                 },
                 fetchSystemCursorPreview: async (cursorName: string) => {
-                    return (await invoke(Commands.getSystemCursorPreview, { cursor_name: cursorName })) as string;
+                    // Some runtimes expect camelCase while others expect snake_case; send both.
+                    return (await invoke(Commands.getSystemCursorPreview, { cursor_name: cursorName, cursorName })) as string;
                 },
                 fetchAniPreviewData: async (filePath: string) => {
                     return (await invoke(Commands.getAniPreviewData, { file_path: filePath, filePath })) as AniPreviewData;

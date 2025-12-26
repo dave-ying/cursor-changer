@@ -123,7 +123,7 @@ export function ActiveCursor({
     // Create the load promise
     const loadPromise = (async () => {
       const result = await invokeWithFeedback(invoke, filePath ? Commands.getLibraryCursorPreview : Commands.getSystemCursorPreview, {
-        args: filePath ? { file_path: filePath } : { cursor_name: cursor.name },
+        args: filePath ? { file_path: filePath } : { cursor_name: cursor.name, cursorName: cursor.name } as any,
         logLabel: `[ActiveCursor] Failed to load preview for ${cursor.name}:`
       });
       if (result.status === 'success') {
@@ -219,7 +219,7 @@ export function ActiveCursor({
       logger.debug('[ActiveCursor] Loading system cursor preview for:', cursor.name);
       try {
         const previewResult = await invokeWithFeedback(invoke, Commands.getSystemCursorPreview, {
-          args: { cursor_name: cursor.name },
+          args: { cursor_name: cursor.name, cursorName: cursor.name } as any,
           logLabel: '[ActiveCursor] Failed to load system cursor preview after reset:'
         });
         const dataUrl = previewResult.status === 'success' ? (previewResult.value as string) : null;

@@ -157,10 +157,6 @@ export function CursorSettings() {
 
     // Reduce preview size to better match on-screen cursor
     const PREVIEW_SCALE = 0.8;
-    const sliderPercent = Math.min(
-        100,
-        Math.max(0, ((localCursorSize - sliderMin) / (sliderMax - sliderMin)) * 100)
-    );
 
     return (
         <>
@@ -198,15 +194,6 @@ export function CursorSettings() {
                                 </div>
 
                                 <div className="relative w-full sm:w-[360px] md:w-[400px] lg:w-[440px] min-w-[220px] sm:min-w-[300px] max-w-[480px] flex items-center self-center">
-                                    <span
-                                        className="absolute -top-8 -translate-x-1/2 text-lg font-semibold text-foreground pointer-events-none whitespace-nowrap"
-                                        style={{
-                                            left: `calc(${sliderPercent}% + 9px)` // half of 18px thumb to center label with knob
-                                        }}
-                                    >
-                                        <span>{localCursorSize}</span>
-                                        <span className="ml-0.5">px</span>
-                                    </span>
                                     <Slider
                                         id="cursor-size-slider"
                                         min={sliderMin}
@@ -215,6 +202,12 @@ export function CursorSettings() {
                                         step={8}
                                         onValueChange={handleValueChange}
                                         onValueCommit={handleValueCommit}
+                                        thumbChildren={
+                                            <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-lg font-semibold text-foreground pointer-events-none whitespace-nowrap">
+                                                <span>{localCursorSize}</span>
+                                                <span className="ml-0.5">px</span>
+                                            </span>
+                                        }
                                         className="w-full"
                                     />
                                 </div>

@@ -73,16 +73,9 @@ export const CURSOR_NAME_MAX_LENGTH = 55;
  */
 export function sanitizeCursorName(cursorName: string, replacement: string = '_'): string {
     if (cursorName === undefined || cursorName === null || cursorName === '') {
-        return '';
+        return 'cursor';
     }
 
     const sanitized = sanitizeFilename(cursorName, replacement);
-
-    if (cursorName.trim() === '' && sanitized === 'cursor') {
-        return '';
-    }
-
-    return sanitized.length > CURSOR_NAME_MAX_LENGTH
-        ? sanitized.slice(0, CURSOR_NAME_MAX_LENGTH)
-        : sanitized;
+    return sanitized;
 }

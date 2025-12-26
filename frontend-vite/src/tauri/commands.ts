@@ -124,9 +124,9 @@ export type CommandArgsMap = {
 
   [Commands.addUploadedCursorToLibrary]: { filename: string; data: number[] };
 
-  [Commands.getLibraryCursorPreview]: { file_path: string };
-  [Commands.getSystemCursorPreview]: { cursor_name: string };
-  [Commands.getAniPreviewData]: { file_path: string };
+  [Commands.getLibraryCursorPreview]: { file_path: string; filePath?: string };
+  [Commands.getSystemCursorPreview]: { cursor_name: string; cursorName?: string };
+  [Commands.getAniPreviewData]: { file_path: string; filePath?: string };
   [Commands.resetLibrary]: undefined;
 };
 

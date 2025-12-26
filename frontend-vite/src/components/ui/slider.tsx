@@ -8,12 +8,13 @@ type SliderProps = React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> &
   thumbStyle?: React.CSSProperties
   thumbCursor?: React.CSSProperties['cursor']
   thumbActiveCursor?: React.CSSProperties['cursor']
+  thumbChildren?: React.ReactNode
 }
 
 const Slider = React.forwardRef<
   React.ComponentRef<typeof SliderPrimitive.Root>,
   SliderProps
->(({ className, style, thumbClassName, thumbStyle, thumbCursor = 'pointer', thumbActiveCursor, ...props }, ref) => {
+>(({ className, style, thumbClassName, thumbStyle, thumbCursor = 'pointer', thumbActiveCursor, thumbChildren, ...props }, ref) => {
   const [isThumbActive, setIsThumbActive] = React.useState(false)
 
   React.useEffect(() => {
@@ -43,7 +44,7 @@ const Slider = React.forwardRef<
     </SliderPrimitive.Track>
     <SliderPrimitive.Thumb
       className={cn(
-        "block rounded-full shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:scale-110 border-2 slider-thumb",
+        "relative block rounded-full shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:scale-110 border-2 slider-thumb",
         thumbClassName
       )}
       onPointerDown={() => setIsThumbActive(true)}
@@ -56,7 +57,9 @@ const Slider = React.forwardRef<
         cursor: resolvedCursor,
         ...thumbStyle
       }}
-    />
+    >
+      {thumbChildren}
+    </SliderPrimitive.Thumb>
   </SliderPrimitive.Root>
   )
 })
