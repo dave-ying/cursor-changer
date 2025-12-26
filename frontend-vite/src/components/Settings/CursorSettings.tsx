@@ -203,7 +203,7 @@ export function CursorSettings() {
                                         onValueChange={handleValueChange}
                                         onValueCommit={handleValueCommit}
                                         thumbChildren={
-                                            <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-lg font-semibold text-foreground pointer-events-none whitespace-nowrap">
+                                            <span className="absolute -top-9 left-1/2 -translate-x-1/2 text-lg font-semibold text-foreground pointer-events-none whitespace-nowrap">
                                                 <span>{localCursorSize}</span>
                                                 <span className="ml-0.5">px</span>
                                             </span>
