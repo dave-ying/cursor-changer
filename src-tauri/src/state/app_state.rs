@@ -7,6 +7,7 @@ use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use super::models::{CustomizationMode, DefaultCursorStyle, ThemeMode};
 
 pub const DEFAULT_SHORTCUT: &str = "Ctrl+Shift+X";
+pub const DEFAULT_APP_SHORTCUT: &str = "Ctrl+Shift+Q";
 
 /// Information about a single cursor type
 #[derive(ts_rs::TS, Serialize, Deserialize, Debug, Clone)]
@@ -60,6 +61,9 @@ impl Default for ModeCustomizationState {
 pub struct PreferencesState {
     pub shortcut: Option<String>,
     pub shortcut_enabled: bool,
+    pub app_shortcut: Option<String>,
+    pub app_shortcut_enabled: bool,
+    pub app_enabled: bool,
     pub run_on_startup: bool,
     pub minimize_to_tray: bool,
     pub cursor_size: i32,
@@ -76,6 +80,9 @@ impl Default for PreferencesState {
         Self {
             shortcut: Some(DEFAULT_SHORTCUT.to_string()),
             shortcut_enabled: false,
+            app_shortcut: Some(DEFAULT_APP_SHORTCUT.to_string()),
+            app_shortcut_enabled: false,
+            app_enabled: true,
             run_on_startup: false,
             minimize_to_tray: true,
             cursor_size: 32,

@@ -53,6 +53,7 @@ export interface ClickPointState {
 export interface ModalState {
   showSettingsModal: boolean;
   showBrowseModal: boolean;
+  showActiveCursorsModal: boolean;
 }
 
 /**
@@ -129,6 +130,7 @@ export interface ClickPointActions {
 export interface ModalActions {
   setShowSettingsModal: (show: boolean) => void;
   setShowBrowseModal: (show: boolean) => void;
+  setShowActiveCursorsModal: (show: boolean) => void;
 }
 
 /**
@@ -200,6 +202,7 @@ export interface ActiveSectionProps {
   onResetCursors: () => void | Promise<void>;
   onCancelPendingLibraryCursor: () => void;
   loadAvailableCursors: () => void | Promise<void>;
+  onShowActiveCursorsModal: () => void;
 }
 
 /**

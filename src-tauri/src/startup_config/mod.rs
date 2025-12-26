@@ -38,6 +38,9 @@ pub fn load_and_apply_config(
         apply::apply_accent_color_config(&mut guard, &persisted_config);
         apply::apply_theme_mode_config(&mut guard, &persisted_config);
         apply::apply_shortcut_enabled_config(&mut guard, &persisted_config);
+        apply::apply_app_shortcut_config(&mut guard, &persisted_config);
+        apply::apply_app_shortcut_enabled_config(&mut guard, &persisted_config);
+        apply::apply_app_enabled_config(&mut guard, &persisted_config);
         apply::apply_customization_mode_config(&mut guard, &persisted_config);
         apply::apply_run_on_startup_config(&mut guard, &persisted_config);
         apply::apply_default_cursor_style_config(&mut guard, &persisted_config);

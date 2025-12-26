@@ -98,7 +98,10 @@ export const coordinateInputStyle: React.CSSProperties = {
   border: '1px solid rgba(120, 119, 198, 0.3)',
   color: 'hsl(var(--primary))',
   borderRadius: '4px',
-  cursor: 'text'
+  cursor: 'text',
+  textAlign: 'center',
+  // Hide stepper buttons for number inputs
+  MozAppearance: 'textfield' as any, // Firefox
 };
 
 export const nudgeButtonStyle: React.CSSProperties = {

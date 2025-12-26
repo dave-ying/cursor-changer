@@ -1,0 +1,39 @@
+/* Hide stepper buttons for number inputs across browsers */
+.coordinate-input {
+  text-align: center;
+  font-size: 11px;
+  padding: 0.25rem;
+  padding-right: 1.5rem; /* Reserve space for stepper buttons */
+  background-color: rgba(120, 119, 198, 0.1);
+  border: 1px solid rgba(120, 119, 198, 0.3);
+  color: hsl(var(--primary));
+  border-radius: 4px;
+  cursor: text;
+  /* Firefox */
+  -moz-appearance: textfield;
+  /* Chrome, Safari, Edge, Opera */
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+/* Show stepper buttons on hover */
+.coordinate-input:hover {
+  -moz-appearance: auto;
+  -webkit-appearance: auto;
+  appearance: auto;
+  padding-right: 0.25rem; /* Remove reserved space when showing steppers */
+}
+
+.coordinate-input::-webkit-outer-spin-button,
+.coordinate-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Show stepper buttons on hover for WebKit browsers */
+.coordinate-input:hover::-webkit-outer-spin-button,
+.coordinate-input:hover::-webkit-inner-spin-button {
+  -webkit-appearance: auto;
+  margin: 0;
+}

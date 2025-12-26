@@ -32,7 +32,8 @@ export function ActiveSection({
   onResetCursors,
   onCancelPendingLibraryCursor,
   loadAvailableCursors,
-  draggingLib
+  draggingLib,
+  onShowActiveCursorsModal
 }: ActiveSectionProps) {
   const safeVisibleCursors = Array.isArray(visibleCursors) ? visibleCursors : [];
 
@@ -195,6 +196,17 @@ export function ActiveSection({
                   Mac
                 </ToggleGroupItem>
               </ToggleGroup>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">Create Cursor Pack</p>
+              </div>
+              <Button
+                className="rounded-full"
+                onClick={onShowActiveCursorsModal}
+              >
+                Create
+              </Button>
             </div>
             <CollapsibleSection
               id="active-cursors-more-options"

@@ -49,7 +49,7 @@ export function MainLayout({
     clickPointPickerKey
   } = clickPointState;
 
-  const { showSettingsModal } = modalState;
+  const { showSettingsModal, showActiveCursorsModal } = modalState;
   const { draggingLib } = dragDropState;
   const { localLibrary } = libraryState;
 
@@ -59,7 +59,7 @@ export function MainLayout({
   const { onAddCursor, onSelectFromLibrary, onLibraryOrderChange, onApplyFromLibrary, onDeleteLibraryCursor, loadLibraryCursors } = actions.library;
   const { onBrowse, onModeChange, onDefaultCursorStyleChange, onResetCursors, loadAvailableCursors } = actions.cursor;
   const { setShowClickPointPicker, setClickPointFile, setClickPointFilePath, setClickPointItemId, onOpenClickPointEditor } = actions.clickPoint;
-  const { setShowSettingsModal } = actions.modal;
+  const { setShowSettingsModal, setShowActiveCursorsModal } = actions.modal;
   const { setDraggingLib, handleDragEnd } = actions.dragDrop;
 
   // Use safe async patterns for cleanup and event handling
@@ -117,6 +117,7 @@ export function MainLayout({
                   onCancelPendingLibraryCursor={cancelBrowseMode}
                   loadAvailableCursors={loadAvailableCursors}
                   draggingLib={draggingLib}
+                  onShowActiveCursorsModal={() => setShowActiveCursorsModal(true)}
                 />
               </ErrorBoundary>
 
@@ -156,6 +157,10 @@ export function MainLayout({
         setClickPointItemId={setClickPointItemId}
         showSettingsModal={showSettingsModal}
         setShowSettingsModal={setShowSettingsModal}
+        showActiveCursorsModal={showActiveCursorsModal}
+        setShowActiveCursorsModal={setShowActiveCursorsModal}
+        visibleCursors={visibleCursors}
+        customizationMode={customizationMode}
         loadLibraryCursors={loadLibraryCursors}
       />
     </ErrorBoundary>

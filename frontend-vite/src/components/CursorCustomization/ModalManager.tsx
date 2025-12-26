@@ -1,10 +1,12 @@
 import React from 'react';
 import { HotspotPicker } from '../HotspotPicker';
 import { SettingsModal } from './SettingsModal';
+import { ActiveCursorsModal } from './ActiveCursorsModal';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { useSafeTimer } from '../../hooks/useSafeAsync';
 import { MAX_CURSOR_SIZE } from '@/constants/cursorConstants';
 import { logger } from '../../utils/logger';
+import type { CursorInfo } from '@/types/generated/CursorInfo';
 
 /**
  * ModalManager component - handles all modal overlays
@@ -22,6 +24,10 @@ interface ModalManagerProps {
   setClickPointItemId: (value: string | null) => void;
   showSettingsModal: boolean;
   setShowSettingsModal: (value: boolean) => void;
+  showActiveCursorsModal: boolean;
+  setShowActiveCursorsModal: (value: boolean) => void;
+  visibleCursors: CursorInfo[];
+  customizationMode: 'simple' | 'advanced';
   loadLibraryCursors: () => void | Promise<void>;
 }
 
@@ -37,6 +43,10 @@ export function ModalManager({
   setClickPointItemId,
   showSettingsModal,
   setShowSettingsModal,
+  showActiveCursorsModal,
+  setShowActiveCursorsModal,
+  visibleCursors,
+  customizationMode,
   loadLibraryCursors
 }: ModalManagerProps) {
   // Create safe timer instance
@@ -98,6 +108,20 @@ export function ModalManager({
             logger.warn('[ModalManager] Error closing settings modal:', error);
           }
         }}
+      />
+
+      {/* Active Cursors Modal */}
+      <ActiveCursorsModal
+        isOpen={showActiveCursorsModal}
+        onClose={() => {
+          try {
+            setShowActiveCursorsModal(false);
+          } catch (error) {
+            logger.warn('[ModalManager] Error closing active cursors modal:', error);
+          }
+        }}
+        visibleCursors={visibleCursors}
+        customizationMode={customizationMode}
       />
     </>
   );

@@ -45,6 +45,60 @@ pub(super) fn apply_cursor_size_config(
     }
 }
 
+pub(super) fn apply_app_shortcut_config(
+    guard: &mut crate::state::app_state::AppStateWriteGuard<'_>,
+    config: &PersistedConfig,
+) {
+    if let Some(shortcut) = &config.app_shortcut {
+        cc_debug!(
+            "[CursorChanger] Applying persisted app_shortcut={} to state",
+            shortcut
+        );
+        guard.prefs.app_shortcut = Some(shortcut.clone());
+    } else {
+        cc_debug!(
+            "[CursorChanger] No persisted app_shortcut value; using state default={:?}",
+            guard.prefs.app_shortcut
+        );
+    }
+}
+
+pub(super) fn apply_app_shortcut_enabled_config(
+    guard: &mut crate::state::app_state::AppStateWriteGuard<'_>,
+    config: &PersistedConfig,
+) {
+    if let Some(enabled) = config.app_shortcut_enabled {
+        cc_debug!(
+            "[CursorChanger] Applying persisted app_shortcut_enabled={} to state",
+            enabled
+        );
+        guard.prefs.app_shortcut_enabled = enabled;
+    } else {
+        cc_debug!(
+            "[CursorChanger] No persisted app_shortcut_enabled value; using state default={}",
+            guard.prefs.app_shortcut_enabled
+        );
+    }
+}
+
+pub(super) fn apply_app_enabled_config(
+    guard: &mut crate::state::app_state::AppStateWriteGuard<'_>,
+    config: &PersistedConfig,
+) {
+    if let Some(enabled) = config.app_enabled {
+        cc_debug!(
+            "[CursorChanger] Applying persisted app_enabled={} to state",
+            enabled
+        );
+        guard.prefs.app_enabled = enabled;
+    } else {
+        cc_debug!(
+            "[CursorChanger] No persisted app_enabled value; using state default={}",
+            guard.prefs.app_enabled
+        );
+    }
+}
+
 pub(super) fn apply_accent_color_config(
     guard: &mut crate::state::app_state::AppStateWriteGuard<'_>,
     config: &PersistedConfig,
@@ -159,6 +213,9 @@ pub(super) fn snapshot_persisted_config_from_state(
     PersistedConfig {
         shortcut: state.prefs.shortcut.clone(),
         shortcut_enabled: Some(state.prefs.shortcut_enabled),
+        app_shortcut: state.prefs.app_shortcut.clone(),
+        app_shortcut_enabled: Some(state.prefs.app_shortcut_enabled),
+        app_enabled: Some(state.prefs.app_enabled),
         minimize_to_tray: Some(state.prefs.minimize_to_tray),
         run_on_startup: Some(state.prefs.run_on_startup),
         cursor_size: Some(state.prefs.cursor_size),

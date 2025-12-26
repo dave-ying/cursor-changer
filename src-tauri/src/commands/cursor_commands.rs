@@ -1,10 +1,11 @@
+use crate::commands::command_helpers;
 use crate::state::{AppState, CursorStatePayload};
-use crate::system;
+use crate::system::{self, apply_blank_system_cursors};
 use std::collections::HashMap;
 use tauri::{AppHandle, Emitter, State};
 
 fn hide_cursor_system() -> bool {
-    system::apply_blank_system_cursors()
+    apply_blank_system_cursors()
 }
 
 fn show_cursor_system(cursor_paths: &HashMap<String, String>, cursor_size: i32) -> bool {
@@ -202,6 +203,16 @@ pub fn show_cursor_if_hidden_with_shared_state(
     shared: &AppState,
 ) -> Result<CursorStatePayload, String> {
     apply_cursor_visibility_intent_with_shared_state(shared, CursorVisibilityIntent::ShowIfHidden)
+}
+
+pub fn toggle_app_enabled_internal(
+    app: &AppHandle,
+    state: &State<AppState>,
+) -> Result<CursorStatePayload, String> {
+    command_helpers::update_state_and_emit(app, state, true, |guard| {
+        guard.prefs.app_enabled = !guard.prefs.app_enabled;
+        Ok(())
+    })
 }
 
 #[cfg(test)]

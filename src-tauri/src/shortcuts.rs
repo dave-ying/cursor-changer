@@ -1,4 +1,4 @@
-use crate::commands::cursor_commands::toggle_cursor_with_shared_state;
+use crate::commands::cursor_commands::{toggle_app_enabled_internal, toggle_cursor_with_shared_state};
 use crate::events;
 use crate::state::config::{persist_config, PersistedConfig};
 use crate::state::{AppState, CursorStatePayload};
@@ -6,7 +6,29 @@ use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 
 /// Default application keyboard shortcut used for hide/show cursor
-pub use crate::state::app_state::DEFAULT_SHORTCUT;
+pub use crate::state::app_state::{DEFAULT_APP_SHORTCUT, DEFAULT_SHORTCUT};
+
+fn register_shortcut_callback<F>(
+    app: &AppHandle,
+    trimmed: &str,
+    callback: F,
+) -> Result<(), String>
+where
+    F: Fn() + Send + Sync + 'static,
+{
+    let app_for_hotkey = app.clone();
+    match app
+        .global_shortcut()
+        .on_shortcut(trimmed, move |_app, _shortcut, event| {
+            if event.state != tauri_plugin_global_shortcut::ShortcutState::Pressed {
+                return;
+            }
+            callback();
+        }) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(format!("Failed to register shortcut '{}': {}", trimmed, e)),
+    }
+}
 
 /// Register or update the global keyboard shortcut for cursor toggling.
 ///

@@ -8,6 +8,9 @@ use tauri::{AppHandle, Manager};
 pub struct PersistedConfig {
     pub shortcut: Option<String>,
     pub shortcut_enabled: Option<bool>,
+    pub app_shortcut: Option<String>,
+    pub app_shortcut_enabled: Option<bool>,
+    pub app_enabled: Option<bool>,
     pub minimize_to_tray: Option<bool>,
     pub run_on_startup: Option<bool>,
     pub cursor_size: Option<i32>,
@@ -55,6 +58,9 @@ impl From<&AppState> for PersistedConfig {
         PersistedConfig {
             shortcut: prefs.shortcut.clone(),
             shortcut_enabled: Some(prefs.shortcut_enabled),
+            app_shortcut: prefs.app_shortcut.clone(),
+            app_shortcut_enabled: Some(prefs.app_shortcut_enabled),
+            app_enabled: Some(prefs.app_enabled),
             minimize_to_tray: Some(prefs.minimize_to_tray),
             run_on_startup: Some(prefs.run_on_startup),
             cursor_size: Some(prefs.cursor_size),

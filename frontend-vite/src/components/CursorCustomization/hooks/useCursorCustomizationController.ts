@@ -60,6 +60,10 @@ export function useCursorCustomizationController() {
     key: persistentKeys.modals.showSettings,
     defaultValue: false
   });
+  const [showActiveCursorsModal, setShowActiveCursorsModal] = usePersistentBoolean({
+    key: persistentKeys.modals.showActiveCursors,
+    defaultValue: false
+  });
   const [showClickPointPicker, setShowClickPointPicker] = usePersistentBoolean({
     key: persistentKeys.modals.showClickPointPicker,
     defaultValue: false
@@ -305,7 +309,8 @@ export function useCursorCustomizationController() {
     },
     modalState: {
       showSettingsModal,
-      showBrowseModal: fileUpload.showBrowseModal
+      showBrowseModal: fileUpload.showBrowseModal,
+      showActiveCursorsModal
     },
     dragDropState: {
       draggingLib: library.draggingLib
@@ -378,7 +383,8 @@ export function useCursorCustomizationController() {
           } else {
             fileUpload.closeBrowseModal();
           }
-        }
+        },
+        setShowActiveCursorsModal
       },
       dragDrop: {
         setDraggingLib: library.setDraggingLibrary,

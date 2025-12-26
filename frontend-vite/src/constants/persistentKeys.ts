@@ -13,7 +13,8 @@ export const persistentKeys = {
   },
   modals: {
     showSettings: `${ROOT}:modals:showSettings`,
-    showClickPointPicker: `${ROOT}:modals:showClickPointPicker`
+    showClickPointPicker: `${ROOT}:modals:showClickPointPicker`,
+    showActiveCursors: `${ROOT}:modals:showActiveCursors`
   }
 } as const;
 

@@ -1,0 +1,122 @@
+:root {
+  --create-pack-bg: rgba(18, 18, 26, 0.96);
+  --create-pack-border: rgba(255, 255, 255, 0.1);
+  --create-pack-info-bg: rgba(255, 255, 255, 0.04);
+  --create-pack-info-border: rgba(255, 255, 255, 0.08);
+  --create-pack-info-text: rgba(255, 255, 255, 0.86);
+}
+
+.create-pack-modal {
+  position: relative;
+  width: min(760px, 92vw);
+  max-height: 86vh;
+  padding: 2rem 2.25rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow: hidden;
+  background: var(--create-pack-bg);
+  border: 1px solid var(--create-pack-border);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.55);
+}
+
+.close-button {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  height: 2rem;
+  width: 2rem;
+  z-index: 10;
+}
+
+.create-pack-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.create-pack-label {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.65));
+}
+
+.create-pack-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem 1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary, #fff);
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(124, 58, 237, 0.35);
+  min-width: 140px;
+}
+
+.create-pack-info-card {
+  border-radius: 0.9rem;
+  border: 1px solid var(--create-pack-info-border);
+  background: var(--create-pack-info-bg);
+  padding: 1rem 1.25rem;
+  color: var(--create-pack-info-text);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.create-pack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  padding: 0.25rem;
+  max-height: 45vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.create-pack-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.create-pack-grid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+}
+
+.create-pack-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  border: 1px dashed var(--create-pack-info-border);
+  border-radius: 0.75rem;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.create-pack-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.create-pack-close-button {
+  min-width: 160px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.create-pack-close-button:disabled {
+  opacity: 0.7;
+}
+
+@media (max-width: 640px) {
+  .create-pack-modal {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .create-pack-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+}
