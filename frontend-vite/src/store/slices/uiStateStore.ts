@@ -2,6 +2,7 @@
 import { StateCreator } from 'zustand';
 import { toastService } from '@/services/toastService';
 import type { ToastType } from '@/types/toastTypes';
+import { persistentKeys } from '@/constants/persistentKeys';
 
 export interface Message {
     text: string;
@@ -53,7 +54,22 @@ export const createUIStateSlice: StateCreator<
     ...initialUIStateSlice,
 
     setCustomizationMode: (mode) => set({ customizationMode: mode ?? 'simple' }),
-    setActiveSection: (section) => set({ activeSection: section ?? 'cursor-customization' }),
+    setActiveSection: (section) => {
+        const newSection = section ?? 'cursor-customization';
+        
+        // Auto-close customize panels when leaving cursor-customization section
+        if (newSection !== 'cursor-customization') {
+            // Clear active section customize panel state
+            localStorage.removeItem(persistentKeys.activeSection.showModeToggle);
+            localStorage.removeItem(persistentKeys.activeSection.showMoreOptions);
+            
+            // Clear library customize panel state
+            localStorage.removeItem(persistentKeys.library.showCustomizePanel);
+            localStorage.removeItem(persistentKeys.library.showMoreOptions);
+        }
+        
+        set({ activeSection: newSection });
+    },
 
     showMessage: (text, type = 'info') =>
         set({ message: { text, type } }),
