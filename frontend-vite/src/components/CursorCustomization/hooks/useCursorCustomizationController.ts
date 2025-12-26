@@ -373,9 +373,30 @@ export function useCursorCustomizationController() {
     setPackFilePreviews({});
   }, []);
 
+  const determinePackMode = useCallback((pack: LibraryCursor): 'simple' | 'advanced' | null => {
+    const metadataMode = pack.pack_metadata?.mode;
+    if (metadataMode === 'simple' || metadataMode === 'advanced') {
+      return metadataMode;
+    }
+
+    const itemCount = pack.pack_metadata?.items?.length ?? 0;
+    if (itemCount === 2) return 'simple';
+    if (itemCount >= 15) return 'advanced';
+
+    return null;
+  }, []);
+
   const handleApplyCursorPack = useCallback(async (pack?: LibraryCursor | null) => {
     const targetPack = pack ?? packDetails;
     if (!targetPack) return;
+
+    const packMode = determinePackMode(targetPack);
+    if (packMode && packMode !== customizationMode) {
+      logger.debug(
+        `[CursorCustomization] Adjusting customization mode to ${packMode} before applying pack ${targetPack.id}`
+      );
+      await handleModeChange(packMode);
+    }
 
     setIsApplyingPack(true);
     const result = await invokeWithFeedback(invoke, Commands.applyCursorPack, {
@@ -393,7 +414,17 @@ export function useCursorCustomizationController() {
       closePackDetailsModal();
       await Promise.all([loadAvailableCursors(), loadLibraryCursors()]);
     }
-  }, [closePackDetailsModal, invoke, loadAvailableCursors, loadLibraryCursors, packDetails, showMessageTyped]);
+  }, [
+    closePackDetailsModal,
+    customizationMode,
+    determinePackMode,
+    handleModeChange,
+    invoke,
+    loadAvailableCursors,
+    loadLibraryCursors,
+    packDetails,
+    showMessageTyped
+  ]);
 
   return {
     containerSelection: {
