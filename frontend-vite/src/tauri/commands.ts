@@ -7,6 +7,7 @@ import type { DefaultCursorStyle } from '../types/generated/DefaultCursorStyle';
 import type { ThemeMode } from '../types/generated/ThemeMode';
 import type { CustomizationMode } from '../types/generated/CustomizationMode';
 import type { LibraryCursor } from '../types/generated/LibraryCursor';
+import type { PackFilePreview } from '../types/generated/PackFilePreview';
 
 import { Commands as GeneratedCommands } from './commands.generated';
 import type { CommandName } from './commands.generated';
@@ -129,6 +130,9 @@ export type CommandArgsMap = {
   [Commands.getSystemCursorPreview]: { cursor_name: string; cursorName?: string };
   [Commands.getAniPreviewData]: { file_path: string; filePath?: string };
   [Commands.resetLibrary]: undefined;
+
+  [Commands.getCursorPackManifest]: { archive_path: string };
+  [Commands.getCursorPackFilePreviews]: { archive_path: string };
 };
 
 export type CommandResultMap = {
@@ -218,6 +222,8 @@ export type CommandResultMap = {
   [Commands.getSystemCursorPreview]: string;
   [Commands.getAniPreviewData]: AniPreviewData;
   [Commands.resetLibrary]: void;
+  [Commands.getCursorPackManifest]: CursorPackManifest;
+  [Commands.getCursorPackFilePreviews]: PackFilePreview[];
 };
 
 type AssertAllCommandArgsMapped = CommandName extends keyof CommandArgsMap

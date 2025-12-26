@@ -80,7 +80,7 @@ export function LibraryCustomizePanel({
           </ToggleGroup>
         </div>
         <div className="flex items-center gap-3">
-          <p className="text-sm font-semibold text-foreground whitespace-nowrap">Cursor Preview</p>
+          <p className="text-sm font-semibold text-foreground whitespace-nowrap">Display Size</p>
           <div className="flex items-center gap-2 ml-auto">
             <span className="text-xs text-muted-foreground whitespace-nowrap">Small</span>
             <Slider
@@ -109,11 +109,11 @@ export function LibraryCustomizePanel({
           openLabel="Hide options"
           maxHeight={300}
           className="space-y-2 mt-4"
-          contentClassName="pt-1 pb-0 space-y-2"
+          contentClassName="pb-0"
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-1">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 pb-1">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground">Library Cursors Folder</p>
+              <p className="text-sm font-semibold text-foreground">Library Folder</p>
             </div>
             <Button
               id="show-library-folder-btn"

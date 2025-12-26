@@ -81,7 +81,7 @@ export function ActiveSection({
       <div
         className={cn(
           'px-6 pt-5 pb-5 border-b border-border/50 active-cursors-header bg-muted/60',
-          selectingCursorForCustomization && 'cursor-customization-header-blurred'
+          selectingFromLibrary && selectedCursor && !pendingLibraryCursor && 'cursor-customization-header-blurred'
         )}
         style={{ flexShrink: 0, position: 'relative', zIndex: 1 }}
       >
@@ -106,13 +106,12 @@ export function ActiveSection({
           {pendingLibraryCursor ? (
             <div className="flex-shrink-0">
               <Button
-                variant="ghost"
-                size="icon"
-                className="h-11 w-11 rounded-full"
+                variant="default"
+                className="inline-flex items-center gap-1 rounded-full"
                 onClick={onCancelPendingLibraryCursor}
                 aria-label="Cancel cursor selection"
               >
-                <SlidersHorizontal className="h-6 w-6" />
+                Cancel
               </Button>
             </div>
           ) : (

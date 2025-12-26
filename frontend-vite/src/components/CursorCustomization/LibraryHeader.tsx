@@ -30,7 +30,7 @@ export function LibraryHeader({
       <div className={cn("px-6 pt-5 pb-5 border-b border-border/50 flex-shrink-0 bg-muted/60", className)} style={{
         flexShrink: 0
       }}>
-        <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="min-w-0">
             <h1 className="text-2xl font-bold text-foreground">
               Choose a cursor to replace

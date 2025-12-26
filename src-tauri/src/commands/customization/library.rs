@@ -356,6 +356,14 @@ pub fn get_library_cursor_preview(file_path: String) -> Result<String, String> {
     preview::get_library_cursor_preview(file_path)
 }
 
+/// Convert raw cursor bytes (e.g., extracted from a pack) into a data URL preview.
+pub fn get_cursor_preview_from_bytes(
+    bytes: &[u8],
+    file_name: Option<&str>,
+) -> Result<String, String> {
+    preview::get_library_cursor_preview_from_bytes(bytes, file_name)
+}
+
 /// Get ANI preview data as frames + timing for efficient frontend animation.
 /// This is more optimized than GIF conversion:
 /// - No server-side GIF encoding overhead

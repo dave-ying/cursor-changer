@@ -24,13 +24,22 @@ export function PackDetailsModal({
   const packItems = pack?.pack_metadata?.items ?? [];
   const modeLabel = pack?.pack_metadata?.mode === 'simple' ? 'Simple Mode' : 'Advanced Mode';
 
-  const uniqueGroups = useMemo(() => {
-    return packItems.reduce<Record<string, string[]>>((acc, item) => {
-      const key = item.cursor_name || 'custom';
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(item.display_name || item.cursor_name || item.file_name);
-      return acc;
-    }, {});
+  const cursorFiles = useMemo(() => {
+    return packItems
+      .map((item, index) => {
+        const fileName = item.file_name || `cursor-${index}`;
+        const extension = fileName.split('.').pop()?.toUpperCase() ?? '';
+        const isCursorFile = /\.(cur|ani)$/i.test(fileName);
+
+        return {
+          id: `${fileName}-${index}`,
+          fileName,
+          cursorLabel: item.display_name || item.cursor_name || 'Custom cursor',
+          extension,
+          isCursorFile
+        };
+      })
+      .filter((entry) => entry.isCursorFile);
   }, [packItems]);
 
   if (!isOpen || !pack) return null;
@@ -80,7 +89,7 @@ export function PackDetailsModal({
 
         <div className="px-6 pb-6">
           <p className="mb-2 text-sm font-semibold text-muted-foreground">
-            Included Cursors {packItems.length ? `(${packItems.length})` : ''}
+            Pack Files {cursorFiles.length ? `(${cursorFiles.length})` : ''}
           </p>
 
           {loading ? (
@@ -90,26 +99,25 @@ export function PackDetailsModal({
                 <p className="text-sm">Loading pack manifest…</p>
               </div>
             </div>
-          ) : packItems.length === 0 ? (
+          ) : cursorFiles.length === 0 ? (
             <div className="flex min-h-[180px] items-center justify-center rounded-xl border border-dashed border-border/60">
               <p className="max-w-sm text-center text-sm text-muted-foreground">
-                No manifest information detected. This pack may be missing metadata. You can still apply it to load cursors.
+                No .cur or .ani files were detected in this pack&apos;s manifest. You can still apply it to load cursors.
               </p>
             </div>
           ) : (
             <div className="grid max-h-72 grid-cols-1 gap-3 overflow-y-auto rounded-xl border border-border/50 bg-muted/30 p-4 sm:grid-cols-2">
-              {Object.entries(uniqueGroups).map(([cursorName, labels]) => (
-                <div key={cursorName} className="rounded-lg bg-background/70 p-3 shadow-sm">
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                    {cursorName === 'custom' ? 'Custom Cursor' : cursorName}
-                  </p>
-                  <ul className="mt-2 space-y-1">
-                    {labels.map((label, index) => (
-                      <li key={`${cursorName}-${index}`} className="text-sm text-card-foreground">
-                        {label}
-                      </li>
-                    ))}
-                  </ul>
+              {cursorFiles.map((file) => (
+                <div key={file.id} className="rounded-lg bg-background/70 p-3 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-card-foreground">{file.fileName}</p>
+                    {file.extension && (
+                      <span className="rounded-full border border-border/60 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        {file.extension}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">{file.cursorLabel}</p>
                 </div>
               ))}
             </div>

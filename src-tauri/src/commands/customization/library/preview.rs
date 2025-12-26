@@ -1,10 +1,9 @@
 use std::fs;
+use std::path::Path;
 
 use crate::utils::encoding::base64_encode;
 
 pub(super) fn get_library_cursor_preview(file_path: String) -> Result<String, String> {
-    use std::path::Path;
-
     let path = Path::new(&file_path);
 
     if !path.exists() {
@@ -14,10 +13,9 @@ pub(super) fn get_library_cursor_preview(file_path: String) -> Result<String, St
     let ext = path
         .extension()
         .and_then(|e| e.to_str())
-        .map(|s| s.to_lowercase())
-        .unwrap_or_default();
+        .map(|s| s.to_lowercase());
 
-    if ext == "svg" {
+    if matches!(ext.as_deref(), Some("svg")) {
         let png_bytes = crate::cursor_converter::render_svg_to_png_bytes(
             &file_path,
             crate::cursor_converter::MAX_CURSOR_SIZE,
@@ -27,14 +25,29 @@ pub(super) fn get_library_cursor_preview(file_path: String) -> Result<String, St
     }
 
     let bytes = fs::read(path).map_err(|e| format!("Failed to read file: {}", e))?;
+    preview_data_from_bytes(&bytes, ext.as_deref())
+}
+
+pub(super) fn get_library_cursor_preview_from_bytes(
+    bytes: &[u8],
+    file_name: Option<&str>,
+) -> Result<String, String> {
+    let ext = file_name
+        .and_then(|name| Path::new(name).extension().and_then(|e| e.to_str()))
+        .map(|s| s.to_lowercase());
+    preview_data_from_bytes(bytes, ext.as_deref())
+}
+
+fn preview_data_from_bytes(bytes: &[u8], ext_hint: Option<&str>) -> Result<String, String> {
+    let ext = ext_hint.unwrap_or_default();
 
     if ext == "ani" {
-        if let Some(gif_bytes) = super::ani::convert_ani_to_gif(&bytes) {
+        if let Some(gif_bytes) = super::ani::convert_ani_to_gif(bytes) {
             let base64 = base64_encode(&gif_bytes);
             return Ok(format!("data:image/gif;base64,{}", base64));
         }
 
-        if let Some(frame_data) = super::ani::extract_ani_first_frame(&bytes) {
+        if let Some(frame_data) = super::ani::extract_ani_first_frame(bytes) {
             if let Some(png) = extract_embedded_png(&frame_data) {
                 let base64 = base64_encode(&png);
                 return Ok(format!("data:image/png;base64,{}", base64));
@@ -45,26 +58,26 @@ pub(super) fn get_library_cursor_preview(file_path: String) -> Result<String, St
             }
         }
 
-        if let Some(png) = extract_embedded_png(&bytes) {
+        if let Some(png) = extract_embedded_png(bytes) {
             let base64 = base64_encode(&png);
             return Ok(format!("data:image/png;base64,{}", base64));
         }
     }
 
     if ext == "cur" || ext == "ico" {
-        if let Some(png) = extract_embedded_png(&bytes) {
+        if let Some(png) = extract_embedded_png(bytes) {
             let base64 = base64_encode(&png);
             return Ok(format!("data:image/png;base64,{}", base64));
         }
 
-        if let Some(png_bytes) = convert_cur_dib_to_png(&bytes) {
+        if let Some(png_bytes) = convert_cur_dib_to_png(bytes) {
             let base64 = base64_encode(&png_bytes);
             return Ok(format!("data:image/png;base64,{}", base64));
         }
     }
 
-    let base64 = base64_encode(&bytes);
-    let mime_type = match ext.as_str() {
+    let base64 = base64_encode(bytes);
+    let mime_type = match ext {
         "cur" | "ico" => "image/x-icon",
         "ani" => "application/x-navi-animation",
         "png" => "image/png",

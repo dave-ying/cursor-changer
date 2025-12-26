@@ -204,7 +204,7 @@ export function HotspotPicker(props: HotspotPickerProps) {
                 <div className="cursor-name-top-row">
                     <div className="cursor-name-block">
                         <label className="cursor-name-label" htmlFor="cursor-name-input">
-                            {props.filePath ? 'Editing Cursor:' : 'Creating Cursor:'}
+                            Cursor Name:
                         </label>
                         <div className={`cursor-filename ${isNameEditing ? 'is-editing' : ''}`} aria-label="cursor filename">
                             <input

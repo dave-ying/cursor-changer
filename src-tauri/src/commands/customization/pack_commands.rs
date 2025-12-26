@@ -3,13 +3,16 @@ use std::fs;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
+use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, State};
 use zip::ZipArchive;
 
 use crate::commands::command_helpers;
 use crate::state::{AppState, CustomizationMode};
 
-use super::library::{load_library, LibraryCursor, LibraryPackItem};
+use super::library::{
+    get_cursor_preview_from_bytes, load_library, LibraryCursor, LibraryPackItem,
+};
 use super::pack_library::{ensure_unique_filename, register_pack_in_library};
 use super::pack_manifest::{read_manifest_from_path, CursorPackManifest, PACK_MANIFEST_FILENAME};
 
@@ -127,6 +130,13 @@ pub fn import_cursor_pack(app: AppHandle, filename: String, data: Vec<u8>) -> Re
     )
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, ts_rs::TS)]
+#[ts(export, export_to = "../../frontend-vite/src/types/generated/")]
+pub struct PackFilePreview {
+    pub file_name: String,
+    pub data_url: String,
+}
+
 #[tauri::command]
 pub fn get_cursor_pack_manifest(archive_path: String) -> Result<CursorPackManifest, String> {
     let path = PathBuf::from(&archive_path);
@@ -137,6 +147,63 @@ pub fn get_cursor_pack_manifest(archive_path: String) -> Result<CursorPackManife
         return Err("Not a .zip cursor pack".to_string());
     }
     read_manifest_from_path(&path)
+}
+
+#[tauri::command]
+pub fn get_cursor_pack_file_previews(archive_path: String) -> Result<Vec<PackFilePreview>, String> {
+    let path = PathBuf::from(&archive_path);
+    if !path.exists() {
+        return Err("Cursor pack file not found".to_string());
+    }
+    if !is_zip(&path) {
+        return Err("Not a .zip cursor pack".to_string());
+    }
+
+    let file = fs::File::open(&path).map_err(|e| format!("Failed to open pack archive: {e}"))?;
+    let mut archive =
+        ZipArchive::new(file).map_err(|e| format!("Failed to read archive contents: {e}"))?;
+
+    let mut previews = Vec::new();
+
+    for i in 0..archive.len() {
+        let mut entry =
+            archive
+                .by_index(i)
+                .map_err(|e| format!("Failed to read archive entry: {e}"))?;
+        if entry.is_dir() {
+            continue;
+        }
+
+        let name_in_zip = entry.name().to_string();
+        let file_name = Path::new(&name_in_zip)
+            .file_name()
+            .and_then(|s| s.to_str())
+            .unwrap_or(&name_in_zip)
+            .to_string();
+
+        if file_name.eq_ignore_ascii_case(PACK_MANIFEST_FILENAME) {
+            continue;
+        }
+
+        let ext = Path::new(&file_name)
+            .extension()
+            .and_then(|s| s.to_str())
+            .map(|s| s.to_lowercase());
+
+        if !matches!(ext.as_deref(), Some("cur") | Some("ani") | Some("ico")) {
+            continue;
+        }
+
+        let mut bytes = Vec::new();
+        entry
+            .read_to_end(&mut bytes)
+            .map_err(|e| format!("Failed to read cursor file from archive: {e}"))?;
+
+        let data_url = get_cursor_preview_from_bytes(&bytes, Some(&file_name))?;
+        previews.push(PackFilePreview { file_name, data_url });
+    }
+
+    Ok(previews)
 }
 
 fn extract_entry_to_folder<R: Read>(mut entry: R, file_name: &str, folder: &Path) -> Result<PathBuf, String> {

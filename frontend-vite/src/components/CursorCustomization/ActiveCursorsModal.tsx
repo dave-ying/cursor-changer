@@ -36,12 +36,6 @@ export function ActiveCursorsModal({
     return visibleCursors;
   }, [visibleCursors, customizationMode]);
 
-  const modeLabel = customizationMode === 'simple' ? 'Simple Mode' : 'Advanced Mode';
-  const infoText =
-    customizationMode === 'simple'
-      ? 'Showing the 2 main cursors in Simple mode'
-      : `Showing all ${displayCursors.length} cursors in Advanced mode`;
-
   const handleCreateCursorPack = React.useCallback(async () => {
     if (isExporting) return;
     setIsExporting(true);
@@ -86,14 +80,7 @@ export function ActiveCursorsModal({
         </Button>
 
         <div className="create-pack-heading">
-          <p className="create-pack-label">Creating Cursor Pack:</p>
-          <div className="create-pack-pill" aria-live="polite">
-            {modeLabel}
-          </div>
-        </div>
-
-        <div className="create-pack-info-card">
-          <p>{infoText}</p>
+          <p className="create-pack-label">Creating Cursor Pack</p>
         </div>
 
         <div className="create-pack-grid" role="list">

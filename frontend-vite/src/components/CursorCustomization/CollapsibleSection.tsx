@@ -102,7 +102,7 @@ export function CollapsibleSection({
             `transform 260ms ${transitionTiming}`,
             `margin-top 260ms ${transitionTiming}`
           ].join(', '),
-          marginTop: open ? '0.75rem' : '0rem',
+          marginTop: open ? '0rem' : '0rem',
           willChange: 'height, opacity, transform, margin-top',
           contain: 'layout paint'
         }}

@@ -9,6 +9,7 @@ import { Commands } from '../../../tauri/commands';
 import { logger } from '../../../utils/logger';
 import type { CursorInfo } from '../../../types/generated/CursorInfo';
 import type { LibraryCursor } from '../../../types/generated/LibraryCursor';
+import type { PackFilePreview } from '@/types/generated/PackFilePreview';
 import { invokeWithFeedback } from '../../../store/operations/invokeWithFeedback';
 import type { Message } from '../../../store/slices/uiStateStore';
 import { useFileUpload } from '../FileUpload/useFileUpload';
@@ -73,6 +74,7 @@ export function useCursorCustomizationController() {
   const [showPackDetailsModal, setShowPackDetailsModal] = useState(false);
   const [packDetails, setPackDetails] = useState<LibraryCursor | null>(null);
   const [packDetailsLoading, setPackDetailsLoading] = useState(false);
+  const [packFilePreviews, setPackFilePreviews] = useState<Record<string, string>>({});
   const [isApplyingPack, setIsApplyingPack] = useState(false);
 
   const resetCustomizePanels = useCallback(() => {
@@ -295,12 +297,8 @@ export function useCursorCustomizationController() {
     }
 
     setPackDetails(cursor);
+    setPackFilePreviews({});
     setShowPackDetailsModal(true);
-
-    if (cursor.pack_metadata?.items?.length) {
-      setPackDetailsLoading(false);
-      return;
-    }
 
     const archivePath = resolvePackArchivePath(cursor);
     if (!archivePath) {
@@ -310,34 +308,60 @@ export function useCursorCustomizationController() {
     }
 
     setPackDetailsLoading(true);
-    const result = await invokeWithFeedback(invoke, Commands.getCursorPackManifest, {
-      args: { archive_path: archivePath },
-      logLabel: '[CursorCustomization] Failed to load cursor pack manifest:',
-      errorMessage: 'Failed to load cursor pack details',
-      errorType: 'error'
-    });
+    const needsManifest = !(cursor.pack_metadata?.items?.length);
 
-    if (result.status === 'success') {
-      const manifest = result.value as {
-        pack_name?: string;
-        mode: LibraryCursor['pack_metadata'] extends infer T ? T extends { mode: infer M } ? M : never : never;
-        items: NonNullable<LibraryCursor['pack_metadata']>['items'];
-      };
+    const loadManifest = needsManifest
+      ? (async () => {
+          const manifestResult = await invokeWithFeedback(invoke, Commands.getCursorPackManifest, {
+            args: { archive_path: archivePath },
+            logLabel: '[CursorCustomization] Failed to load cursor pack manifest:',
+            errorMessage: 'Failed to load cursor pack details',
+            errorType: 'error'
+          });
 
-      setPackDetails((prev) => {
-        const base = prev ?? cursor;
-        return {
-          ...base,
-          name: manifest.pack_name || base.name,
-          is_pack: true,
-          pack_metadata: {
-            archive_path: archivePath,
-            mode: manifest.mode as NonNullable<LibraryCursor['pack_metadata']>['mode'],
-            items: manifest.items
+          if (manifestResult.status === 'success') {
+            const manifest = manifestResult.value as {
+              pack_name?: string;
+              mode: LibraryCursor['pack_metadata'] extends infer T ? T extends { mode: infer M } ? M : never : never;
+              items: NonNullable<LibraryCursor['pack_metadata']>['items'];
+            };
+
+            setPackDetails((prev) => {
+              const base = prev ?? cursor;
+              return {
+                ...base,
+                name: manifest.pack_name || base.name,
+                is_pack: true,
+                pack_metadata: {
+                  archive_path: archivePath,
+                  mode: manifest.mode as NonNullable<LibraryCursor['pack_metadata']>['mode'],
+                  items: manifest.items
+                }
+              };
+            });
           }
-        };
+        })()
+      : Promise.resolve();
+
+    const loadPreviews = (async () => {
+      const previewResult = await invokeWithFeedback(invoke, Commands.getCursorPackFilePreviews, {
+        args: { archive_path: archivePath },
+        logLabel: '[CursorCustomization] Failed to load pack previews:',
+        errorMessage: 'Failed to load pack previews',
+        errorType: 'error'
       });
-    }
+
+      if (previewResult.status === 'success') {
+        const values = previewResult.value as PackFilePreview[];
+        const previewMap = values.reduce<Record<string, string>>((acc, preview) => {
+          acc[preview.file_name.toLowerCase()] = preview.data_url;
+          return acc;
+        }, {});
+        setPackFilePreviews(previewMap);
+      }
+    })();
+
+    await Promise.all([loadManifest, loadPreviews]);
     setPackDetailsLoading(false);
   }, [invoke, resolvePackArchivePath, showMessage]);
 
@@ -346,6 +370,7 @@ export function useCursorCustomizationController() {
     setPackDetails(null);
     setPackDetailsLoading(false);
     setIsApplyingPack(false);
+    setPackFilePreviews({});
   }, []);
 
   const handleApplyCursorPack = useCallback(async (pack?: LibraryCursor | null) => {
@@ -405,6 +430,7 @@ export function useCursorCustomizationController() {
       showPackDetailsModal,
       packDetails,
       packDetailsLoading,
+      packFilePreviews,
       isApplyingPack
     },
     dragDropState: {
