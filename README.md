@@ -4,10 +4,21 @@
 
 Instead of navigating through complex system settings, use Cursor Changer to personalize your desktop experience in seconds.
 
+## 📚 Table of Contents
+
+- [Features](#features)
+- [Changelog](#changelog)
+- [For Developers](#for-developers)
+    - [Tech Stack](#tech-stack)
+    - [Important Commands](#important-commands)
+        - [Run in Development Mode](#run-in-development-mode)
+        - [Build for Production](#build-for-production)
+
+<a id="features"></a>
 ## ✨ Features
 
--   **�️ Full Cursor Control**: Change your Windows cursor theme in seconds, with easy access to customize all 15 pointer styles the OS supports.
--   **�️ Instant Cursor Creation**: Automatically turn any image (PNG or JPG) into a functional cursor at the maximum 256×256 resolution with full alpha transparency—no external tools needed.
+-   **🖱️ Full Cursor Control**: Change your Windows cursor theme in seconds, with easy access to customize all 15 pointer styles the OS supports.
+-   **🖌️ Instant Cursor Creation**: Automatically turn any image (PNG or JPG) into a functional cursor at the maximum 256×256 resolution with full alpha transparency—no external tools needed.
 -   **📂 Personal Library**: Store and organize all your custom cursors in one convenient location.
 -   **🎯 Precise Accuracy**: Easily adjust your cursor’s click point (cursor hotspot) for perfect control.
 -   **🍏 Mac Cursor Presets**: Swap Windows defaults for a full macOS-style cursor set in one click.
@@ -17,16 +28,27 @@ Instead of navigating through complex system settings, use Cursor Changer to per
 -   **📏 Adjustable Size**: Make cursors as tiny or as large as you'd like (up to 256 px)
 -   **🛡️ One-Click Reset**: Revert to the default Windows cursor instantly at any time.
 
+<a id="changelog"></a>
 ## 📄 Changelog
 
 See the full [CHANGELOG.md](CHANGELOG.md) document for release details, fixes, and improvements.
 
 ---
 
+<div align="center">
+
+### 🧑‍💻 — Developer Zone Below —
+
+</div>
+
+---
+
+<a id="for-developers"></a>
 # For Developers
 
 This section is for developers interested in the technology behind Cursor Changer.
 
+<a id="tech-stack"></a>
 ## 🛠️ Tech Stack
 
 This project is built using a modern, high-performance stack:
@@ -37,16 +59,19 @@ This project is built using a modern, high-performance stack:
 *   **Styling**: [TailwindCSS](https://tailwindcss.com/) - Utility-first CSS framework.
 *   **State**: [Zustand](https://github.com/pmndrs/zustand) - Minimalist state management.
 
+<a id="important-commands"></a>
 ## 💻 Important Commands
 
 To work with this repository, you will need **Rust** and **Node.js** installed.
 
+<a id="run-in-development-mode"></a>
 ### 1. Run in Development Mode
 Starts the frontend dev server and the Tauri window with hot-reload enabled.
 ```bash
 cargo tauri dev
 ```
 
+<a id="build-for-production"></a>
 ### 2. Build for Production
 Compiles the application and enables optimizations. This creates the installer (`.exe` / `.msi`) in `src-tauri/target/release/bundle/`.
 ```bash
