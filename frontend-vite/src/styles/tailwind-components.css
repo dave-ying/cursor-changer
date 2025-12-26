@@ -219,6 +219,9 @@ section[aria-label="Library"] {
   margin: 0 auto;
   /* Ensure transforms never clip inside the grid cell even when previews scale up */
   overflow: visible;
+  /* When grid uses justifyItems: stretch, maintain centered content */
+  max-width: var(--library-item-size, 120px);
+  max-height: var(--library-item-size, 120px);
 }
 
 /* Override @dnd-kit library cursor styles to ensure consistent cursor behavior */

@@ -113,18 +113,27 @@ export function LibrarySection({
 
     const gap = `${gapValue}px`;
 
+    // For large scales, use flexible columns to better utilize available width
+    // For smaller scales, use fixed columns to maintain grid structure
+    const useFlexibleColumns = libraryPreviewScale >= 1.5; // Use flexible layout for large cursors
+    
     return {
-      '--cursor-grid-template': `repeat(auto-fill, minmax(${cardSize}px, ${cardSize}px))`,
+      '--cursor-grid-template': useFlexibleColumns 
+        ? `repeat(auto-fill, minmax(${cardSize}px, 1fr))`
+        : `repeat(auto-fill, minmax(${cardSize}px, ${cardSize}px))`,
       '--cursor-grid-min': `${cardSize}px`,
       '--library-item-size': `${cardSize}px`,
       '--library-item-padding': `${padding}px`,
       '--cursor-grid-gap': gap,
       gap,
-      gridTemplateColumns: `repeat(auto-fill, minmax(${cardSize}px, ${cardSize}px))`,
+      gridTemplateColumns: useFlexibleColumns
+        ? `repeat(auto-fill, minmax(${cardSize}px, 1fr))`
+        : `repeat(auto-fill, minmax(${cardSize}px, ${cardSize}px))`,
       gridAutoRows: `${cardSize}px`,
       gridAutoFlow: 'row',
-      justifyContent: 'center',
-      justifyItems: 'center'
+      justifyContent: useFlexibleColumns ? 'start' : 'center',
+      justifyItems: useFlexibleColumns ? 'stretch' : 'center',
+      width: '100%'
     } as React.CSSProperties;
   }, [libraryPreviewScale]);
 

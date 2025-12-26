@@ -233,6 +233,8 @@ export function LibraryCursor({
     cursor: selectionMode ? 'pointer' : 'pointer !important',
     width: `${cardSize}px`,
     height: `${cardSize}px`,
+    // When in flexible layout, allow self-centering within stretched grid cells
+    margin: 'auto',
     ...animationCSSProperties
   };
 
