@@ -2,11 +2,12 @@ import React, { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { LibraryCursor } from '@/types/generated/LibraryCursor';
-import { Loader2, Package } from 'lucide-react';
+import { Loader2, MousePointer2, Package } from 'lucide-react';
 
 interface PackDetailsModalProps {
   isOpen: boolean;
   pack: LibraryCursor | null;
+  previews?: Record<string, string>;
   loading?: boolean;
   isApplying?: boolean;
   onApply: (pack: LibraryCursor) => void;
@@ -16,6 +17,7 @@ interface PackDetailsModalProps {
 export function PackDetailsModal({
   isOpen,
   pack,
+  previews = {},
   loading = false,
   isApplying = false,
   onApply,
@@ -30,17 +32,19 @@ export function PackDetailsModal({
         const fileName = item.file_name || `cursor-${index}`;
         const extension = fileName.split('.').pop()?.toUpperCase() ?? '';
         const isCursorFile = /\.(cur|ani)$/i.test(fileName);
+        const previewKey = fileName.toLowerCase();
 
         return {
           id: `${fileName}-${index}`,
           fileName,
           cursorLabel: item.display_name || item.cursor_name || 'Custom cursor',
           extension,
-          isCursorFile
+          isCursorFile,
+          previewUrl: previews?.[previewKey]
         };
       })
       .filter((entry) => entry.isCursorFile);
-  }, [packItems]);
+  }, [packItems, previews]);
 
   if (!isOpen || !pack) return null;
 
@@ -109,15 +113,31 @@ export function PackDetailsModal({
             <div className="grid max-h-72 grid-cols-1 gap-3 overflow-y-auto rounded-xl border border-border/50 bg-muted/30 p-4 sm:grid-cols-2">
               {cursorFiles.map((file) => (
                 <div key={file.id} className="rounded-lg bg-background/70 p-3 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-card-foreground">{file.fileName}</p>
-                    {file.extension && (
-                      <span className="rounded-full border border-border/60 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                        {file.extension}
-                      </span>
-                    )}
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-md border border-border/60 bg-muted/40">
+                      {file.previewUrl ? (
+                        <img
+                          src={file.previewUrl}
+                          alt={`Preview of ${file.fileName}`}
+                          className="h-full w-full object-contain"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <MousePointer2 className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium text-card-foreground truncate">{file.fileName}</p>
+                        {file.extension && (
+                          <span className="shrink-0 rounded-full border border-border/60 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                            {file.extension}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">{file.cursorLabel}</p>
+                    </div>
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">{file.cursorLabel}</p>
                 </div>
               ))}
             </div>

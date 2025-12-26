@@ -13,7 +13,9 @@ use crate::state::{AppState, CustomizationMode};
 use super::library::{
     get_cursor_preview_from_bytes, load_library, LibraryCursor, LibraryPackItem,
 };
-use super::pack_library::{ensure_unique_filename, register_pack_in_library};
+use super::pack_library::{
+    ensure_pack_previews, ensure_unique_filename, register_pack_in_library,
+};
 use super::pack_manifest::{read_manifest_from_path, CursorPackManifest, PACK_MANIFEST_FILENAME};
 
 fn is_zip(path: &Path) -> bool {
@@ -21,6 +23,14 @@ fn is_zip(path: &Path) -> bool {
         .and_then(|s| s.to_str())
         .map(|ext| ext.eq_ignore_ascii_case("zip"))
         .unwrap_or(false)
+}
+
+#[tauri::command]
+pub fn get_cached_pack_previews(
+    app: AppHandle,
+    pack_id: String,
+) -> Result<HashMap<String, String>, String> {
+    ensure_pack_previews(&app, &pack_id)
 }
 
 fn pack_storage_root() -> Result<PathBuf, String> {
@@ -61,16 +71,22 @@ fn infer_items_from_archive(archive_path: &Path) -> Result<Vec<LibraryPackItem>,
         let cursor_name = cursor_changer::DEFAULT_CURSOR_BASE_NAMES
             .iter()
             .find(|(_cursor_name, base_name)| *base_name == stem)
-            .map(|(cursor_name, _)| (*cursor_name).to_string())
-            .unwrap_or_default();
+            .map(|(_, base_name)| (*base_name).to_string())
+            .unwrap_or_else(|| stem.to_string());
 
         let display_name = if cursor_name.is_empty() {
             stem.to_string()
         } else {
-            cursor_changer::CURSOR_TYPES
+            // Map kebab-case cursor_name back to Windows cursor name for display lookup
+            cursor_changer::DEFAULT_CURSOR_BASE_NAMES
                 .iter()
-                .find(|ct| ct.name == cursor_name)
-                .map(|ct| ct.display_name.to_string())
+                .find(|(_, base_name)| *base_name == cursor_name)
+                .and_then(|(windows_name, _)| {
+                    cursor_changer::CURSOR_TYPES
+                        .iter()
+                        .find(|ct| ct.name == *windows_name)
+                        .map(|ct| ct.display_name.to_string())
+                })
                 .unwrap_or_else(|| cursor_name.clone())
         };
 
@@ -258,8 +274,16 @@ pub fn apply_cursor_pack(app: AppHandle, state: State<'_, AppState>, id: String)
         };
 
         let extracted_path = extract_entry_to_folder(&mut zip_file, &item.file_name, &extract_folder)?;
+        
+        // Convert kebab-case cursor_name back to Windows cursor name for application
+        let windows_cursor_name = cursor_changer::DEFAULT_CURSOR_BASE_NAMES
+            .iter()
+            .find(|(_, base_name)| *base_name == item.cursor_name)
+            .map(|(windows_name, _)| windows_name.to_string())
+            .unwrap_or_else(|| item.cursor_name.clone());
+            
         cursor_paths.insert(
-            item.cursor_name.clone(),
+            windows_cursor_name,
             extracted_path.to_string_lossy().to_string(),
         );
     }

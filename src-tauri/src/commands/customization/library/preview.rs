@@ -49,6 +49,7 @@ fn preview_data_from_bytes(bytes: &[u8], ext_hint: Option<&str>) -> Result<Strin
 
         if let Some(frame_data) = super::ani::extract_ani_first_frame(bytes) {
             if let Some(png) = extract_embedded_png(&frame_data) {
+                let png = ensure_square_png_bytes(&png).unwrap_or(png);
                 let base64 = base64_encode(&png);
                 return Ok(format!("data:image/png;base64,{}", base64));
             }
@@ -59,6 +60,7 @@ fn preview_data_from_bytes(bytes: &[u8], ext_hint: Option<&str>) -> Result<Strin
         }
 
         if let Some(png) = extract_embedded_png(bytes) {
+            let png = ensure_square_png_bytes(&png).unwrap_or(png);
             let base64 = base64_encode(&png);
             return Ok(format!("data:image/png;base64,{}", base64));
         }
@@ -66,6 +68,7 @@ fn preview_data_from_bytes(bytes: &[u8], ext_hint: Option<&str>) -> Result<Strin
 
     if ext == "cur" || ext == "ico" {
         if let Some(png) = extract_embedded_png(bytes) {
+            let png = ensure_square_png_bytes(&png).unwrap_or(png);
             let base64 = base64_encode(&png);
             return Ok(format!("data:image/png;base64,{}", base64));
         }
@@ -220,7 +223,7 @@ pub(super) fn extract_embedded_png(data: &[u8]) -> Option<Vec<u8>> {
 }
 
 pub(super) fn convert_cur_dib_to_png(data: &[u8]) -> Option<Vec<u8>> {
-    use image::{codecs::png::PngEncoder, ImageBuffer, ImageEncoder, Rgba};
+    use image::{ImageBuffer, Rgba};
 
     if data.len() < 22 {
         return None;
@@ -283,13 +286,60 @@ pub(super) fn convert_cur_dib_to_png(data: &[u8]) -> Option<Vec<u8>> {
         }
     }
 
+    encode_rgba_to_png(ensure_square_image(img))
+}
+
+fn ensure_square_png_bytes(data: &[u8]) -> Option<Vec<u8>> {
+    use image::ImageFormat;
+
+    let dynamic =
+        image::load_from_memory_with_format(data, ImageFormat::Png).ok()?.to_rgba8();
+    if dynamic.width() == dynamic.height() {
+        return Some(data.to_vec());
+    }
+
+    encode_rgba_to_png(ensure_square_image(dynamic))
+}
+
+fn ensure_square_image(
+    img: image::ImageBuffer<image::Rgba<u8>, Vec<u8>>,
+) -> image::ImageBuffer<image::Rgba<u8>, Vec<u8>> {
+    use image::{ImageBuffer, Rgba};
+
+    let (width, height) = img.dimensions();
+    if width == height {
+        return img;
+    }
+
+    let size = width.max(height);
+    let mut square = ImageBuffer::from_pixel(size, size, Rgba([0, 0, 0, 0]));
+    let x_offset = (size - width) / 2;
+    let y_offset = (size - height) / 2;
+
+    for y in 0..height {
+        for x in 0..width {
+            if let Some(pixel) = img.get_pixel_checked(x, y) {
+                square.put_pixel(x + x_offset, y + y_offset, *pixel);
+            }
+        }
+    }
+
+    square
+}
+
+fn encode_rgba_to_png(
+    img: image::ImageBuffer<image::Rgba<u8>, Vec<u8>>,
+) -> Option<Vec<u8>> {
+    use image::{codecs::png::PngEncoder, ImageEncoder};
+
+    let (width, height) = img.dimensions();
     let mut png_data = Vec::new();
     let encoder = PngEncoder::new(&mut png_data);
     encoder
         .write_image(
             img.as_raw(),
-            bmp_width,
-            bmp_height,
+            width,
+            height,
             image::ColorType::Rgba8.into(),
         )
         .ok()?;

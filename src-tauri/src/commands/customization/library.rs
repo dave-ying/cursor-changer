@@ -44,6 +44,11 @@ pub struct LibraryPackMetadata {
     pub mode: CustomizationMode,
     pub archive_path: String,
     pub items: Vec<LibraryPackItem>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub previews: Option<std::collections::HashMap<String, String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[ts(skip)]
+    pub previews_version: Option<u32>,
 }
 
 #[derive(ts_rs::TS, Serialize, Deserialize, Clone, Debug)]

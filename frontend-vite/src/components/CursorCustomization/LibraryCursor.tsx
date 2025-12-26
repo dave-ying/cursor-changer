@@ -7,7 +7,8 @@ import { useSortable } from '@dnd-kit/sortable';
 import { ContextMenu } from './ContextMenu';
 import { useLibraryAnimation, useAnimationCSSProperties } from '../../hooks/useLibraryAnimation';
 import { AniPreview, useAniPreview } from './AniPreview';
-import { LoaderCircle, Package } from 'lucide-react';
+import { LoaderCircle, Folder } from 'lucide-react';
+// import { Package } from 'lucide-react';
 import { Commands } from '../../tauri/commands';
 import { logger } from '../../utils/logger';
 import type { LibraryCursor as LibraryCursorItem } from '../../types/generated/LibraryCursor';
@@ -99,6 +100,8 @@ export function LibraryCursor({
 
   const isPack = Boolean(item.is_pack || item.pack_metadata);
   const packItems = item.pack_metadata?.items ?? [];
+  const packPreviews = item.pack_metadata?.previews;
+
   const packMode = item.pack_metadata?.mode;
   const packModeLabel = packMode ? `${packMode === 'simple' ? 'Simple' : 'Advanced'} mode` : null;
   const packCountLabel = packItems.length > 0 ? `${packItems.length} cursor${packItems.length === 1 ? '' : 's'}` : 'Cursor pack';
@@ -214,6 +217,30 @@ export function LibraryCursor({
     return () => { mounted = false; };
   }, [invoke, item.file_path, isAniFile, aniLoading, isPack]);
 
+  const findPackPreview = React.useCallback(
+    (fileName?: string | null) => {
+      if (!packPreviews || !fileName) return null;
+
+      const direct = packPreviews[fileName];
+      if (direct) return direct;
+
+      const matchKey = Object.keys(packPreviews).find(
+        (key) => key.toLowerCase() === fileName.toLowerCase()
+      );
+
+      return matchKey ? packPreviews[matchKey] : null;
+    },
+    [packPreviews]
+  );
+
+  const normalSelectItem = packItems.find(
+    (packItem) => packItem.cursor_name?.toLowerCase() === 'normal-select'
+  );
+
+  const packPreviewUrl =
+    findPackPreview(normalSelectItem?.file_name) ||
+    (packPreviews ? Object.values(packPreviews)[0] : null);
+
   // Handle right-click context menu
   const handleContextMenu = (e: React.MouseEvent) => {
     // Don't show context menu when in selection mode
@@ -291,25 +318,17 @@ export function LibraryCursor({
           style={previewStyle}
         >
           {isPack ? (
-            <>
-              <div className="absolute -top-2 -left-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-700 shadow">
-                Pack
-              </div>
-              <div className="flex h-full w-full flex-col items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 p-2 text-center text-white">
-                <Package className="h-6 w-6 mb-1 text-white/90" strokeWidth={1.5} />
-                <p className="text-[11px] font-semibold uppercase tracking-wide">{item.name || 'Cursor Pack'}</p>
-                {packModeLabel && (
-                  <p className="text-[10px] uppercase tracking-wide text-white/80">{packModeLabel}</p>
-                )}
-                <p className="text-[10px] text-white/80">{packCountLabel}</p>
-                {packItemLabels.length > 0 && (
-                  <p className="mt-1 text-[9px] leading-tight text-white/70">
-                    {packItemLabels.join(' • ')}
-                    {packItems.length > packItemLabels.length ? ` +${packItems.length - packItemLabels.length}` : ''}
-                  </p>
-                )}
-              </div>
-            </>
+            <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-lg bg-muted text-muted-foreground">
+              <Folder className="h-4/5 w-4/5" strokeWidth={1.4} />
+              {packPreviewUrl ? (
+                <img
+                  src={packPreviewUrl}
+                  alt={`${item.name} normal-select preview`}
+                  className="absolute inset-2 m-auto h-2/5 w-2/5 object-contain drop-shadow-sm"
+                  loading="lazy"
+                />
+              ) : null}
+            </div>
           ) : loading ? (
             <LoaderCircle className="w-8 h-8 animate-spin text-muted-foreground" />
           ) : isAniFile && aniData ? (

@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use std::path::PathBuf;
 use tauri::AppHandle;
 
+use crate::commands::customization::pack_library;
 use crate::commands::customization::pack_manifest;
 
 pub(super) fn sync_library_with_folder_inner(app: &AppHandle) -> Result<(), String> {
@@ -83,11 +84,18 @@ fn apply_folder_diff(
 
         let (is_pack, pack_metadata, hotspot_x, hotspot_y) = if ext == "zip" {
             let meta = match pack_manifest::read_manifest_from_path(path) {
-                Ok(manifest) => Some(LibraryPackMetadata {
-                    mode: manifest.mode,
-                    archive_path: file_path.clone(),
-                    items: manifest.items,
-                }),
+                Ok(manifest) => {
+                    let previews = pack_library::generate_pack_previews_from_archive(path).ok();
+                    Some(LibraryPackMetadata {
+                        mode: manifest.mode,
+                        archive_path: file_path.clone(),
+                        items: manifest.items,
+                        previews_version: previews
+                            .as_ref()
+                            .map(|_| pack_library::CURRENT_PREVIEW_CACHE_VERSION),
+                        previews,
+                    })
+                }
                 Err(_) => None,
             };
 

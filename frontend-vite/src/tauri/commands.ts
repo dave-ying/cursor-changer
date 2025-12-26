@@ -133,6 +133,7 @@ export type CommandArgsMap = {
 
   [Commands.getCursorPackManifest]: { archive_path: string };
   [Commands.getCursorPackFilePreviews]: { archive_path: string };
+  [Commands.getCachedPackPreviews]: { pack_id: string };
 };
 
 export type CommandResultMap = {
@@ -224,6 +225,7 @@ export type CommandResultMap = {
   [Commands.resetLibrary]: void;
   [Commands.getCursorPackManifest]: CursorPackManifest;
   [Commands.getCursorPackFilePreviews]: PackFilePreview[];
+  [Commands.getCachedPackPreviews]: Record<string, string>;
 };
 
 type AssertAllCommandArgsMapped = CommandName extends keyof CommandArgsMap

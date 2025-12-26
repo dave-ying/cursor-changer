@@ -1,17 +1,15 @@
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::path::Path;
 
 use serde::{Deserialize, Serialize};
-use zip::write::FileOptions;
-use zip::{ZipArchive, ZipWriter};
+use zip::ZipArchive;
 
 use crate::state::CustomizationMode;
 
 use super::library::LibraryPackItem;
 
 pub const PACK_MANIFEST_FILENAME: &str = "cursor-pack.json";
-const MANIFEST_VERSION: u32 = 1;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct CursorPackManifest {
@@ -20,38 +18,6 @@ pub struct CursorPackManifest {
     pub mode: CustomizationMode,
     pub created_at: String,
     pub items: Vec<LibraryPackItem>,
-}
-
-impl CursorPackManifest {
-    pub fn new(
-        pack_name: String,
-        mode: CustomizationMode,
-        created_at: String,
-        items: Vec<LibraryPackItem>,
-    ) -> Self {
-        Self {
-            version: MANIFEST_VERSION,
-            pack_name,
-            mode,
-            created_at,
-            items,
-        }
-    }
-}
-
-pub fn write_manifest_entry<W: std::io::Seek + Write>(
-    writer: &mut ZipWriter<W>,
-    manifest: &CursorPackManifest,
-    options: FileOptions<'_, ()>,
-) -> Result<(), String> {
-    let manifest_json =
-        serde_json::to_vec_pretty(manifest).map_err(|e| format!("Failed to encode manifest: {e}"))?;
-    writer
-        .start_file(PACK_MANIFEST_FILENAME, options)
-        .map_err(|e| format!("Failed to start manifest entry: {e}"))?;
-    writer
-        .write_all(&manifest_json)
-        .map_err(|e| format!("Failed to write manifest: {e}"))
 }
 
 pub fn read_manifest_from_archive<R: Read + std::io::Seek>(

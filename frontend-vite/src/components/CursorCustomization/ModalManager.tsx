@@ -34,6 +34,7 @@ interface ModalManagerProps {
   showPackDetailsModal: boolean;
   packDetails: LibraryCursor | null;
   packDetailsLoading?: boolean;
+  packFilePreviews?: Record<string, string>;
   isApplyingPack?: boolean;
   closePackDetailsModal: () => void;
   applyCursorPack: (pack: LibraryCursor) => void | Promise<void>;
@@ -59,6 +60,7 @@ export function ModalManager({
   showPackDetailsModal,
   packDetails,
   packDetailsLoading,
+  packFilePreviews,
   isApplyingPack,
   closePackDetailsModal,
   applyCursorPack
@@ -142,6 +144,7 @@ export function ModalManager({
         isOpen={showPackDetailsModal}
         pack={packDetails}
         loading={packDetailsLoading}
+        previews={packFilePreviews}
         isApplying={isApplyingPack}
         onClose={closePackDetailsModal}
         onApply={(pack) => applyCursorPack(pack)}

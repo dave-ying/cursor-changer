@@ -55,6 +55,7 @@ export function MainLayout({
     showPackDetailsModal,
     packDetails,
     packDetailsLoading,
+    packFilePreviews,
     isApplyingPack
   } = modalState;
   const { draggingLib } = dragDropState;
@@ -179,6 +180,7 @@ export function MainLayout({
         showPackDetailsModal={showPackDetailsModal}
         packDetails={packDetails}
         packDetailsLoading={packDetailsLoading}
+        packFilePreviews={packFilePreviews}
         isApplyingPack={isApplyingPack}
         closePackDetailsModal={closePackDetailsModal}
         applyCursorPack={applyCursorPack}

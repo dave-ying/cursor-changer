@@ -54,6 +54,7 @@ export const Commands = {
   importCursorPack: 'import_cursor_pack',
   applyCursorPack: 'apply_cursor_pack',
   getCursorPackManifest: 'get_cursor_pack_manifest',
+  getCachedPackPreviews: 'get_cached_pack_previews',
   getCursorPackFilePreviews: 'get_cursor_pack_file_previews',
   getLibraryCursors: 'get_library_cursors',
   reorderLibraryCursors: 'reorder_library_cursors',

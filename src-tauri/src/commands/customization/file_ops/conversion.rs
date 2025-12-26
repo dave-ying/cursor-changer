@@ -1,6 +1,5 @@
 /// Image to cursor conversion operations
 use std::path::{Path, PathBuf};
-use std::fs;
 
 use crate::cursor_converter;
 use crate::paths;

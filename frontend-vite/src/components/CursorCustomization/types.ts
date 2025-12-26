@@ -57,6 +57,7 @@ export interface ModalState {
   showPackDetailsModal: boolean;
   packDetails: LibraryCursor | null;
   packDetailsLoading?: boolean;
+  packFilePreviews?: Record<string, string>;
   isApplyingPack?: boolean;
 }
 

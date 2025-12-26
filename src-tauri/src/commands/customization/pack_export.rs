@@ -8,7 +8,6 @@ use crate::state::{AppState, CustomizationMode};
 
 use super::library::LibraryPackItem;
 use super::pack_library::{ensure_unique_filename, register_pack_in_library};
-use super::pack_manifest::{write_manifest_entry, CursorPackManifest};
 
 const SIMPLE_MODE_EXPORT_NAMES: [&str; 2] = ["Normal", "Hand"];
 
@@ -122,8 +121,6 @@ pub async fn export_active_cursor_pack(
         })
         .collect();
 
-    let manifest = CursorPackManifest::new(pack_name.clone(), current_mode, created_at.clone(), items.clone());
-
     let cursor = IoCursor::new(Vec::new());
     let mut zip_writer = zip::ZipWriter::new(cursor);
     let options: FileOptions<'_, ()> =
@@ -140,8 +137,6 @@ pub async fn export_active_cursor_pack(
             .write_all(&data)
             .map_err(|e| format!("Failed to write {} to zip: {}", pack_filename, e))?;
     }
-
-    write_manifest_entry(&mut zip_writer, &manifest, options)?;
 
     let writer = zip_writer
         .finish()

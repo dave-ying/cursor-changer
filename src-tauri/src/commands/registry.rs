@@ -55,6 +55,8 @@ pub fn register(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wr
         crate::commands::customization::pack_commands::import_cursor_pack,
         crate::commands::customization::pack_commands::apply_cursor_pack,
         crate::commands::customization::pack_commands::get_cursor_pack_manifest,
+        crate::commands::customization::pack_commands::get_cached_pack_previews,
+        crate::commands::customization::pack_commands::get_cursor_pack_file_previews,
         crate::commands::customization::library::get_library_cursors,
         crate::commands::customization::library::reorder_library_cursors,
         crate::commands::customization::library::export_library_cursors,

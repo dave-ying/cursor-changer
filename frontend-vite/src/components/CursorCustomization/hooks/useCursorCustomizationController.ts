@@ -9,7 +9,6 @@ import { Commands } from '../../../tauri/commands';
 import { logger } from '../../../utils/logger';
 import type { CursorInfo } from '../../../types/generated/CursorInfo';
 import type { LibraryCursor } from '../../../types/generated/LibraryCursor';
-import type { PackFilePreview } from '@/types/generated/PackFilePreview';
 import { invokeWithFeedback } from '../../../store/operations/invokeWithFeedback';
 import type { Message } from '../../../store/slices/uiStateStore';
 import { useFileUpload } from '../FileUpload/useFileUpload';
@@ -343,7 +342,22 @@ export function useCursorCustomizationController() {
         })()
       : Promise.resolve();
 
-    const loadPreviews = (async () => {
+    const loadCachedPreviews = (async () => {
+      const cachedResult = await invokeWithFeedback(invoke, Commands.getCachedPackPreviews, {
+        args: { pack_id: cursor.id },
+        logLabel: '[CursorCustomization] Failed to load cached pack previews:',
+        errorMessage: 'Failed to load pack previews',
+        errorType: 'error'
+      });
+
+      if (cachedResult.status === 'success') {
+        const previewMap = cachedResult.value as Record<string, string>;
+        setPackFilePreviews(Object.fromEntries(
+          Object.entries(previewMap).map(([key, value]) => [key.toLowerCase(), value])
+        ));
+        return;
+      }
+
       const previewResult = await invokeWithFeedback(invoke, Commands.getCursorPackFilePreviews, {
         args: { archive_path: archivePath },
         logLabel: '[CursorCustomization] Failed to load pack previews:',
@@ -352,7 +366,7 @@ export function useCursorCustomizationController() {
       });
 
       if (previewResult.status === 'success') {
-        const values = previewResult.value as PackFilePreview[];
+        const values = previewResult.value as { file_name: string; data_url: string }[];
         const previewMap = values.reduce<Record<string, string>>((acc, preview) => {
           acc[preview.file_name.toLowerCase()] = preview.data_url;
           return acc;
@@ -361,7 +375,7 @@ export function useCursorCustomizationController() {
       }
     })();
 
-    await Promise.all([loadManifest, loadPreviews]);
+    await Promise.all([loadManifest, loadCachedPreviews]);
     setPackDetailsLoading(false);
   }, [invoke, resolvePackArchivePath, showMessage]);
 
