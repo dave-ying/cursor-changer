@@ -214,11 +214,16 @@ export function HotspotPicker(props: HotspotPickerProps) {
                                 size={cursorNameInputSize}
                                 style={{ width: `${cursorNameInputSize}ch` }}
                                 value={logic.editableCursorName}
+                                autoComplete="off"
+                                autoCorrect="off"
+                                autoCapitalize="none"
+                                spellCheck={false}
                                 onChange={(e) => {
                                     const rawInput = e.target.value.slice(0, CURSOR_NAME_MAX_LENGTH);
                                     setRawNameInput(rawInput);
                                     logic.setEditableCursorName(rawInput);
                                 }}
+
                                 onKeyDown={(e) => {
                                     if (e.key === 'Escape' && isNameEditing) {
                                         e.preventDefault();
