@@ -1,6 +1,8 @@
 import React from 'react';
 import { logger } from '../utils/logger';
 
+const PERSISTENCE_SUSPEND_UNTIL_KEY = 'cursor-changer:persistenceSuspendUntil';
+
 export interface UsePersistentStateOptions<T> {
   key: string;
   defaultValue: T;
@@ -50,6 +52,19 @@ export function usePersistentState<T>({
   React.useEffect(() => {
     const target = getStorage();
     if (!target) return;
+
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        const untilRaw = window.sessionStorage.getItem(PERSISTENCE_SUSPEND_UNTIL_KEY);
+        const until = untilRaw ? Number(untilRaw) : null;
+        if (typeof until === 'number' && Number.isFinite(until) && until > Date.now()) {
+          return;
+        }
+      }
+    } catch (error) {
+      logger.error('[usePersistentState] Failed to read persistence suspend flag:', error);
+    }
+
     try {
       target.setItem(key, serializeFn(value));
     } catch (error) {

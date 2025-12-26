@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { persistentKeys } from '@/constants/persistentKeys';
 
 import {
   AlertDialog,
@@ -30,13 +31,30 @@ export function GeneralSettings() {
 
   const handleResetAllSettings = async () => {
     try {
+      try {
+        sessionStorage.setItem('cursor-changer:persistenceSuspendUntil', String(Date.now() + 2000));
+      } catch (_error) {
+        // ignore
+      }
       await resetAllSettings();
       // Reset local recording state if any (though KeyboardShortcuts handles its own,
       // we clear global state here just in case)
       setRecording(false);
       setCapturedShortcut(null);
       setOriginalShortcut(null);
+      // Force cursor size to reset to default by updating the global state
+      const setCursorSize = useAppStore.getState().operations.setCursorSize;
+      await setCursorSize('32');
+      // Reset Library preview scale to default by setting it directly
+      // This ensures the usePersistentState hook updates properly
+      localStorage.setItem(persistentKeys.library.previewScale, '1.65');
+      // Reset other Library-related localStorage items
+      localStorage.removeItem(persistentKeys.library.showCustomizePanel);
+      localStorage.removeItem(persistentKeys.library.showMoreOptions);
       setResetDialogOpen(false);
+      // Reload page to ensure all components re-read their default values
+      // (delay ensures localStorage writes are fully committed before reload)
+      setTimeout(() => window.location.reload(), 50);
     } catch (_error) {
       // Error already shown in resetAllSettings
       setResetDialogOpen(false);
@@ -90,7 +108,8 @@ export function GeneralSettings() {
                   <p className="text-sm font-medium text-foreground mb-2">What will be reset:</p>
                   <ul className="list-disc list-inside space-y-1 text-sm text-red-600 dark:text-red-400">
                     <li>All active cursor assignments</li>
-                    <li>Cursor size settings</li>
+                    <li>Cursor size settings (including Library cursor size)</li>
+                    <li>Library preview scale and layout settings</li>
                     <li>Keyboard shortcut preferences</li>
                     <li>Theme and accent color</li>
                     <li>Startup and tray preferences</li>

@@ -67,6 +67,40 @@ export function useCursorCustomizationController() {
   const [clickPointItemId, setClickPointItemId] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<string>('cursors');
 
+  const resetCustomizePanels = useCallback(() => {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return;
+    }
+
+    try {
+      const storage = window.localStorage;
+      const keysToClose = [
+        persistentKeys.activeSection.showModeToggle,
+        persistentKeys.activeSection.showMoreOptions,
+        persistentKeys.library.showCustomizePanel,
+        persistentKeys.library.showMoreOptions
+      ];
+
+      keysToClose.forEach((key) => {
+        storage.setItem(key, 'false');
+      });
+    } catch (error) {
+      logger.warn('[CursorCustomization] Failed to reset customize panel state:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    resetCustomizePanels();
+  }, [resetCustomizePanels]);
+
+  useEffect(() => {
+    if (currentView === 'cursors') {
+      return;
+    }
+
+    resetCustomizePanels();
+  }, [currentView, resetCustomizePanels]);
+
   const applyLibraryCursor = useCallback(async (libCursor: LibraryCursor, targetCursor: CursorInfo | null) => {
     await library.applyLibraryCursor({ libCursor, targetCursor });
   }, [library]);

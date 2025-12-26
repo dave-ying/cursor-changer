@@ -49,18 +49,22 @@ export function LibrarySection({
   const [resetLibraryDialogOpen, setResetLibraryDialogOpen] = React.useState(false);
   const scaleMin = 0.6;
   const scaleMax = 3;
+  const previewScaleDefault = 1.65;
+
+  const serializePreviewScale = React.useCallback((value: number) => String(value), []);
+  const deserializePreviewScale = React.useCallback((stored: string) => {
+    const parsed = Number(stored);
+    if (!Number.isFinite(parsed)) return previewScaleDefault;
+    if (parsed < scaleMin) return scaleMin;
+    if (parsed > scaleMax) return scaleMax;
+    return parsed;
+  }, [previewScaleDefault, scaleMin, scaleMax]);
 
   const [libraryPreviewScale, setLibraryPreviewScale] = usePersistentState<number>({
     key: persistentKeys.library.previewScale,
-    defaultValue: 1,
-    serialize: (value: number) => String(value),
-    deserialize: (stored: string) => {
-      const parsed = Number(stored);
-      if (!Number.isFinite(parsed)) return 1;
-      if (parsed < scaleMin) return scaleMin;
-      if (parsed > scaleMax) return scaleMax;
-      return parsed;
-    }
+    defaultValue: previewScaleDefault,
+    serialize: serializePreviewScale,
+    deserialize: deserializePreviewScale
   });
 
   const handleToggleCustomizePanel = React.useCallback(() => {
@@ -82,6 +86,7 @@ export function LibrarySection({
       await invokeCommand(invoke, Commands.resetLibrary);
       await invokeCommand(invoke, Commands.syncLibraryWithFolder);
       resetSortPreference();
+      setLibraryPreviewScale(previewScaleDefault);
       await loadLibraryCursors();
       showMessage('Library reset to defaults', 'success');
     } catch (error) {
