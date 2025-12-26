@@ -26,6 +26,7 @@ export function LibrarySection({
   selectedLibraryCursor,
   onAddCursor,
   onSelectFromLibrary,
+  onOpenPackDetails,
   onOpenClickPointEditor,
   onLibraryOrderChange,
   onApplyFromLibrary,
@@ -206,13 +207,19 @@ export function LibrarySection({
                     animationIndex={index} // For staggered pulse animation
                     enablePulseAnimation={true} // Enable the new pulse feature
                     onSelect={async () => {
-                      // Always call onSelectFromLibrary.
-                      // If in "replace mode", it applies to active.
-                      // If in "normal mode", it sets pendingLibraryCursor.
+                      const isPack = Boolean(lib.is_pack || lib.pack_metadata);
+                      if (isPack) {
+                        onOpenPackDetails(lib);
+                        return;
+                      }
                       await onSelectFromLibrary(lib);
                     }}
                     onApply={async (item) => {
-                      // Apply should work exactly like clicking on the cursor
+                      const isPack = Boolean(item.is_pack || item.pack_metadata);
+                      if (isPack) {
+                        onOpenPackDetails(item);
+                        return;
+                      }
                       await onSelectFromLibrary(item);
                     }}
                     onEdit={(item) => {

@@ -2,11 +2,13 @@ import React from 'react';
 import { HotspotPicker } from '../HotspotPicker';
 import { SettingsModal } from './SettingsModal';
 import { ActiveCursorsModal } from './ActiveCursorsModal';
+import { PackDetailsModal } from './PackDetailsModal';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { useSafeTimer } from '../../hooks/useSafeAsync';
 import { MAX_CURSOR_SIZE } from '@/constants/cursorConstants';
 import { logger } from '../../utils/logger';
 import type { CursorInfo } from '@/types/generated/CursorInfo';
+import type { LibraryCursor } from '@/types/generated/LibraryCursor';
 
 /**
  * ModalManager component - handles all modal overlays
@@ -29,6 +31,12 @@ interface ModalManagerProps {
   visibleCursors: CursorInfo[];
   customizationMode: 'simple' | 'advanced';
   loadLibraryCursors: () => void | Promise<void>;
+  showPackDetailsModal: boolean;
+  packDetails: LibraryCursor | null;
+  packDetailsLoading?: boolean;
+  isApplyingPack?: boolean;
+  closePackDetailsModal: () => void;
+  applyCursorPack: (pack: LibraryCursor) => void | Promise<void>;
 }
 
 export function ModalManager({
@@ -47,7 +55,13 @@ export function ModalManager({
   setShowActiveCursorsModal,
   visibleCursors,
   customizationMode,
-  loadLibraryCursors
+  loadLibraryCursors,
+  showPackDetailsModal,
+  packDetails,
+  packDetailsLoading,
+  isApplyingPack,
+  closePackDetailsModal,
+  applyCursorPack
 }: ModalManagerProps) {
   // Create safe timer instance
   const { safeSetTimeout } = useSafeTimer();
@@ -122,6 +136,15 @@ export function ModalManager({
         }}
         visibleCursors={visibleCursors}
         customizationMode={customizationMode}
+      />
+
+      <PackDetailsModal
+        isOpen={showPackDetailsModal}
+        pack={packDetails}
+        loading={packDetailsLoading}
+        isApplying={isApplyingPack}
+        onClose={closePackDetailsModal}
+        onApply={(pack) => applyCursorPack(pack)}
       />
     </>
   );

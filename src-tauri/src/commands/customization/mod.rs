@@ -4,6 +4,10 @@ pub(super) mod cursor_apply_service;
 pub(super) mod cursor_preview_resolver;
 pub mod file_ops;
 pub mod query;
+pub mod pack_commands;
+pub mod pack_export;
+pub mod pack_library;
+pub mod pack_manifest;
 pub mod set_cursor_bulk;
 pub mod set_cursor_core;
 pub mod set_cursor_focus;
@@ -25,3 +29,4 @@ pub use set_cursor_size::*;
 
 pub use defaults::*;
 pub use library::*;
+pub use pack_export::*;

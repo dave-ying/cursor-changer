@@ -2,4 +2,4 @@
 import type { DefaultCursorStyle } from "./DefaultCursorStyle";
 import type { ThemeMode } from "./ThemeMode";
 
-export type CursorStatePayload = { hidden: boolean, shortcut: string | null, shortcut_enabled: boolean, minimize_to_tray: boolean, run_on_startup: boolean, cursor_size: number, last_loaded_cursor_path: string | null, cursor_paths: { [key in string]?: string }, accent_color: string, theme_mode: ThemeMode, default_cursor_style: DefaultCursorStyle, };
+export type CursorStatePayload = { hidden: boolean, shortcut: string | null, shortcut_enabled: boolean, app_shortcut: string | null, app_shortcut_enabled: boolean, app_enabled: boolean, minimize_to_tray: boolean, run_on_startup: boolean, cursor_size: number, last_loaded_cursor_path: string | null, cursor_paths: { [key in string]?: string }, accent_color: string, theme_mode: ThemeMode, default_cursor_style: DefaultCursorStyle, };

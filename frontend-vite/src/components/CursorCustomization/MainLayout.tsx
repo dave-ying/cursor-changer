@@ -49,17 +49,30 @@ export function MainLayout({
     clickPointPickerKey
   } = clickPointState;
 
-  const { showSettingsModal, showActiveCursorsModal } = modalState;
+  const {
+    showSettingsModal,
+    showActiveCursorsModal,
+    showPackDetailsModal,
+    packDetails,
+    packDetailsLoading,
+    isApplyingPack
+  } = modalState;
   const { draggingLib } = dragDropState;
   const { localLibrary } = libraryState;
 
   // Destructure grouped actions
   const { setCurrentView } = actions.view;
   const { cancelBrowseMode, cancelPreviewSelection } = actions.selection;
-  const { onAddCursor, onSelectFromLibrary, onLibraryOrderChange, onApplyFromLibrary, onDeleteLibraryCursor, loadLibraryCursors } = actions.library;
+  const { onAddCursor, onSelectFromLibrary, onLibraryOrderChange, onApplyFromLibrary, onDeleteLibraryCursor, loadLibraryCursors, onOpenPackDetails } = actions.library;
   const { onBrowse, onModeChange, onDefaultCursorStyleChange, onResetCursors, loadAvailableCursors } = actions.cursor;
   const { setShowClickPointPicker, setClickPointFile, setClickPointFilePath, setClickPointItemId, onOpenClickPointEditor } = actions.clickPoint;
-  const { setShowSettingsModal, setShowActiveCursorsModal } = actions.modal;
+  const {
+    setShowSettingsModal,
+    setShowActiveCursorsModal,
+    setShowPackDetailsModal,
+    closePackDetailsModal,
+    applyCursorPack
+  } = actions.modal;
   const { setDraggingLib, handleDragEnd } = actions.dragDrop;
 
   // Use safe async patterns for cleanup and event handling
@@ -133,6 +146,7 @@ export function MainLayout({
                   selectedLibraryCursor={selectedLibraryCursor}
                   onAddCursor={() => onAddCursor()}
                   onSelectFromLibrary={onSelectFromLibrary}
+                  onOpenPackDetails={onOpenPackDetails}
                   onOpenClickPointEditor={onOpenClickPointEditor}
                   onLibraryOrderChange={onLibraryOrderChange}
                   onApplyFromLibrary={onApplyFromLibrary}
@@ -162,6 +176,12 @@ export function MainLayout({
         visibleCursors={visibleCursors}
         customizationMode={customizationMode}
         loadLibraryCursors={loadLibraryCursors}
+        showPackDetailsModal={showPackDetailsModal}
+        packDetails={packDetails}
+        packDetailsLoading={packDetailsLoading}
+        isApplyingPack={isApplyingPack}
+        closePackDetailsModal={closePackDetailsModal}
+        applyCursorPack={applyCursorPack}
       />
     </ErrorBoundary>
   );

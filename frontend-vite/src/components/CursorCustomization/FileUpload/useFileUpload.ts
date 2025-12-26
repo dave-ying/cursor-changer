@@ -64,6 +64,28 @@ export function useFileUpload() {
           setShowBrowseModal(false);
         }
         return;
+      } else if (ext === 'zip') {
+        try {
+          const result = await invokeCommand(invoke, Commands.importCursorPack, {
+            filename: file.name,
+            data
+          });
+
+          const displayName = (result && result.name) ? result.name : file.name;
+          showMessage(`Imported cursor pack ${displayName}`, 'success');
+
+          try {
+            await loadLibraryCursors();
+          } catch (refreshErr) {
+            logger.warn('Failed to refresh cursor library after pack import:', refreshErr);
+          }
+        } catch (err) {
+          logger.error('Failed to import cursor pack:', err);
+          showMessage('Failed to import cursor pack: ' + (err || 'unknown error'), 'error');
+        } finally {
+          setShowBrowseModal(false);
+        }
+        return;
       } else {
         // Handle image files - open click point picker
         const supported = ['svg', 'png', 'ico', 'bmp', 'jpg', 'jpeg'];

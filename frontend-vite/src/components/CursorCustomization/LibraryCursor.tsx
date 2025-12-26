@@ -3,15 +3,18 @@ import { useApp } from '../../context/AppContext';
 import { useMessage } from '../../hooks/useMessage';
 import { useAppStore } from '../../store/useAppStore';
 import { useSortable } from '@dnd-kit/sortable';
+
 import { ContextMenu } from './ContextMenu';
 import { useLibraryAnimation, useAnimationCSSProperties } from '../../hooks/useLibraryAnimation';
 import { AniPreview, useAniPreview } from './AniPreview';
-import { LoaderCircle } from 'lucide-react';
+import { LoaderCircle, Package } from 'lucide-react';
 import { Commands } from '../../tauri/commands';
 import { logger } from '../../utils/logger';
 import type { LibraryCursor as LibraryCursorItem } from '../../types/generated/LibraryCursor';
 import type { DraggedLibraryCursor } from './types';
 import { invokeWithFeedback } from '../../store/operations/invokeWithFeedback';
+import type { CustomizationMode } from '@/types/generated/CustomizationMode';
+
 import type { Message } from '../../store/slices/uiStateStore';
 
 import { 
@@ -94,8 +97,18 @@ export function LibraryCursor({
   const [contextMenuOpen, setContextMenuOpen] = useState<boolean>(false);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
+  const isPack = Boolean(item.is_pack || item.pack_metadata);
+  const packItems = item.pack_metadata?.items ?? [];
+  const packMode = item.pack_metadata?.mode;
+  const packModeLabel = packMode ? `${packMode === 'simple' ? 'Simple' : 'Advanced'} mode` : null;
+  const packCountLabel = packItems.length > 0 ? `${packItems.length} cursor${packItems.length === 1 ? '' : 's'}` : 'Cursor pack';
+  const packItemLabels = packItems
+    .map((packItem) => packItem.display_name || packItem.cursor_name || packItem.file_name)
+    .filter(Boolean)
+    .slice(0, 3);
+
   // Check if this is an ANI file for optimized animated preview
-  const isAniFile = item.file_path?.toLowerCase().endsWith('.ani');
+  const isAniFile = !isPack && item.file_path?.toLowerCase().endsWith('.ani');
   const { data: aniData, loading: aniLoading } = useAniPreview(
     invoke,
     isAniFile ? item.file_path : null
@@ -110,6 +123,12 @@ export function LibraryCursor({
 
   // For non-ANI files, load static preview
   useEffect(() => {
+    if (isPack) {
+      setPreview(null);
+      setLoading(false);
+      return;
+    }
+
     // Skip if ANI file (handled by useAniPreview hook)
     if (isAniFile) {
       setLoading(aniLoading);
@@ -122,7 +141,7 @@ export function LibraryCursor({
       setLoading(false);
       return;
     }
-    
+
     // Check cache first for instant preview
     const cachedUrl = getCachedPreview(filePath);
     if (cachedUrl) {
@@ -193,7 +212,7 @@ export function LibraryCursor({
     setPendingRequest(filePath, loadPromise);
 
     return () => { mounted = false; };
-  }, [invoke, item.file_path, isAniFile, aniLoading]);
+  }, [invoke, item.file_path, isAniFile, aniLoading, isPack]);
 
   // Handle right-click context menu
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -267,8 +286,31 @@ export function LibraryCursor({
         onContextMenu={handleContextMenu}
         style={style}
       >
-        <div className="cursor-preview has-custom-cursor" style={previewStyle}>
-          {loading ? (
+        <div
+          className={`cursor-preview has-custom-cursor ${isPack ? 'relative overflow-hidden rounded-xl' : ''}`}
+          style={previewStyle}
+        >
+          {isPack ? (
+            <>
+              <div className="absolute -top-2 -left-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-700 shadow">
+                Pack
+              </div>
+              <div className="flex h-full w-full flex-col items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 p-2 text-center text-white">
+                <Package className="h-6 w-6 mb-1 text-white/90" strokeWidth={1.5} />
+                <p className="text-[11px] font-semibold uppercase tracking-wide">{item.name || 'Cursor Pack'}</p>
+                {packModeLabel && (
+                  <p className="text-[10px] uppercase tracking-wide text-white/80">{packModeLabel}</p>
+                )}
+                <p className="text-[10px] text-white/80">{packCountLabel}</p>
+                {packItemLabels.length > 0 && (
+                  <p className="mt-1 text-[9px] leading-tight text-white/70">
+                    {packItemLabels.join(' • ')}
+                    {packItems.length > packItemLabels.length ? ` +${packItems.length - packItemLabels.length}` : ''}
+                  </p>
+                )}
+              </div>
+            </>
+          ) : loading ? (
             <LoaderCircle className="w-8 h-8 animate-spin text-muted-foreground" />
           ) : isAniFile && aniData ? (
             <AniPreview
@@ -284,6 +326,7 @@ export function LibraryCursor({
           )}
         </div>
       </div>
+
       <ContextMenu
         isOpen={contextMenuOpen}
         x={contextMenuPosition.x}
@@ -294,8 +337,12 @@ export function LibraryCursor({
           logger.debug('[LibraryCursor] onApply prop exists?', Boolean(onApply));
           onApply?.(item);
         }}
-        onClickPointEdit={() => { onClickPointEdit?.(item.file_path, item.id); }}
-        onEdit={() => { onEdit?.(item); }}
+        onClickPointEdit={() => {
+          onClickPointEdit?.(item.file_path, item.id);
+        }}
+        onEdit={isPack ? undefined : () => {
+          onEdit?.(item);
+        }}
         onDelete={async () => {
           logger.debug('[LibraryCursor] onDelete called for item:', item);
           // If a parent provided an onDelete prop, call it and allow it to handle deletion

@@ -44,7 +44,7 @@ export function useCursorCustomizationController() {
 
   const selectionMachine = useSelectionStateMachine();
   const selection = selectionMachine.state;
-  const preview = usePreview(selection.selectedCursor);
+  const preview = usePreview();
   const fileUpload = useFileUpload();
   const library = useLibrary();
 
@@ -70,6 +70,10 @@ export function useCursorCustomizationController() {
   });
   const [clickPointItemId, setClickPointItemId] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<string>('cursors');
+  const [showPackDetailsModal, setShowPackDetailsModal] = useState(false);
+  const [packDetails, setPackDetails] = useState<LibraryCursor | null>(null);
+  const [packDetailsLoading, setPackDetailsLoading] = useState(false);
+  const [isApplyingPack, setIsApplyingPack] = useState(false);
 
   const resetCustomizePanels = useCallback(() => {
     if (typeof window === 'undefined' || !window.localStorage) {
@@ -279,6 +283,93 @@ export function useCursorCustomizationController() {
 
   const selectingCursorForCustomization = selection.selectingCursorForCustomization;
 
+  const resolvePackArchivePath = useCallback((cursor: LibraryCursor) => {
+    return cursor.pack_metadata?.archive_path ?? cursor.file_path ?? '';
+  }, []);
+
+  const handleOpenPackDetails = useCallback(async (cursor: LibraryCursor) => {
+    if (!cursor) return;
+    if (!(cursor.is_pack || cursor.pack_metadata)) {
+      showMessage('This library item is not a cursor pack.', 'info');
+      return;
+    }
+
+    setPackDetails(cursor);
+    setShowPackDetailsModal(true);
+
+    if (cursor.pack_metadata?.items?.length) {
+      setPackDetailsLoading(false);
+      return;
+    }
+
+    const archivePath = resolvePackArchivePath(cursor);
+    if (!archivePath) {
+      showMessage('Cursor pack file is missing or invalid.', 'error');
+      setPackDetailsLoading(false);
+      return;
+    }
+
+    setPackDetailsLoading(true);
+    const result = await invokeWithFeedback(invoke, Commands.getCursorPackManifest, {
+      args: { archive_path: archivePath },
+      logLabel: '[CursorCustomization] Failed to load cursor pack manifest:',
+      errorMessage: 'Failed to load cursor pack details',
+      errorType: 'error'
+    });
+
+    if (result.status === 'success') {
+      const manifest = result.value as {
+        pack_name?: string;
+        mode: LibraryCursor['pack_metadata'] extends infer T ? T extends { mode: infer M } ? M : never : never;
+        items: NonNullable<LibraryCursor['pack_metadata']>['items'];
+      };
+
+      setPackDetails((prev) => {
+        const base = prev ?? cursor;
+        return {
+          ...base,
+          name: manifest.pack_name || base.name,
+          is_pack: true,
+          pack_metadata: {
+            archive_path: archivePath,
+            mode: manifest.mode as NonNullable<LibraryCursor['pack_metadata']>['mode'],
+            items: manifest.items
+          }
+        };
+      });
+    }
+    setPackDetailsLoading(false);
+  }, [invoke, resolvePackArchivePath, showMessage]);
+
+  const closePackDetailsModal = useCallback(() => {
+    setShowPackDetailsModal(false);
+    setPackDetails(null);
+    setPackDetailsLoading(false);
+    setIsApplyingPack(false);
+  }, []);
+
+  const handleApplyCursorPack = useCallback(async (pack?: LibraryCursor | null) => {
+    const targetPack = pack ?? packDetails;
+    if (!targetPack) return;
+
+    setIsApplyingPack(true);
+    const result = await invokeWithFeedback(invoke, Commands.applyCursorPack, {
+      args: { id: targetPack.id },
+      showMessage: showMessageTyped,
+      successMessage: `Applied ${targetPack.name || 'cursor pack'}`,
+      successType: 'success',
+      logLabel: '[CursorCustomization] Failed to apply cursor pack:',
+      errorMessage: 'Failed to apply cursor pack',
+      errorType: 'error'
+    });
+    setIsApplyingPack(false);
+
+    if (result.status === 'success') {
+      closePackDetailsModal();
+      await Promise.all([loadAvailableCursors(), loadLibraryCursors()]);
+    }
+  }, [closePackDetailsModal, invoke, loadAvailableCursors, loadLibraryCursors, packDetails, showMessageTyped]);
+
   return {
     containerSelection: {
       mode: selection.mode,
@@ -310,7 +401,11 @@ export function useCursorCustomizationController() {
     modalState: {
       showSettingsModal,
       showBrowseModal: fileUpload.showBrowseModal,
-      showActiveCursorsModal
+      showActiveCursorsModal,
+      showPackDetailsModal,
+      packDetails,
+      packDetailsLoading,
+      isApplyingPack
     },
     dragDropState: {
       draggingLib: library.draggingLib
@@ -351,6 +446,7 @@ export function useCursorCustomizationController() {
       library: {
         onAddCursor: handleAddCursor,
         onSelectFromLibrary: handleSelectFromLibrary,
+        onOpenPackDetails: handleOpenPackDetails,
         onApplyLibraryToSelected: applyLibraryToSelected,
         onApplyLibraryToSlot: applyLibraryCursor,
         onLibraryOrderChange: library.handleLibraryOrderChange,
@@ -384,7 +480,9 @@ export function useCursorCustomizationController() {
             fileUpload.closeBrowseModal();
           }
         },
-        setShowActiveCursorsModal
+        setShowActiveCursorsModal,
+        closePackDetailsModal,
+        applyCursorPack: handleApplyCursorPack
       },
       dragDrop: {
         setDraggingLib: library.setDraggingLibrary,

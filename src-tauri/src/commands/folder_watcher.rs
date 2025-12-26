@@ -30,7 +30,7 @@ fn is_cursor_file(path: &std::path::Path) -> bool {
         .and_then(|ext| ext.to_str())
         .map(|ext| {
             let ext_lower = ext.to_lowercase();
-            ext_lower == "cur" || ext_lower == "ani"
+            ext_lower == "cur" || ext_lower == "ani" || ext_lower == "zip"
         })
         .unwrap_or(false)
 }

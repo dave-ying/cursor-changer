@@ -176,17 +176,15 @@ export function BrowseModal({
         </div>
 
         {/* Subtitle in separate row */}
-        <div className="px-6 pb-6">
-          <p className="text-sm text-muted-foreground">
-            Upload a cursor or image file (.cur, .ani, .svg, .png, .ico, .bmp, .jpg, .jpeg)
-          </p>
+        <div className="px-6 pb-6 text-sm text-muted-foreground">
+          <p>Upload a cursor, pack, or image file below.</p>
         </div>
 
         {/* Body */}
-        <CardContent className="pt-2 pb-8 flex-1 flex items-center justify-center">
+        <CardContent className="pt-2 pb-8 flex-1 flex flex-col">
           {/* Drop area with compact, focused design and accessibility */}
           <label
-            className={`group flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-6 text-center transition-all min-h-[140px] w-full max-w-lg cursor-pointer ${
+            className={`group flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-6 text-center transition-all min-h-[140px] w-full max-w-lg cursor-pointer mx-auto ${
               isDragging
                 ? 'border-primary bg-primary/10 scale-[1.02]'
                 : 'border-border bg-muted/30 hover:border-primary hover:bg-accent/50'
@@ -204,7 +202,7 @@ export function BrowseModal({
             <input
               type="file"
               className="hidden"
-              accept=".cur,.ani,.svg,.png,.ico,.bmp,.jpg,.jpeg"
+              accept=".cur,.ani,.zip,.svg,.png,.ico,.bmp,.jpg,.jpeg"
               onChange={handleFileChange}
               aria-label="Hidden file input for cursor upload"
               ref={inputRef}
@@ -235,6 +233,20 @@ export function BrowseModal({
               </p>
             </div>
           </label>
+          <div className="px-6 py-4 text-left">
+            <p className="font-medium text-foreground mb-2 text-sm text-left">Supported file types:</p>
+            <ul className="space-y-1 text-[14px] text-left">
+              <li>
+                <span className="text-foreground font-medium">Image files:</span> PNG, JPG/JPEG, SVG, ICO, BMP
+              </li>
+              <li>
+                <span className="text-foreground font-medium">Cursor files:</span> CUR, ANI
+              </li>
+              <li>
+                <span className="text-foreground font-medium">Cursor packs:</span> ZIP
+              </li>
+            </ul>
+          </div>
         </CardContent>
       </Card>
     </div>

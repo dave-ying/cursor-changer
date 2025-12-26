@@ -5,6 +5,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use tauri::AppHandle;
 
+use crate::state::CustomizationMode;
+
 mod ani;
 mod export;
 mod preview;
@@ -27,6 +29,23 @@ pub struct AniPreviewData {
     pub total_duration: u32,
 }
 
+#[derive(ts_rs::TS, Serialize, Deserialize, Clone, Debug, Default)]
+#[ts(export, export_to = "../../frontend-vite/src/types/generated/")]
+pub struct LibraryPackItem {
+    pub cursor_name: String,
+    pub display_name: String,
+    pub file_name: String,
+    pub file_path: Option<String>,
+}
+
+#[derive(ts_rs::TS, Serialize, Deserialize, Clone, Debug)]
+#[ts(export, export_to = "../../frontend-vite/src/types/generated/")]
+pub struct LibraryPackMetadata {
+    pub mode: CustomizationMode,
+    pub archive_path: String,
+    pub items: Vec<LibraryPackItem>,
+}
+
 #[derive(ts_rs::TS, Serialize, Deserialize, Clone, Debug)]
 #[ts(export, export_to = "../../frontend-vite/src/types/generated/")]
 pub struct LibraryCursor {
@@ -36,6 +55,10 @@ pub struct LibraryCursor {
     pub click_point_x: u16,
     pub click_point_y: u16,
     pub created_at: String,
+    #[serde(default)]
+    pub is_pack: bool,
+    #[serde(default)]
+    pub pack_metadata: Option<LibraryPackMetadata>,
 }
 
 #[derive(Serialize, Deserialize, Default, Debug)]
@@ -84,6 +107,8 @@ pub fn add_cursor_to_library(
         click_point_x,
         click_point_y,
         created_at,
+        is_pack: false,
+        pack_metadata: None,
     };
 
     library.cursors.push(cursor.clone());
@@ -125,7 +150,7 @@ pub fn remove_cursor_from_library(app: AppHandle, id: String) -> Result<(), Stri
     library.cursors.retain(|c| c.id != id);
     save_library(&app, &library)?;
 
-    // Delete the .CUR file if it exists in our cursors folder
+    // Delete the library file if it exists in our cursors folder
     if let Some(cursor) = cursor_to_remove {
         let file_path = std::path::Path::new(&cursor.file_path);
         match try_delete_library_file(file_path) {
@@ -136,6 +161,26 @@ pub fn remove_cursor_from_library(app: AppHandle, id: String) -> Result<(), Stri
                 cursor.file_path,
                 e
             ),
+        }
+
+        // If this was a pack, also remove any extracted cache under `cursors/.packs/<id>`.
+        if cursor.is_pack {
+            if let Ok(cursors_dir) = crate::paths::cursors_dir() {
+                let pack_dir = cursors_dir.join(".packs").join(&cursor.id);
+                if pack_dir.exists() {
+                    match std::fs::remove_dir_all(&pack_dir) {
+                        Ok(()) => cc_debug!(
+                            "[CursorChanger] Deleted cursor pack extracted cache: {}",
+                            pack_dir.to_string_lossy()
+                        ),
+                        Err(e) => cc_warn!(
+                            "[CursorChanger] Failed to delete pack cache {}: {}",
+                            pack_dir.to_string_lossy(),
+                            e
+                        ),
+                    }
+                }
+            }
         }
     }
 
@@ -185,6 +230,13 @@ pub fn rename_cursor_in_library(
     }
 
     cursor.name = desired_name;
+
+    // Keep pack metadata consistent after rename.
+    if cursor.is_pack {
+        if let Some(meta) = cursor.pack_metadata.as_mut() {
+            meta.archive_path = cursor.file_path.clone();
+        }
+    }
     save_library(&app, &library)?;
     Ok(())
 }

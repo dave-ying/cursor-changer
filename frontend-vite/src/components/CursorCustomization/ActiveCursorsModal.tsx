@@ -1,6 +1,10 @@
 import React from 'react';
 import type { CursorInfo } from '@/types/generated/CursorInfo';
 import { Button } from '@/components/ui/button';
+import { useApp } from '@/context/AppContext';
+import { useMessage } from '@/hooks/useMessage';
+import { invokeWithFeedback } from '@/store/operations/invokeWithFeedback';
+import { Commands } from '@/tauri/commands';
 import { ActiveCursorPreviewCard } from './ActiveCursorPreviewCard';
 import './ActiveCursorsModal.css';
 
@@ -19,6 +23,10 @@ export function ActiveCursorsModal({
 }: ActiveCursorsModalProps) {
   if (!isOpen) return null;
 
+  const { invoke } = useApp();
+  const { showMessage } = useMessage();
+  const [isExporting, setIsExporting] = React.useState(false);
+
   // Filter cursors based on mode
   const displayCursors = React.useMemo(() => {
     if (customizationMode === 'simple') {
@@ -33,6 +41,27 @@ export function ActiveCursorsModal({
     customizationMode === 'simple'
       ? 'Showing the 2 main cursors in Simple mode'
       : `Showing all ${displayCursors.length} cursors in Advanced mode`;
+
+  const handleCreateCursorPack = React.useCallback(async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    const result = await invokeWithFeedback(invoke, Commands.exportActiveCursorPack, {
+      logLabel: '[ActiveCursorsModal] Failed to export cursor pack',
+      errorMessage: 'Unable to create cursor pack. Please try again.'
+    });
+    setIsExporting(false);
+
+    if (result.status === 'success') {
+      if (result.value) {
+        showMessage(`Cursor pack saved to ${result.value}`, 'success');
+      } else {
+        showMessage('Export canceled', 'info');
+      }
+      onClose();
+    } else if (result.status === 'error') {
+      showMessage('Unable to create cursor pack. Please try again.', 'error');
+    }
+  }, [invoke, isExporting, onClose, showMessage]);
 
   return (
     <div
@@ -84,11 +113,12 @@ export function ActiveCursorsModal({
 
         <div className="create-pack-footer">
           <Button
-            onClick={onClose}
+            onClick={handleCreateCursorPack}
             size="lg"
             className="create-pack-close-button"
+            disabled={isExporting || displayCursors.length === 0}
           >
-            Close
+            {isExporting ? 'Creating...' : 'Create Cursor Pack'}
           </Button>
         </div>
       </div>

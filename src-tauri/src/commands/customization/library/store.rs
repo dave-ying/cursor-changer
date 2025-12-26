@@ -68,6 +68,8 @@ pub fn load_library(app: &AppHandle) -> Result<LibraryData, String> {
                         click_point_x: legacy_cursor.click_point_x,
                         click_point_y: legacy_cursor.click_point_y,
                         created_at: legacy_cursor.created_at,
+                        is_pack: false,
+                        pack_metadata: None,
                     });
                 }
                 Ok(library)
@@ -253,6 +255,8 @@ pub fn initialize_library_with_defaults(app: &AppHandle) -> Result<LibraryData, 
             click_point_x: click_x,
             click_point_y: click_y,
             created_at,
+            is_pack: false,
+            pack_metadata: None,
         };
 
         entries.push(cursor);

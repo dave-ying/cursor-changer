@@ -8,6 +8,9 @@
 use ts_rs::TS;
 
 // Import types from the library crate
+use cursor_changer_tauri::commands::customization::library::{
+    AniPreviewData, LibraryCursor, LibraryPackItem, LibraryPackMetadata,
+};
 use cursor_changer_tauri::state::app_state::CursorInfo;
 use cursor_changer_tauri::state::types::{CursorClickPointInfo, CursorStatePayload};
 use cursor_changer_tauri::state::{CustomizationMode, DefaultCursorStyle, ThemeMode};
@@ -33,6 +36,15 @@ fn main() {
 
     CustomizationMode::export().expect("Failed to export CustomizationMode");
     println!("✓ Generated CustomizationMode.ts");
+
+    LibraryCursor::export().expect("Failed to export LibraryCursor");
+    println!("✓ Generated LibraryCursor.ts");
+    LibraryPackMetadata::export().expect("Failed to export LibraryPackMetadata");
+    println!("✓ Generated LibraryPackMetadata.ts");
+    LibraryPackItem::export().expect("Failed to export LibraryPackItem");
+    println!("✓ Generated LibraryPackItem.ts");
+    AniPreviewData::export().expect("Failed to export AniPreviewData");
+    println!("✓ Generated AniPreviewData.ts");
 
     println!("\n✅ All TypeScript types generated successfully!");
     println!("Location: frontend-vite/src/types/generated/");

@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use std::path::PathBuf;
 use tauri::AppHandle;
 
+use crate::commands::customization::pack_manifest;
+
 pub(super) fn sync_library_with_folder_inner(app: &AppHandle) -> Result<(), String> {
     use super::super::customization::library::{load_library, save_library};
 
@@ -60,11 +62,17 @@ fn apply_folder_diff(
     files_to_remove: Vec<String>,
 ) -> bool {
     use super::super::customization::library::LibraryCursor;
+    use super::super::customization::library::LibraryPackMetadata;
 
     let mut changed = false;
 
     for file_path in files_to_add {
         let path = std::path::Path::new(&file_path);
+        let ext = path
+            .extension()
+            .and_then(|s| s.to_str())
+            .unwrap_or("")
+            .to_ascii_lowercase();
         let name = path
             .file_stem()
             .and_then(|n| n.to_str())
@@ -73,7 +81,21 @@ fn apply_folder_diff(
 
         let id = crate::utils::library_meta::new_library_cursor_id();
 
-        let (hotspot_x, hotspot_y) = read_cursor_hotspot(&file_path).unwrap_or((0, 0));
+        let (is_pack, pack_metadata, hotspot_x, hotspot_y) = if ext == "zip" {
+            let meta = match pack_manifest::read_manifest_from_path(path) {
+                Ok(manifest) => Some(LibraryPackMetadata {
+                    mode: manifest.mode,
+                    archive_path: file_path.clone(),
+                    items: manifest.items,
+                }),
+                Err(_) => None,
+            };
+
+            (true, meta, 0, 0)
+        } else {
+            let (hotspot_x, hotspot_y) = read_cursor_hotspot(&file_path).unwrap_or((0, 0));
+            (false, None, hotspot_x, hotspot_y)
+        };
 
         let cursor = LibraryCursor {
             id,
@@ -82,6 +104,8 @@ fn apply_folder_diff(
             click_point_x: hotspot_x,
             click_point_y: hotspot_y,
             created_at: crate::utils::library_meta::now_iso8601_utc(),
+            is_pack,
+            pack_metadata,
         };
 
         library.cursors.push(cursor);

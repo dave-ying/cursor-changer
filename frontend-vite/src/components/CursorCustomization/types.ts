@@ -54,6 +54,10 @@ export interface ModalState {
   showSettingsModal: boolean;
   showBrowseModal: boolean;
   showActiveCursorsModal: boolean;
+  showPackDetailsModal: boolean;
+  packDetails: LibraryCursor | null;
+  packDetailsLoading?: boolean;
+  isApplyingPack?: boolean;
 }
 
 /**
@@ -94,6 +98,7 @@ export interface SelectionActions {
 export interface LibraryActions {
   onAddCursor: () => void;
   onSelectFromLibrary: (cursor: LibraryCursor | null) => void;
+  onOpenPackDetails: (cursor: LibraryCursor) => void;
   onApplyLibraryToSelected: (libCursor: LibraryCursor | null) => void | Promise<void>;
   onApplyLibraryToSlot: (libCursor: LibraryCursor, targetCursor: CursorInfo) => void | Promise<void>;
   onLibraryOrderChange: (newOrder: LibraryCursor[]) => void;
@@ -131,6 +136,9 @@ export interface ModalActions {
   setShowSettingsModal: (show: boolean) => void;
   setShowBrowseModal: (show: boolean) => void;
   setShowActiveCursorsModal: (show: boolean) => void;
+  setShowPackDetailsModal: (show: boolean) => void;
+  closePackDetailsModal: () => void;
+  applyCursorPack: (pack: LibraryCursor) => void | Promise<void>;
 }
 
 /**
@@ -217,6 +225,7 @@ export interface LibrarySectionProps {
 
   onAddCursor: () => void;
   onSelectFromLibrary: (cursor: LibraryCursor | null) => void;
+  onOpenPackDetails: (cursor: LibraryCursor) => void;
   onOpenClickPointEditor: (filePath: string, id: string) => void;
   onLibraryOrderChange: (newOrder: LibraryCursor[]) => void;
   onApplyFromLibrary: (cursor: LibraryCursor) => void;
