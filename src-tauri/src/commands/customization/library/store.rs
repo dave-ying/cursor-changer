@@ -2,9 +2,11 @@ use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
     fs,
+    io::Write,
     path::{Path, PathBuf},
 };
 use tauri::{AppHandle, Manager};
+use tempfile::NamedTempFile;
 
 use super::{LibraryCursor, LibraryData};
 
@@ -81,16 +83,36 @@ pub fn load_library(app: &AppHandle) -> Result<LibraryData, String> {
 
 pub(super) fn save_library(app: &AppHandle, library: &LibraryData) -> Result<(), String> {
     let path = library_path(app)?;
+    let parent_dir = path
+        .parent()
+        .map(Path::to_path_buf)
+        .ok_or_else(|| "Library path missing parent directory".to_string())?;
 
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent)
-            .map_err(|e| format!("Failed to create library directory: {}", e))?;
-    }
+    fs::create_dir_all(&parent_dir)
+        .map_err(|e| format!("Failed to create library directory: {}", e))?;
 
     let json = serde_json::to_string_pretty(library)
         .map_err(|e| format!("Failed to serialize library: {}", e))?;
 
-    fs::write(&path, json).map_err(|e| format!("Failed to write library: {}", e))
+    let mut temp_file = NamedTempFile::new_in(&parent_dir)
+        .map_err(|e| format!("Failed to create temporary library file: {}", e))?;
+
+    temp_file
+        .write_all(json.as_bytes())
+        .map_err(|e| format!("Failed to write temporary library file: {}", e))?;
+    temp_file
+        .flush()
+        .map_err(|e| format!("Failed to flush temporary library file: {}", e))?;
+    temp_file
+        .as_file()
+        .sync_all()
+        .map_err(|e| format!("Failed to sync temporary library file: {}", e))?;
+
+    temp_file
+        .persist(&path)
+        .map_err(|e| format!("Failed to replace library file: {}", e))?;
+
+    Ok(())
 }
 
 /// Get candidate paths for the default library cursors directory
