@@ -4,6 +4,7 @@ use std::{fs, io::Write, path::PathBuf};
 use tauri::{AppHandle, State};
 use zip::write::FileOptions;
 
+use crate::cursor_defaults::populate_missing_cursor_paths_with_defaults;
 use crate::state::{AppState, CustomizationMode};
 
 use super::library::LibraryPackItem;
@@ -80,12 +81,22 @@ pub async fn export_active_cursor_pack(
     app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<Option<String>, String> {
-    let (cursor_paths, current_mode) = {
+    let (mut cursor_paths, current_mode, cursor_style) = {
         let guard = state
             .read_all()
             .map_err(|e| format!("Failed to lock state: {}", e))?;
-        (guard.cursor.cursor_paths.clone(), guard.modes.customization_mode)
+        (
+            guard.cursor.cursor_paths.clone(),
+            guard.modes.customization_mode,
+            guard.prefs.default_cursor_style,
+        )
     };
+
+    populate_missing_cursor_paths_with_defaults(
+        &app,
+        cursor_style.as_str(),
+        &mut cursor_paths,
+    )?;
 
     let entries = collect_cursor_entries(&cursor_paths, current_mode);
     if entries.is_empty() {

@@ -233,13 +233,31 @@ export function LibraryCursor({
     [packPreviews]
   );
 
+  // Deterministic fallback: try common cursor names in order, then first alphabetically
+  const getDeterministicPreview = React.useCallback(
+    (previews: Record<string, string>) => {
+      // Priority order for fallback cursors
+      const priorityCursors = ['normal-select', 'link-select', 'text-select', 'busy', 'help-select'];
+      
+      for (const cursorName of priorityCursors) {
+        const preview = previews[cursorName];
+        if (preview) return preview;
+      }
+      
+      // Fallback to first alphabetically sorted filename
+      const sortedKeys = Object.keys(previews).sort();
+      return sortedKeys.length > 0 ? previews[sortedKeys[0]!] : null;
+    },
+    []
+  );
+
   const normalSelectItem = packItems.find(
     (packItem) => packItem.cursor_name?.toLowerCase() === 'normal-select'
   );
 
   const packPreviewUrl =
     findPackPreview(normalSelectItem?.file_name) ||
-    (packPreviews ? Object.values(packPreviews)[0] : null);
+    (packPreviews ? getDeterministicPreview(packPreviews) : null);
 
   // Handle right-click context menu
   const handleContextMenu = (e: React.MouseEvent) => {
