@@ -14,6 +14,7 @@ pub fn quit_app(app: AppHandle) {
     request_exit(app);
 }
 
+#[allow(dead_code)]
 /// Graceful app quit with proper cleanup
 pub fn quit_app_graceful(app: AppHandle) {
     cc_debug!("[CursorChanger] Starting graceful shutdown");
@@ -45,6 +46,7 @@ pub fn request_exit(app: AppHandle) {
     app.exit(0);
 }
 
+#[allow(dead_code)]
 pub fn restore_state(state: &AppState) -> bool {
     let was_hidden = state.cursor.read().map(|c| c.hidden).unwrap_or(false);
     if was_hidden {

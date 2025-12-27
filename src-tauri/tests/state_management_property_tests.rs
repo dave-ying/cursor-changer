@@ -39,10 +39,7 @@ fn arb_app_state() -> impl Strategy<Value = AppState> {
             Just(ThemeMode::Dark),
             Just(ThemeMode::System)
         ],
-        prop_oneof![
-            Just(DefaultCursorStyle::Windows),
-            Just(DefaultCursorStyle::Mac)
-        ],
+        Just(DefaultCursorStyle::Windows),
     );
 
     (basic_fields, path_fields, ui_fields).prop_map(|(basic, paths, ui)| {
@@ -102,10 +99,7 @@ fn arb_persisted_config() -> impl Strategy<Value = PersistedConfig> {
             Just(ThemeMode::Dark),
             Just(ThemeMode::System)
         ]),
-        prop::option::of(prop_oneof![
-            Just(DefaultCursorStyle::Windows),
-            Just(DefaultCursorStyle::Mac)
-        ]),
+        prop::option::of(Just(DefaultCursorStyle::Windows)),
     )
         .prop_map(
             |(

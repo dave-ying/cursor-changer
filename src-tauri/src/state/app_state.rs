@@ -71,7 +71,7 @@ pub struct PreferencesState {
     pub accent_color: String,
     // Theme mode: "light", "dark", or "system"
     pub theme_mode: ThemeMode,
-    // Default cursor style: "windows" or "mac"
+    // Default cursor style: "windows"
     pub default_cursor_style: DefaultCursorStyle,
 }
 
@@ -111,6 +111,7 @@ pub struct AppState {
     pub prefs: RwLock<PreferencesState>,
     pub modes: RwLock<ModeCustomizationState>,
     pub cursor: RwLock<CursorRuntimeState>,
+    #[allow(dead_code)]
     pub restoration: RwLock<RestorationState>,
 }
 
@@ -129,6 +130,7 @@ pub struct AppStateReadGuard<'a> {
     pub prefs: RwLockReadGuard<'a, PreferencesState>,
     pub modes: RwLockReadGuard<'a, ModeCustomizationState>,
     pub cursor: RwLockReadGuard<'a, CursorRuntimeState>,
+    #[allow(dead_code)]
     pub restoration: RwLockReadGuard<'a, RestorationState>,
 }
 
@@ -136,6 +138,7 @@ pub struct AppStateWriteGuard<'a> {
     pub prefs: RwLockWriteGuard<'a, PreferencesState>,
     pub modes: RwLockWriteGuard<'a, ModeCustomizationState>,
     pub cursor: RwLockWriteGuard<'a, CursorRuntimeState>,
+    #[allow(dead_code)]
     pub restoration: RwLockWriteGuard<'a, RestorationState>,
 }
 

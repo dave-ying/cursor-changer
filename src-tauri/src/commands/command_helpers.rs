@@ -127,6 +127,7 @@ where
     Ok((payload, result))
 }
 
+#[allow(dead_code)]
 pub fn emit_state(app: &AppHandle, state: &State<AppState>) -> Result<CursorStatePayload, String> {
     let payload = CursorStatePayload::try_from(&**state)?;
 

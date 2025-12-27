@@ -36,9 +36,7 @@ export function MainLayout({
 
   const {
     visibleCursors,
-    customizationMode,
-    defaultCursorStyle,
-    accentColor
+    customizationMode
   } = cursorState;
 
   const {
@@ -65,7 +63,8 @@ export function MainLayout({
   const { setCurrentView } = actions.view;
   const { cancelBrowseMode, cancelPreviewSelection } = actions.selection;
   const { onAddCursor, onSelectFromLibrary, onLibraryOrderChange, onApplyFromLibrary, onDeleteLibraryCursor, loadLibraryCursors, onOpenPackDetails } = actions.library;
-  const { onBrowse, onModeChange, onDefaultCursorStyleChange, onResetCursors, loadAvailableCursors } = actions.cursor;
+  const { onBrowse, onModeChange, onResetCursors, loadAvailableCursors } = actions.cursor;
+
   const { setShowClickPointPicker, setClickPointFile, setClickPointFilePath, setClickPointItemId, onOpenClickPointEditor } = actions.clickPoint;
   const {
     setShowSettingsModal,
@@ -122,12 +121,10 @@ export function MainLayout({
                   pendingLibraryCursor={pendingLibraryCursor}
                   selectedLibraryCursor={selectedLibraryCursor}
                   selectingCursorForCustomization={selectingCursorForCustomization}
-                  defaultCursorStyle={defaultCursorStyle}
-                  accentColor={accentColor}
                   onBrowse={onBrowse}
                   onModeChange={onModeChange}
-                  onDefaultCursorStyleChange={onDefaultCursorStyleChange}
                   onResetCursors={onResetCursors}
+
                   onCancelPendingLibraryCursor={cancelBrowseMode}
                   loadAvailableCursors={loadAvailableCursors}
                   draggingLib={draggingLib}
@@ -143,6 +140,7 @@ export function MainLayout({
                   localLibrary={localLibrary}
                   selectingFromLibrary={selectingFromLibrary}
                   selectedCursor={selectedCursor}
+
                   pendingLibraryCursor={pendingLibraryCursor}
                   selectedLibraryCursor={selectedLibraryCursor}
                   onAddCursor={() => onAddCursor()}

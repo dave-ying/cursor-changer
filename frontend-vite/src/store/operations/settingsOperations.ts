@@ -118,7 +118,7 @@ export const createSettingsOperations = (
             rethrow: true
         });
         updateCursorState({ defaultCursorStyle: style });
-        showMessage(`Default cursors set to ${style === 'windows' ? 'Windows' : 'Mac'} style`, 'success');
+        showMessage('Default cursors set to Windows style', 'success');
     },
 
     resetAllSettings: async () => {

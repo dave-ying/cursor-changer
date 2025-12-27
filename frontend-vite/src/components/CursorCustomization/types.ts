@@ -32,7 +32,7 @@ export interface CursorState {
   visibleCursors: CursorInfo[];
   availableCursors: CursorInfo[];
   customizationMode: 'simple' | 'advanced';
-  defaultCursorStyle: 'windows' | 'mac';
+  defaultCursorStyle: 'windows';
   accentColor?: string;
 }
 
@@ -114,7 +114,6 @@ export interface LibraryActions {
 export interface CursorActions {
   onBrowse: (cursor: CursorInfo) => void;
   onModeChange: (mode: 'simple' | 'advanced' | string) => void | Promise<void>;
-  onDefaultCursorStyleChange: (value: 'windows' | 'mac') => void | Promise<void>;
   onResetCursors: () => void | Promise<void>;
   loadAvailableCursors: () => void | Promise<void>;
 }
@@ -201,13 +200,10 @@ export interface ActiveSectionProps {
   pendingLibraryCursor: LibraryCursor | null;
   selectedLibraryCursor: LibraryCursor | null;
   selectingCursorForCustomization: boolean;
-  defaultCursorStyle: 'windows' | 'mac';
-  accentColor?: string;
   draggingLib?: DraggedLibraryCursor | null;
 
   onBrowse: (cursor: CursorInfo) => void;
   onModeChange: (value: 'simple' | 'advanced' | string) => void | Promise<void>;
-  onDefaultCursorStyleChange: (value: 'windows' | 'mac') => void | Promise<void>;
   onResetCursors: () => void | Promise<void>;
   onCancelPendingLibraryCursor: () => void;
   loadAvailableCursors: () => void | Promise<void>;

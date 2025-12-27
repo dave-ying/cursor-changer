@@ -74,24 +74,6 @@ fn test_find_cursor_file_in_dir_with_cur() {
 }
 
 #[test]
-fn test_find_cursor_file_in_dir_with_ani() {
-    use std::path::Path;
-    // Test with the mac default cursors directory (has busy.ani)
-    let mac_dir = Path::new("src-tauri/default-cursors/mac");
-    if mac_dir.exists() {
-        let result = find_cursor_file_in_dir(mac_dir, "busy");
-        assert!(result.is_some(), "Should find busy cursor");
-        let path = result.unwrap();
-        assert!(path.exists(), "Found path should exist");
-        // Mac has busy.ani, so it should prefer .ani over .cur
-        assert!(
-            path.to_string_lossy().ends_with(".ani"),
-            "Should find .ani file for mac busy cursor"
-        );
-    }
-}
-
-#[test]
 fn test_find_cursor_file_in_dir_nonexistent() {
     use std::path::Path;
     let windows_dir = Path::new("src-tauri/default-cursors/windows");
@@ -113,19 +95,4 @@ fn test_find_default_cursor_in_dir() {
     }
 }
 
-#[test]
-fn test_find_default_cursor_in_dir_mac_busy() {
-    use std::path::Path;
-    let mac_dir = Path::new("src-tauri/default-cursors/mac");
-    if mac_dir.exists() {
-        let result = find_default_cursor_in_dir(mac_dir, "Wait");
-        assert!(result.is_some(), "Should find Wait (busy) cursor for mac");
-        let path = result.unwrap();
-        assert!(path.exists(), "Found path should exist");
-        // Mac busy cursor is .ani
-        assert!(
-            path.to_string_lossy().ends_with(".ani"),
-            "Mac Wait cursor should be .ani file"
-        );
-    }
-}
+// Tests covering mac directories were removed since mac defaults are no longer bundled.

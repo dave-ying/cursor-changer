@@ -1,10 +1,9 @@
 import React from 'react';
 import { ActiveCursor } from './ActiveCursor';
 import { ModeToggle } from './ModeToggle';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Button } from '@/components/ui/button';
 import { logger } from '../../utils/logger';
-import { ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
 import { ActionPillButton } from './ActionPillButton';
 import { CollapsibleSection } from './CollapsibleSection';
 import { cn } from '@/lib/utils';
@@ -24,11 +23,8 @@ export function ActiveSection({
   pendingLibraryCursor,
   selectedLibraryCursor,
   selectingCursorForCustomization,
-  defaultCursorStyle,
-  accentColor,
   onBrowse,
   onModeChange,
-  onDefaultCursorStyleChange,
   onResetCursors,
   onCancelPendingLibraryCursor,
   loadAvailableCursors,
@@ -152,49 +148,6 @@ export function ActiveSection({
                 value={customizationMode}
                 onValueChange={onModeChange}
               />
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">Default Cursor Style</p>
-              </div>
-              <ToggleGroup
-                type="single"
-                value={defaultCursorStyle}
-                onValueChange={(value) => {
-                  if (value && value !== defaultCursorStyle) {
-                    onDefaultCursorStyleChange(value as 'windows' | 'mac');
-                  }
-                }}
-                className="bg-muted rounded-full p-1"
-                aria-label="Default Cursor Style"
-              >
-                <ToggleGroupItem
-                  value="windows"
-                  className="rounded-full px-4 py-1 data-[state=on]:text-primary-foreground"
-                  style={defaultCursorStyle === 'windows'
-                    ? {
-                      backgroundColor: accentColor || '#7c3aed',
-                      borderColor: accentColor || '#7c3aed'
-                    }
-                    : {}}
-                  aria-label="Windows style cursors"
-                >
-                  Windows
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="mac"
-                  className="rounded-full px-4 py-1 data-[state=on]:text-primary-foreground"
-                  style={defaultCursorStyle === 'mac'
-                    ? {
-                      backgroundColor: accentColor || '#7c3aed',
-                      borderColor: accentColor || '#7c3aed'
-                    }
-                    : {}}
-                  aria-label="Mac style cursors"
-                >
-                  Mac
-                </ToggleGroupItem>
-              </ToggleGroup>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">

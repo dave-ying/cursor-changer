@@ -34,6 +34,7 @@ pub(super) async fn get_ani_preview_data(file_path: String) -> Result<AniPreview
 
 pub(super) use parser::AniData;
 
+#[allow(dead_code)]
 pub(super) fn parse_ani_file(data: &[u8]) -> Option<AniData> {
     parser::parse_ani_file(data).ok()
 }

@@ -95,6 +95,7 @@ pub fn write_config(dir: &PathBuf, config: &PersistedConfig) -> Result<(), Strin
     fs::write(&file, serialized).map_err(|e| e.to_string())
 }
 
+#[allow(dead_code)]
 pub fn persist_preferences(app: &AppHandle, state: &AppState) -> Result<(), String> {
     persist_config(app, &PersistedConfig::from(state))
 }

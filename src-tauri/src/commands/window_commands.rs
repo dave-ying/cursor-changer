@@ -13,10 +13,12 @@ pub fn quit_app(app: AppHandle) {
     shutdown::quit_app(app)
 }
 
+#[allow(dead_code)]
 pub fn quit_app_graceful(app: AppHandle) {
     shutdown::quit_app_graceful(app)
 }
 
+#[allow(dead_code)]
 pub fn restore_state(state: &mut AppState) -> bool {
     shutdown::restore_state(state)
 }

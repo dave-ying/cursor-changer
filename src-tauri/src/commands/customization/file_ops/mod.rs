@@ -1,4 +1,7 @@
+#![allow(unused_imports)]
+
 pub(crate) mod browsing;
+
 /// File operations for cursor customization - modular structure
 ///
 /// This module provides file operations for cursor customization, organized into

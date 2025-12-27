@@ -1,14 +1,12 @@
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
-use std::{
-    fs,
-    io::Write,
-    path::{Path, PathBuf},
-};
+use std::{fs, io::Write, path::{Path, PathBuf}};
 use tauri::{AppHandle, Manager};
 use tempfile::NamedTempFile;
 
 use super::{LibraryCursor, LibraryData};
+use crate::commands::customization::pack_commands::read_manifest_or_infer;
+use crate::commands::customization::pack_library::register_pack_in_library;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct LegacyLibraryCursor {
@@ -168,6 +166,25 @@ fn list_default_library_cursor_files(dir: &Path) -> Result<Vec<PathBuf>, String>
     Ok(cursor_files)
 }
 
+/// Enumerate cursor pack archives (.zip) in a directory
+fn list_default_library_packs(dir: &Path) -> Result<Vec<PathBuf>, String> {
+    let entries =
+        fs::read_dir(dir).map_err(|e| format!("Failed to read default library directory: {}", e))?;
+
+    let packs: Vec<PathBuf> = entries
+        .filter_map(|e| e.ok())
+        .map(|e| e.path())
+        .filter(|path| {
+            path.extension()
+                .and_then(|s| s.to_str())
+                .map(|ext| ext.eq_ignore_ascii_case("zip"))
+                .unwrap_or(false)
+        })
+        .collect();
+
+    Ok(packs)
+}
+
 fn cursor_numeric_prefix(path: &Path) -> Option<u32> {
     path.file_stem()
         .and_then(|s| s.to_str())
@@ -288,9 +305,60 @@ pub fn initialize_library_with_defaults(app: &AppHandle) -> Result<LibraryData, 
     entries.reverse();
     library.cursors.extend(entries);
 
+    // Also register any bundled cursor packs (zip archives)
+    let pack_archives = list_default_library_packs(&default_dir)?;
+    let mut pack_count = 0usize;
+    for pack_path in pack_archives {
+        let file_name = pack_path
+            .file_name()
+            .and_then(|s| s.to_str())
+            .unwrap_or("cursor-pack.zip");
+
+        // Copy archive into user cursors dir to keep everything under user data
+        let dest_path = {
+            if let Some(parent) = cursors_dir.parent() {
+                fs::create_dir_all(parent)
+                    .map_err(|e| format!("Failed to create cursors directory: {}", e))?;
+            }
+            let target_path = crate::commands::customization::pack_library::ensure_unique_filename(
+                &cursors_dir,
+                file_name,
+            );
+            fs::copy(&pack_path, &target_path).map_err(|e| {
+                format!(
+                    "Failed to copy default cursor pack {}: {}",
+                    file_name, e
+                )
+            })?;
+            target_path
+        };
+
+        match read_manifest_or_infer(&dest_path) {
+            Ok((mode, pack_name, created_at, items)) => {
+                if let Err(err) =
+                    register_pack_in_library(app, pack_name, &dest_path, mode, items, Some(created_at))
+                {
+                    cc_warn!(
+                        "[CursorChanger] Failed to register default cursor pack {}: {}",
+                        file_name,
+                        err
+                    );
+                } else {
+                    pack_count += 1;
+                }
+            }
+            Err(err) => cc_warn!(
+                "[CursorChanger] Skipping default cursor pack {} (manifest inference failed): {}",
+                file_name,
+                err
+            ),
+        }
+    }
+
     cc_debug!(
-        "[CursorChanger] Initialized library with {} default cursors",
-        library.cursors.len()
+        "[CursorChanger] Initialized library with {} default cursors and {} default cursor packs",
+        library.cursors.len(),
+        pack_count
     );
 
     save_library(app, &library)?;
@@ -298,8 +366,10 @@ pub fn initialize_library_with_defaults(app: &AppHandle) -> Result<LibraryData, 
 }
 
 /// .CUR file format constants
+#[allow(dead_code)]
 mod cursor_format {
     /// Size of the ICONDIR header in bytes
+    #[allow(dead_code)]
     pub const ICONDIR_SIZE: usize = 6;
     /// Offset to hotspot X coordinate in ICONDIRENTRY (after ICONDIR header)
     pub const HOTSPOT_X_OFFSET: usize = 10;

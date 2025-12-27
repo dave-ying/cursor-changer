@@ -19,11 +19,11 @@ pub struct CursorStatePayload {
     pub last_loaded_cursor_path: Option<String>,
     // In-memory map of cursor name -> image path (for UI previews)
     pub cursor_paths: HashMap<String, String>,
-    // User-selected accent color for UI elements (hex format)
+    // User-selected accent color for UI elements
     pub accent_color: String,
     // Theme mode: "light", "dark", or "system"
     pub theme_mode: ThemeMode,
-    // Default cursor style: "windows" or "mac"
+    // Default cursor style: "windows"
     pub default_cursor_style: DefaultCursorStyle,
 }
 

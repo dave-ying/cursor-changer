@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 // Cursor customization commands - split into logical modules
 
 pub(super) mod cursor_apply_service;

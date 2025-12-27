@@ -101,7 +101,7 @@ fn infer_items_from_archive(archive_path: &Path) -> Result<Vec<LibraryPackItem>,
     Ok(items)
 }
 
-fn read_manifest_or_infer(
+pub(crate) fn read_manifest_or_infer(
     archive_path: &Path,
 ) -> Result<(CustomizationMode, String, String, Vec<LibraryPackItem>), String> {
     match read_manifest_from_path(archive_path) {

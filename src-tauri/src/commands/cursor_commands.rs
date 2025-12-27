@@ -38,6 +38,7 @@ fn show_cursor_system(cursor_paths: &HashMap<String, String>, cursor_size: i32) 
 }
 
 #[derive(Copy, Clone, Debug)]
+#[allow(dead_code)]
 enum CursorVisibilityIntent {
     Hide,
     Show,
@@ -147,6 +148,7 @@ fn apply_cursor_visibility_intent_with_shared_state(
     CursorStatePayload::try_from(shared)
 }
 
+#[allow(dead_code)]
 pub fn hide_cursor(state: &AppState) -> Result<(), String> {
     let payload =
         apply_cursor_visibility_intent_with_shared_state(state, CursorVisibilityIntent::Hide)?;
@@ -157,6 +159,7 @@ pub fn hide_cursor(state: &AppState) -> Result<(), String> {
     }
 }
 
+#[allow(dead_code)]
 pub fn show_cursor(state: &AppState) -> Result<(), String> {
     let payload =
         apply_cursor_visibility_intent_with_shared_state(state, CursorVisibilityIntent::Show)?;
@@ -167,6 +170,7 @@ pub fn show_cursor(state: &AppState) -> Result<(), String> {
     }
 }
 
+#[allow(dead_code)]
 pub fn toggle_cursor_internal(state: &AppState) -> Result<bool, String> {
     let payload =
         apply_cursor_visibility_intent_with_shared_state(state, CursorVisibilityIntent::Toggle)?;
@@ -205,6 +209,7 @@ pub fn show_cursor_if_hidden_with_shared_state(
     apply_cursor_visibility_intent_with_shared_state(shared, CursorVisibilityIntent::ShowIfHidden)
 }
 
+#[allow(dead_code)]
 pub fn toggle_app_enabled_internal(
     app: &AppHandle,
     state: &State<AppState>,

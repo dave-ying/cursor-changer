@@ -5,6 +5,7 @@ pub const CURSOR_STATE: &str = "cursor-state";
 pub const CURSOR_ERROR: &str = "cursor-error";
 pub const THEME_CHANGED: &str = "theme-changed";
 pub const RESET_CURSORS_AFTER_SETTINGS: &str = "reset-cursors-after-settings";
+#[allow(dead_code)]
 pub const SHOW_CLOSE_CONFIRMATION: &str = "show-close-confirmation";
 pub const LIBRARY_FILE_ADDED: &str = "library:file-added";
 pub const LIBRARY_FILE_REMOVED: &str = "library:file-removed";

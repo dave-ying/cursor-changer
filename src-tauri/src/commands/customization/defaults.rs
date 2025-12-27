@@ -51,6 +51,7 @@ fn apply_resolved_cursors_advanced(resolved: &HashMap<CursorName, PathBuf>, curs
     crate::cursor_defaults::apply_cursor_paths_advanced(&cursor_paths, cursor_size);
 }
 
+#[allow(dead_code)]
 fn apply_resolved_cursors_simple(resolved: &HashMap<CursorName, PathBuf>, cursor_size: i32) {
     let cursor_paths = to_state_cursor_paths(resolved);
     crate::cursor_defaults::apply_cursor_paths_simple(&cursor_paths, cursor_size);

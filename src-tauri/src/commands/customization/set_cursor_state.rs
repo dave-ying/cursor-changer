@@ -2,6 +2,7 @@ use crate::state::AppState;
 /// State management utilities for cursor operations
 use tauri::State;
 
+#[allow(dead_code)]
 /// Update cursor state in memory
 pub fn update_cursor_state(state: &State<AppState>, cursor_name: &str, final_path: &str) {
     if let Ok(mut cursor) = state.cursor.write() {
@@ -15,6 +16,7 @@ pub fn update_cursor_state(state: &State<AppState>, cursor_name: &str, final_pat
     }
 }
 
+#[allow(dead_code)]
 /// Update cursor size and merge cursor paths (preserving existing mappings)
 pub fn update_cursor_size_with_merge(
     state: &State<AppState>,
@@ -37,6 +39,7 @@ pub fn update_cursor_size_with_merge(
     }
 }
 
+#[allow(dead_code)]
 /// Update cursor size and replace cursor paths (legacy function)
 pub fn update_cursor_size(
     state: &State<AppState>,

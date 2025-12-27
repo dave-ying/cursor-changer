@@ -39,7 +39,6 @@ export function useCursorCustomizationController() {
   const setCustomizationMode = useAppStore((s) => s.setCustomizationMode);
   const loadAvailableCursors = useAppStore((s) => s.operations.loadAvailableCursors);
   const loadLibraryCursors = useAppStore((s) => s.operations.loadLibraryCursors);
-  const setDefaultCursorStyle = useAppStore((s) => s.operations.setDefaultCursorStyle);
   const cursorState = useAppStore((s) => s.cursorState);
 
   const selectionMachine = useSelectionStateMachine();
@@ -192,25 +191,6 @@ export function useCursorCustomizationController() {
       errorMessage: 'Failed to switch customization mode'
     });
   }, [customizationMode, invoke, loadAvailableCursors, safeAsync, setCustomizationMode, showMessageTyped]);
-
-  const handleDefaultCursorStyleChange = useCallback(async (style: 'windows' | 'mac') => {
-    if (!style || style === cursorState?.defaultCursorStyle) return;
-    await safeAsync(async () => {
-      await setDefaultCursorStyle(style);
-      const result = await invokeWithFeedback(invoke, Commands.resetCurrentModeCursors, {
-        logLabel: '[CursorCustomization] Failed to reset current mode cursors:',
-        errorMessage: 'Failed to change default cursor style',
-        errorType: 'error'
-      });
-      if (result.status !== 'success') return;
-      await loadAvailableCursors();
-    }, {
-      onError: (err: unknown) => {
-        logger.error('[CursorCustomization] Failed to change default cursor style:', err);
-      },
-      errorMessage: 'Failed to change default cursor style'
-    });
-  }, [cursorState?.defaultCursorStyle, invoke, loadAvailableCursors, safeAsync, setDefaultCursorStyle]);
 
   const handleResetCursors = useCallback(async () => {
     await safeAsync(async () => {
@@ -458,7 +438,6 @@ export function useCursorCustomizationController() {
       visibleCursors,
       availableCursors,
       customizationMode: customizationMode as 'simple' | 'advanced',
-      defaultCursorStyle: cursorState?.defaultCursorStyle ?? 'windows',
       accentColor: cursorState?.accentColor
     },
     clickPointState: {
@@ -531,7 +510,6 @@ export function useCursorCustomizationController() {
       cursor: {
         onBrowse: handleActiveCursorClick,
         onModeChange: handleModeChange,
-        onDefaultCursorStyleChange: handleDefaultCursorStyleChange,
         onResetCursors: handleResetCursors,
         loadAvailableCursors
       },

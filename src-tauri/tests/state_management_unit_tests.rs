@@ -287,7 +287,7 @@ fn test_state_restoration_from_persisted_config() {
         cursor_size: Some(80),
         accent_color: Some("#123456".to_string()),
         theme_mode: Some(ThemeMode::Dark),
-        default_cursor_style: Some(DefaultCursorStyle::Mac),
+        default_cursor_style: Some(DefaultCursorStyle::Windows),
     };
 
     let state = AppState::default();
