@@ -7,8 +7,8 @@ import { useSortable } from '@dnd-kit/sortable';
 import { ContextMenu } from './ContextMenu';
 import { useLibraryAnimation, useAnimationCSSProperties } from '../../hooks/useLibraryAnimation';
 import { AniPreview, useAniPreview } from './AniPreview';
-import { LoaderCircle, Folder } from 'lucide-react';
-// import { Package } from 'lucide-react';
+import { LoaderCircle } from 'lucide-react';
+
 import { Commands } from '../../tauri/commands';
 import { logger } from '../../utils/logger';
 import type { LibraryCursor as LibraryCursorItem } from '../../types/generated/LibraryCursor';
@@ -336,16 +336,27 @@ export function LibraryCursor({
           style={previewStyle}
         >
           {isPack ? (
-            <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-lg bg-muted text-muted-foreground">
-              <Folder className="h-4/5 w-4/5" strokeWidth={1.4} />
+            <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-muted/70 p-3 text-muted-foreground">
               {packPreviewUrl ? (
                 <img
                   src={packPreviewUrl}
                   alt={`${item.name} normal-select preview`}
-                  className="absolute inset-2 m-auto h-2/5 w-2/5 object-contain drop-shadow-sm"
+                  className="h-4/5 w-4/5 object-contain drop-shadow-sm"
                   loading="lazy"
                 />
-              ) : null}
+              ) : (
+                <>
+                  <span className="text-sm font-semibold text-foreground line-clamp-2 text-center">
+                    {item.name || 'Cursor Pack'}
+                  </span>
+                  <span className="text-xs mt-1">{packCountLabel}</span>
+                  {packModeLabel ? (
+                    <span className="text-[10px] uppercase tracking-wide text-muted-foreground/80 mt-1">
+                      {packModeLabel}
+                    </span>
+                  ) : null}
+                </>
+              )}
             </div>
           ) : loading ? (
             <LoaderCircle className="w-8 h-8 animate-spin text-muted-foreground" />
