@@ -233,17 +233,32 @@ export function LibraryCursor({
     [packPreviews]
   );
 
-  // Deterministic fallback: try common cursor names in order, then first alphabetically
+  // Deterministic fallback: always try to use the normal-select preview even if metadata is missing
   const getDeterministicPreview = React.useCallback(
     (previews: Record<string, string>) => {
-      // Priority order for fallback cursors
-      const priorityCursors = ['normal-select', 'link-select', 'text-select', 'busy', 'help-select'];
-      
-      for (const cursorName of priorityCursors) {
-        const preview = previews[cursorName];
-        if (preview) return preview;
-      }
-      
+      const normalizeKey = (key: string) =>
+        key.toLowerCase().replace(/\.(cur|ani|ico)$/g, '');
+
+      const matchByNames = (names: string[]) => {
+        for (const name of names) {
+          const entry = Object.entries(previews).find(
+            ([fileName]) => normalizeKey(fileName) === name
+          );
+          if (entry) {
+            return entry[1];
+          }
+        }
+        return null;
+      };
+
+      // Normal-select should always win when present; fall back to common aliases
+      const normalPreview = matchByNames(['normal-select', 'normal', 'arrow']);
+      if (normalPreview) return normalPreview;
+
+      // Otherwise, follow the former priority order using normalized keys
+      const priorityPreview = matchByNames(['link-select', 'text-select', 'busy', 'help-select']);
+      if (priorityPreview) return priorityPreview;
+
       // Fallback to first alphabetically sorted filename
       const sortedKeys = Object.keys(previews).sort();
       return sortedKeys.length > 0 ? previews[sortedKeys[0]!] : null;
