@@ -8,9 +8,12 @@ use crate::cursor_defaults::populate_missing_cursor_paths_with_defaults;
 use crate::state::{AppState, CustomizationMode};
 
 use super::library::LibraryPackItem;
-use super::pack_library::{ensure_unique_filename, register_pack_in_library};
+use super::pack_manifest::{CursorPackManifest, PACK_MANIFEST_FILENAME};
+use super::pack_library::{prepare_pack_archive_destination, register_pack_in_library};
 
 const SIMPLE_MODE_EXPORT_NAMES: [&str; 2] = ["Normal", "Hand"];
+const MAX_PACK_NAME_LEN: usize = 55;
+const INVALID_FILENAME_CHARS: [char; 9] = ['<', '>', ':', '"', '/', '\\', '|', '?', '*'];
 
 fn resolve_export_names(mode: CustomizationMode) -> Vec<&'static str> {
     match mode {
@@ -37,6 +40,39 @@ fn default_filename(mode: CustomizationMode) -> &'static str {
         CustomizationMode::Simple => "simple-cursor-pack.zip",
         CustomizationMode::Advanced => "advanced-cursor-pack.zip",
     }
+}
+
+fn sanitize_pack_filename(input: &str) -> Option<String> {
+    let trimmed = input.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+
+    let mut sanitized = trimmed
+        .chars()
+        .map(|c| if c.is_control() || INVALID_FILENAME_CHARS.contains(&c) { '_' } else { c })
+        .collect::<String>();
+
+    sanitized = sanitized.chars().take(MAX_PACK_NAME_LEN).collect();
+    let sanitized = sanitized.trim_matches('.');
+
+    if sanitized.is_empty() {
+        None
+    } else {
+        Some(sanitized.to_string())
+    }
+}
+
+fn determine_target_filename(mode: CustomizationMode, user_pack_name: Option<String>) -> String {
+    if let Some(name) = user_pack_name.and_then(|value| sanitize_pack_filename(&value)) {
+        let mut file_name = name;
+        if !file_name.to_ascii_lowercase().ends_with(".zip") {
+            file_name.push_str(".zip");
+        }
+        return file_name;
+    }
+
+    default_filename(mode).to_string()
 }
 
 fn collect_cursor_entries(
@@ -80,6 +116,7 @@ fn collect_cursor_entries(
 pub async fn export_active_cursor_pack(
     app: AppHandle,
     state: State<'_, AppState>,
+    pack_name: Option<String>,
 ) -> Result<Option<String>, String> {
     let (mut cursor_paths, current_mode, cursor_style) = {
         let guard = state
@@ -103,8 +140,9 @@ pub async fn export_active_cursor_pack(
         return Err("No cursor files available to export".to_string());
     }
 
-    let cursors_dir = crate::paths::cursors_dir()?;
-    let target_path = ensure_unique_filename(&cursors_dir, default_filename(current_mode));
+    let packs_dir = crate::paths::cursor_packs_dir()?;
+    let desired_filename = determine_target_filename(current_mode, pack_name);
+    let target_path = prepare_pack_archive_destination(&packs_dir, &desired_filename)?;
     let archive_path_str = target_path.to_string_lossy().to_string();
 
     let created_at = crate::utils::library_meta::now_iso8601_utc();
@@ -137,6 +175,22 @@ pub async fn export_active_cursor_pack(
     let options: FileOptions<'_, ()> =
         FileOptions::default().compression_method(zip::CompressionMethod::Stored);
 
+    let manifest = CursorPackManifest {
+        version: 1,
+        pack_name: pack_name.clone(),
+        mode: current_mode,
+        created_at: created_at.clone(),
+        items: items.clone(),
+    };
+    let manifest_json =
+        serde_json::to_string_pretty(&manifest).map_err(|e| format!("Failed to serialize manifest: {e}"))?;
+    zip_writer
+        .start_file(PACK_MANIFEST_FILENAME, options)
+        .map_err(|e| format!("Failed to start manifest entry: {}", e))?;
+    zip_writer
+        .write_all(manifest_json.as_bytes())
+        .map_err(|e| format!("Failed to write manifest to zip: {}", e))?;
+
     for (_cursor_name, pack_filename, source_path) in &entries {
         let data =
             fs::read(source_path).map_err(|e| format!("Failed to read file {}: {}", source_path.display(), e))?;
@@ -158,7 +212,6 @@ pub async fn export_active_cursor_pack(
 
     register_pack_in_library(
         &app,
-        pack_name,
         &target_path,
         current_mode,
         items,

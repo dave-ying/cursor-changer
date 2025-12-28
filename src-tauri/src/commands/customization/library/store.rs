@@ -334,9 +334,14 @@ pub fn initialize_library_with_defaults(app: &AppHandle) -> Result<LibraryData, 
         };
 
         match read_manifest_or_infer(&dest_path) {
-            Ok((mode, pack_name, created_at, items)) => {
-                if let Err(err) =
-                    register_pack_in_library(app, pack_name, &dest_path, mode, items, Some(created_at))
+            Ok(manifest) => {
+                if let Err(err) = register_pack_in_library(
+                    app,
+                    &dest_path,
+                    manifest.mode,
+                    manifest.items,
+                    Some(manifest.created_at),
+                )
                 {
                     cc_warn!(
                         "[CursorChanger] Failed to register default cursor pack {}: {}",

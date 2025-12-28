@@ -168,10 +168,10 @@ pub fn remove_cursor_from_library(app: AppHandle, id: String) -> Result<(), Stri
             ),
         }
 
-        // If this was a pack, also remove any extracted cache under `cursors/.packs/<id>`.
+        // If this was a pack, also remove any extracted cache under `cursor-packs/<id>`.
         if cursor.is_pack {
-            if let Ok(cursors_dir) = crate::paths::cursors_dir() {
-                let pack_dir = cursors_dir.join(".packs").join(&cursor.id);
+            if let Ok(cache_root) = crate::paths::pack_cache_dir() {
+                let pack_dir = cache_root.join(&cursor.id);
                 if pack_dir.exists() {
                     match std::fs::remove_dir_all(&pack_dir) {
                         Ok(()) => cc_debug!(
@@ -186,6 +186,11 @@ pub fn remove_cursor_from_library(app: AppHandle, id: String) -> Result<(), Stri
                     }
                 }
             }
+        }
+
+        // Clean up any orphaned pack folders after deletion
+        if let Err(e) = cleanup_orphaned_pack_folders(&app) {
+            cc_warn!("[CursorChanger] Failed to cleanup orphaned pack folders: {}", e);
         }
     }
 
@@ -391,6 +396,49 @@ pub async fn export_library_cursors(app: AppHandle) -> Result<Option<String>, St
     export::export_library_cursors(app).await
 }
 
+/// Clean up orphaned pack extraction folders that don't have corresponding ZIP files in the library
+pub fn cleanup_orphaned_pack_folders(app: &AppHandle) -> Result<(), String> {
+    let library = load_library(app)?;
+    
+    // Get all valid pack IDs from the library
+    let valid_pack_ids: std::collections::HashSet<String> = library
+        .cursors
+        .iter()
+        .filter(|c| c.is_pack)
+        .map(|c| c.id.clone())
+        .collect();
+    
+    if let Ok(cache_root) = crate::paths::pack_cache_dir() {
+        if cache_root.exists() {
+            if let Ok(entries) = std::fs::read_dir(&cache_root) {
+                for entry in entries.flatten() {
+                    let path = entry.path();
+
+                    if path.is_dir() {
+                        if let Some(folder_name) = path.file_name().and_then(|n| n.to_str()) {
+                            if !valid_pack_ids.contains(folder_name) {
+                                match std::fs::remove_dir_all(&path) {
+                                    Ok(()) => cc_debug!(
+                                        "[CursorChanger] Cleaned up orphaned pack folder: {}",
+                                        path.to_string_lossy()
+                                    ),
+                                    Err(e) => cc_warn!(
+                                        "[CursorChanger] Failed to clean up orphaned pack folder {}: {}",
+                                        path.to_string_lossy(),
+                                        e
+                                    ),
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    Ok(())
+}
+
 /// Reset the library by removing all user cursors and restoring default cursors
 #[tauri::command]
 pub fn reset_library(app: AppHandle) -> Result<(), String> {
@@ -407,6 +455,23 @@ pub fn reset_library(app: AppHandle) -> Result<(), String> {
                 cursor.file_path,
                 e
             ),
+        }
+    }
+    
+    // Clean up all extracted pack caches under `cursor-packs/`
+    if let Ok(cache_root) = crate::paths::pack_cache_dir() {
+        if cache_root.exists() {
+            match std::fs::remove_dir_all(&cache_root) {
+                Ok(()) => cc_debug!(
+                    "[CursorChanger] Deleted all cursor pack extracted caches: {}",
+                    cache_root.to_string_lossy()
+                ),
+                Err(e) => cc_warn!(
+                    "[CursorChanger] Failed to delete packs directory {}: {}",
+                    cache_root.to_string_lossy(),
+                    e
+                ),
+            }
         }
     }
     

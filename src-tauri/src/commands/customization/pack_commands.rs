@@ -14,7 +14,8 @@ use super::library::{
     get_cursor_preview_from_bytes, load_library, LibraryCursor, LibraryPackItem,
 };
 use super::pack_library::{
-    ensure_pack_previews, ensure_unique_filename, register_pack_in_library,
+    ensure_pack_previews, pack_extract_folder, pack_storage_root, prepare_pack_archive_destination,
+    register_pack_in_library,
 };
 use super::pack_manifest::{read_manifest_from_path, CursorPackManifest, PACK_MANIFEST_FILENAME};
 
@@ -33,8 +34,58 @@ pub fn get_cached_pack_previews(
     ensure_pack_previews(&app, &pack_id)
 }
 
-fn pack_storage_root() -> Result<PathBuf, String> {
-    Ok(crate::paths::cursors_dir()?.join(".packs"))
+pub(crate) fn extract_pack_assets(
+    pack_id: &str,
+    archive_path: &Path,
+    manifest: &CursorPackManifest,
+) -> Result<HashMap<String, PathBuf>, String> {
+    if !archive_path.exists() {
+        return Err("Cursor pack file not found".to_string());
+    }
+    if !is_zip(archive_path) {
+        return Err("Not a .zip cursor pack".to_string());
+    }
+
+    let storage_root = pack_storage_root()?;
+    let extract_folder = pack_extract_folder(&storage_root, pack_id, archive_path)?;
+
+    if extract_folder.exists() {
+        fs::remove_dir_all(&extract_folder)
+            .map_err(|e| format!("Failed to clean pack folder: {e}"))?;
+    }
+    fs::create_dir_all(&extract_folder)
+        .map_err(|e| format!("Failed to prepare pack folder: {e}"))?;
+
+    let file =
+        fs::File::open(archive_path).map_err(|e| format!("Failed to open pack archive: {e}"))?;
+    let mut archive =
+        ZipArchive::new(file).map_err(|e| format!("Failed to read archive contents: {e}"))?;
+
+    let mut extracted = HashMap::new();
+
+    for item in &manifest.items {
+        if item.file_name.trim().is_empty() {
+            continue;
+        }
+
+        let mut zip_file = match archive.by_name(&item.file_name) {
+            Ok(entry) => entry,
+            Err(err) => {
+                cc_warn!(
+                    "[CursorCustomization] Cursor file {} missing from archive: {}",
+                    item.file_name,
+                    err
+                );
+                continue;
+            }
+        };
+
+        let extracted_path =
+            extract_entry_to_folder(&mut zip_file, &item.file_name, &extract_folder)?;
+        extracted.insert(item.file_name.clone(), extracted_path);
+    }
+
+    Ok(extracted)
 }
 
 fn infer_items_from_archive(archive_path: &Path) -> Result<Vec<LibraryPackItem>, String> {
@@ -43,6 +94,8 @@ fn infer_items_from_archive(archive_path: &Path) -> Result<Vec<LibraryPackItem>,
         ZipArchive::new(file).map_err(|e| format!("Failed to read archive contents: {e}"))?;
 
     let mut items: Vec<LibraryPackItem> = Vec::new();
+    
+    cc_debug!("[infer_items_from_archive] Processing archive: {}", archive_path.display());
 
     for i in 0..archive.len() {
         let file = archive
@@ -59,7 +112,10 @@ fn infer_items_from_archive(archive_path: &Path) -> Result<Vec<LibraryPackItem>,
             .unwrap_or(&name_in_zip)
             .to_string();
 
+        cc_debug!("[infer_items_from_archive] Found file: {}", file_name);
+
         if file_name.eq_ignore_ascii_case(PACK_MANIFEST_FILENAME) {
+            cc_debug!("[infer_items_from_archive] Skipping manifest file");
             continue;
         }
 
@@ -90,6 +146,9 @@ fn infer_items_from_archive(archive_path: &Path) -> Result<Vec<LibraryPackItem>,
                 .unwrap_or_else(|| cursor_name.clone())
         };
 
+        cc_debug!("[infer_items_from_archive] Creating item: cursor_name={}, display_name={}, file_name={}", 
+                 cursor_name, display_name, file_name);
+
         items.push(LibraryPackItem {
             cursor_name,
             display_name,
@@ -98,15 +157,21 @@ fn infer_items_from_archive(archive_path: &Path) -> Result<Vec<LibraryPackItem>,
         });
     }
 
+    cc_debug!("[infer_items_from_archive] Total items found: {}", items.len());
     Ok(items)
 }
 
 pub(crate) fn read_manifest_or_infer(
     archive_path: &Path,
-) -> Result<(CustomizationMode, String, String, Vec<LibraryPackItem>), String> {
+) -> Result<CursorPackManifest, String> {
     match read_manifest_from_path(archive_path) {
-        Ok(manifest) => Ok((manifest.mode, manifest.pack_name, manifest.created_at, manifest.items)),
-        Err(_) => {
+        Ok(manifest) => Ok(manifest),
+        Err(err) => {
+            cc_debug!(
+                "[CursorCustomization] Falling back to inferred manifest for {}: {}",
+                archive_path.display(),
+                err
+            );
             let pack_name = archive_path
                 .file_stem()
                 .and_then(|s| s.to_str())
@@ -114,7 +179,13 @@ pub(crate) fn read_manifest_or_infer(
                 .to_string();
             let created_at = crate::utils::library_meta::now_iso8601_utc();
             let items = infer_items_from_archive(archive_path)?;
-            Ok((CustomizationMode::Advanced, pack_name, created_at, items))
+            Ok(CursorPackManifest {
+                version: 1,
+                pack_name,
+                mode: CustomizationMode::Advanced,
+                created_at,
+                items,
+            })
         }
     }
 }
@@ -129,20 +200,19 @@ pub fn import_cursor_pack(app: AppHandle, filename: String, data: Vec<u8>) -> Re
         return Err("Only .zip cursor packs are supported".to_string());
     }
 
-    let cursors_dir = crate::paths::cursors_dir()?;
-    let target_path = ensure_unique_filename(&cursors_dir, &filename);
+    let packs_dir = crate::paths::cursor_packs_dir()?;
+    let target_path = prepare_pack_archive_destination(&packs_dir, &filename)?;
 
     fs::write(&target_path, &data).map_err(|e| format!("Failed to save cursor pack: {e}"))?;
 
-    let (mode, pack_name, created_at, items) = read_manifest_or_infer(&target_path)?;
+    let manifest = read_manifest_or_infer(&target_path)?;
 
     register_pack_in_library(
         &app,
-        pack_name,
         &target_path,
-        mode,
-        items,
-        Some(created_at),
+        manifest.mode,
+        manifest.items,
+        Some(manifest.created_at),
     )
 }
 
@@ -162,7 +232,7 @@ pub fn get_cursor_pack_manifest(archive_path: String) -> Result<CursorPackManife
     if !is_zip(&path) {
         return Err("Not a .zip cursor pack".to_string());
     }
-    read_manifest_from_path(&path)
+    read_manifest_or_infer(&path)
 }
 
 #[tauri::command]
@@ -222,7 +292,11 @@ pub fn get_cursor_pack_file_previews(archive_path: String) -> Result<Vec<PackFil
     Ok(previews)
 }
 
-fn extract_entry_to_folder<R: Read>(mut entry: R, file_name: &str, folder: &Path) -> Result<PathBuf, String> {
+pub(super) fn extract_entry_to_folder<R: Read>(
+    mut entry: R,
+    file_name: &str,
+    folder: &Path,
+) -> Result<PathBuf, String> {
     fs::create_dir_all(folder).map_err(|e| format!("Failed to create pack folder: {e}"))?;
     let out_path = folder.join(file_name);
     let mut out = fs::File::create(&out_path).map_err(|e| format!("Failed to create file: {e}"))?;
@@ -253,17 +327,18 @@ pub fn apply_cursor_pack(app: AppHandle, state: State<'_, AppState>, id: String)
         return Err("Cursor pack file is not a .zip".to_string());
     }
 
-    let (pack_mode, _pack_name, _created_at, items) = read_manifest_or_infer(&archive_path)?;
+    let manifest = read_manifest_or_infer(&archive_path)?;
+    let pack_mode = manifest.mode.clone();
 
     let storage_root = pack_storage_root()?;
-    let extract_folder = storage_root.join(&id);
+    let extract_folder = pack_extract_folder(&storage_root, &id, &archive_path)?;
 
     let file = fs::File::open(&archive_path).map_err(|e| format!("Failed to open pack archive: {e}"))?;
     let mut archive =
         ZipArchive::new(file).map_err(|e| format!("Failed to read archive contents: {e}"))?;
 
     let mut cursor_paths: HashMap<String, String> = HashMap::new();
-    for item in &items {
+    for item in &manifest.items {
         if item.cursor_name.trim().is_empty() {
             continue;
         }

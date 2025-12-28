@@ -56,7 +56,7 @@ export type CommandArgsMap = {
   [Commands.setCursorsToWindowsDefaults]: undefined;
   [Commands.loadAppDefaultCursors]: undefined;
   [Commands.deleteCustomCursor]: { cursor_name: string };
-  [Commands.exportActiveCursorPack]: undefined;
+  [Commands.exportActiveCursorPack]: { pack_name?: string };
 
   [Commands.readCursorFileAsDataUrl]: { file_path: string };
 

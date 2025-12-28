@@ -3,8 +3,8 @@ use std::collections::HashSet;
 use std::path::PathBuf;
 use tauri::AppHandle;
 
+use crate::commands::customization::pack_commands::{extract_pack_assets, read_manifest_or_infer};
 use crate::commands::customization::pack_library;
-use crate::commands::customization::pack_manifest;
 
 pub(super) fn sync_library_with_folder_inner(app: &AppHandle) -> Result<(), String> {
     use super::super::customization::library::{load_library, save_library};
@@ -21,6 +21,11 @@ pub(super) fn sync_library_with_folder_inner(app: &AppHandle) -> Result<(), Stri
     if changed {
         save_library(app, &library)?;
         cc_debug!("[FolderWatcher] Library synced with folder");
+    }
+
+    // Clean up orphaned pack folders after sync
+    if let Err(e) = super::super::customization::library::cleanup_orphaned_pack_folders(app) {
+        cc_warn!("[FolderWatcher] Failed to cleanup orphaned pack folders: {}", e);
     }
 
     Ok(())
@@ -74,7 +79,7 @@ fn apply_folder_diff(
             .and_then(|s| s.to_str())
             .unwrap_or("")
             .to_ascii_lowercase();
-        let name = path
+        let mut display_name = path
             .file_stem()
             .and_then(|n| n.to_str())
             .unwrap_or("Cursor")
@@ -83,8 +88,28 @@ fn apply_folder_diff(
         let id = crate::utils::library_meta::new_library_cursor_id();
 
         let (is_pack, pack_metadata, hotspot_x, hotspot_y) = if ext == "zip" {
-            let meta = match pack_manifest::read_manifest_from_path(path) {
-                Ok(manifest) => {
+            let meta = match read_manifest_or_infer(path) {
+                Ok(mut manifest) => {
+                    display_name = manifest.pack_name.clone();
+
+                    match extract_pack_assets(&id, path, &manifest) {
+                        Ok(extracted_map) => {
+                            for item in manifest.items.iter_mut() {
+                                if let Some(extracted_path) = extracted_map.get(&item.file_name) {
+                                    item.file_path =
+                                        Some(extracted_path.to_string_lossy().to_string());
+                                }
+                            }
+                        }
+                        Err(err) => {
+                            cc_warn!(
+                                "[FolderWatcher] Failed to extract pack {} assets: {}",
+                                file_path,
+                                err
+                            );
+                        }
+                    }
+
                     let previews = pack_library::generate_pack_previews_from_archive(path).ok();
                     Some(LibraryPackMetadata {
                         mode: manifest.mode,
@@ -96,7 +121,14 @@ fn apply_folder_diff(
                         previews,
                     })
                 }
-                Err(_) => None,
+                Err(err) => {
+                    cc_warn!(
+                        "[FolderWatcher] Failed to infer cursor pack manifest for {}: {}",
+                        file_path,
+                        err
+                    );
+                    None
+                }
             };
 
             (true, meta, 0, 0)
@@ -107,7 +139,7 @@ fn apply_folder_diff(
 
         let cursor = LibraryCursor {
             id,
-            name,
+            name: display_name,
             file_path,
             click_point_x: hotspot_x,
             click_point_y: hotspot_y,

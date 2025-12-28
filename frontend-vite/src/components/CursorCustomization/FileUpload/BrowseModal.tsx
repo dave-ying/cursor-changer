@@ -22,8 +22,9 @@ interface BrowseModalProps {
   clickPointItemId?: string;
 }
 
-const SUPPORTED_EXTENSIONS = ['cur', 'ani', 'svg', 'png', 'ico', 'bmp', 'jpg', 'jpeg'];
 const SUPPORTED_IMAGE_EXTENSIONS = ['svg', 'png', 'ico', 'bmp', 'jpg', 'jpeg'];
+const SUPPORTED_CURSOR_EXTENSIONS = ['cur', 'ani', 'zip'];
+const SUPPORTED_EXTENSIONS = [...SUPPORTED_IMAGE_EXTENSIONS, ...SUPPORTED_CURSOR_EXTENSIONS];
 
 export function BrowseModal({
   isOpen,
@@ -72,19 +73,18 @@ export function BrowseModal({
       return;
     }
 
-    // For .cur / .ani files, create a synthetic event to pass to handleFileSelect
-    if (handleFileSelect) {
-      // Create a DataTransfer to build a FileList
+    // For cursor files (.cur / .ani) and packs (.zip), pass through to handler
+    if (SUPPORTED_CURSOR_EXTENSIONS.includes(ext) && handleFileSelect) {
+      // Create a DataTransfer to build a real FileList (handles all cursor/pack files uniformly)
       const dataTransfer = new DataTransfer();
       dataTransfer.items.add(file);
-      
-      // Create a synthetic event-like object
+
       const syntheticEvent = {
         target: {
           files: dataTransfer.files
         }
       } as React.ChangeEvent<HTMLInputElement>;
-      
+
       handleFileSelect(syntheticEvent);
     } else {
       logger.warn('handleFileSelect function not provided to BrowseModal');
