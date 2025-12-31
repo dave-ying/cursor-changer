@@ -9,7 +9,7 @@ use tauri::{AppHandle, Emitter};
 pub(super) fn start_watcher(
     app: AppHandle,
     state: &Mutex<FolderWatcherState>,
-    folders: Vec<PathBuf>,
+    folders: Vec<(PathBuf, RecursiveMode)>,
 ) -> Result<(), String> {
     let mut guard = state.lock().map_err(|e| format!("Lock error: {}", e))?;
     if guard.running {
@@ -30,10 +30,10 @@ pub(super) fn start_watcher(
         })
         .map_err(|e| format!("Failed to create watcher: {}", e))?;
 
-    for folder in &folders {
+    for (folder, mode) in &folders {
         if folder.exists() {
             watcher
-                .watch(folder, RecursiveMode::NonRecursive)
+                .watch(folder, *mode)
                 .map_err(|e| format!("Failed to watch folder {:?}: {}", folder, e))?;
         } else {
             // Just warn, don't fail if one folder is missing (e.g. nested packs might not exist yet)

@@ -185,7 +185,7 @@ struct DefaultPackStructure {
 /// library/cursor-packs/
 ///   ├── PackName/
 ///   │   ├── PackName.zip (or any .zip)
-///   │   └── cursors/ (optional, contains .cur/.ani files)
+///   │   └── (optional extracted .cur/.ani files alongside the zip)
 fn list_default_pack_structures(dir: &Path) -> Result<Vec<DefaultPackStructure>, String> {
     if !dir.exists() {
         return Ok(Vec::new());
@@ -212,10 +212,27 @@ fn list_default_pack_structures(dir: &Path) -> Result<Vec<DefaultPackStructure>,
                                 zip_path = Some(sub_path);
                             }
                         }
-                    } else if sub_path.is_dir() {
-                        if sub_path.file_name().and_then(|s| s.to_str()) == Some("cursors") {
-                            cursors_path = Some(sub_path);
+                    }
+                }
+            }
+
+            // New pack layout: extracted cursors live next to the zip in the same folder.
+            // If we find any .cur/.ani files at this level, allow pre-hydration by copying them
+            // into the user's pack folder.
+            if cursors_path.is_none() {
+                if let Ok(sub_entries) = fs::read_dir(&path) {
+                    let has_cursor_files = sub_entries.flatten().any(|e| {
+                        let p = e.path();
+                        if !p.is_file() {
+                            return false;
                         }
+                        p.extension()
+                            .and_then(|s| s.to_str())
+                            .map(|ext| ext.eq_ignore_ascii_case("cur") || ext.eq_ignore_ascii_case("ani"))
+                            .unwrap_or(false)
+                    });
+                    if has_cursor_files {
+                        cursors_path = Some(path.clone());
                     }
                 }
             }
@@ -428,11 +445,8 @@ pub fn initialize_library_with_defaults<R: Runtime>(app: &AppHandle<R>) -> Resul
                         
                         // If we have pre-extracted cursors, hydrate the cache
                         if let Some(src_cursors_dir) = pack.extracted_cursors_path {
-                            // Resolve the cache folder for this pack
-                            // pack_library::pack_extract_folder normally does this logic
-                            let cache_dir = pack_dir.join("cursors");
-                            
-                             if let Err(e) = copy_dir_contents(&src_cursors_dir, &cache_dir) {
+                            // New pack layout stores extracted files alongside the zip.
+                            if let Err(e) = copy_dir_contents(&src_cursors_dir, &pack_dir) {
                                   cc_warn!(
                                     "[CursorChanger] Failed to pre-hydrate cache for pack {}: {}",
                                     cursor.name,

@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
-use std::io::{Read, Write};
+use std::io::{Read, Seek, Write};
 use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
@@ -14,10 +14,141 @@ use super::library::{
     get_cursor_preview_from_bytes, load_library, LibraryCursor, LibraryPackItem,
 };
 use super::pack_library::{
-    ensure_pack_previews, pack_extract_folder, pack_storage_root, prepare_pack_archive_destination,
+    ensure_pack_previews, prepare_pack_archive_destination,
     register_pack_in_library,
 };
-use super::pack_manifest::{read_manifest_from_path, CursorPackManifest, PACK_MANIFEST_FILENAME};
+use super::pack_manifest::{CursorPackManifest, PACK_MANIFEST_FILENAME};
+
+fn allowed_pack_base_names() -> HashSet<&'static str> {
+    cursor_changer::DEFAULT_CURSOR_BASE_NAMES
+        .iter()
+        .map(|(_windows_name, base_name)| *base_name)
+        .collect()
+}
+
+fn cursor_pack_required_base_names() -> [&'static str; 2] {
+    ["normal-select", "link-select"]
+}
+
+fn validate_cursor_pack_archive<R: Read + Seek>(
+    archive: &mut ZipArchive<R>,
+) -> Result<Vec<LibraryPackItem>, String> {
+    let allowed = allowed_pack_base_names();
+    let required = cursor_pack_required_base_names();
+
+    let mut total_files = 0usize;
+    let mut by_base_name: HashMap<String, String> = HashMap::new();
+
+    for i in 0..archive.len() {
+        let entry = archive
+            .by_index(i)
+            .map_err(|e| format!("Failed to read archive entry: {e}"))?;
+
+        if entry.is_dir() {
+            continue;
+        }
+
+        let name_in_zip = entry.name().to_string();
+        if name_in_zip.contains('/') || name_in_zip.contains('\\') {
+            return Err("Cursor pack zip must not contain folders".to_string());
+        }
+
+        let file_name = Path::new(&name_in_zip)
+            .file_name()
+            .and_then(|s| s.to_str())
+            .ok_or_else(|| "Cursor pack zip contains invalid filename".to_string())?
+            .to_string();
+
+        total_files += 1;
+        if total_files > 15 {
+            return Err("Cursor pack zip contains more than 15 files".to_string());
+        }
+
+        let ext = Path::new(&file_name)
+            .extension()
+            .and_then(|s| s.to_str())
+            .unwrap_or("")
+            .to_ascii_lowercase();
+
+        if ext != "cur" && ext != "ani" {
+            return Err("Cursor pack zip must contain only .cur or .ani files".to_string());
+        }
+
+        let stem = Path::new(&file_name)
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or("")
+            .to_ascii_lowercase();
+        if stem.is_empty() {
+            return Err("Cursor pack zip contains a file with no name".to_string());
+        }
+
+        if !allowed.contains(stem.as_str()) {
+            return Err(format!(
+                "Cursor pack zip contains an invalid cursor name: {}",
+                stem
+            ));
+        }
+
+        if by_base_name.contains_key(&stem) {
+            return Err(format!(
+                "Cursor pack zip contains duplicate cursor for: {}",
+                stem
+            ));
+        }
+
+        by_base_name.insert(stem, file_name);
+    }
+
+    for req in required {
+        if !by_base_name.contains_key(req) {
+            return Err(format!(
+                "Cursor pack zip must include {}.cur or {}.ani",
+                req, req
+            ));
+        }
+    }
+
+    // Build items in stable order defined by DEFAULT_CURSOR_BASE_NAMES
+    let mut items: Vec<LibraryPackItem> = Vec::new();
+    for (windows_name, base_name) in cursor_changer::DEFAULT_CURSOR_BASE_NAMES.iter() {
+        if let Some(file_name) = by_base_name.get(&base_name.to_string()) {
+            let display_name = cursor_changer::CURSOR_TYPES
+                .iter()
+                .find(|ct| ct.name == *windows_name)
+                .map(|ct| ct.display_name.to_string())
+                .unwrap_or_else(|| (*base_name).to_string());
+
+            items.push(LibraryPackItem {
+                cursor_name: (*base_name).to_string(),
+                display_name,
+                file_name: file_name.clone(),
+                file_path: None,
+            });
+        }
+    }
+
+    if items.is_empty() {
+        return Err("Cursor pack zip contains no valid cursor files".to_string());
+    }
+
+    Ok(items)
+}
+
+fn validate_cursor_pack_bytes(data: &[u8]) -> Result<Vec<LibraryPackItem>, String> {
+    let cursor = std::io::Cursor::new(data);
+    let mut archive = ZipArchive::new(cursor)
+        .map_err(|e| format!("Failed to read archive contents: {e}"))?;
+    validate_cursor_pack_archive(&mut archive)
+}
+
+fn validate_cursor_pack_path(archive_path: &Path) -> Result<Vec<LibraryPackItem>, String> {
+    let file = fs::File::open(archive_path)
+        .map_err(|e| format!("Failed to open pack archive: {e}"))?;
+    let mut archive = ZipArchive::new(file)
+        .map_err(|e| format!("Failed to read archive contents: {e}"))?;
+    validate_cursor_pack_archive(&mut archive)
+}
 
 fn is_zip(path: &Path) -> bool {
     path.extension()
@@ -39,6 +170,7 @@ pub(crate) fn extract_pack_assets(
     archive_path: &Path,
     manifest: &CursorPackManifest,
 ) -> Result<HashMap<String, PathBuf>, String> {
+    let _ = pack_id;
     if !archive_path.exists() {
         return Err("Cursor pack file not found".to_string());
     }
@@ -46,13 +178,10 @@ pub(crate) fn extract_pack_assets(
         return Err("Not a .zip cursor pack".to_string());
     }
 
-    let storage_root = pack_storage_root()?;
-    let extract_folder = pack_extract_folder(&storage_root, pack_id, archive_path)?;
-
-    if extract_folder.exists() {
-        fs::remove_dir_all(&extract_folder)
-            .map_err(|e| format!("Failed to clean pack folder: {e}"))?;
-    }
+    let extract_folder = archive_path
+        .parent()
+        .ok_or_else(|| "Cursor pack archive missing parent folder".to_string())?
+        .to_path_buf();
     fs::create_dir_all(&extract_folder)
         .map_err(|e| format!("Failed to prepare pack folder: {e}"))?;
 
@@ -164,30 +293,21 @@ fn infer_items_from_archive(archive_path: &Path) -> Result<Vec<LibraryPackItem>,
 pub(crate) fn read_manifest_or_infer(
     archive_path: &Path,
 ) -> Result<CursorPackManifest, String> {
-    match read_manifest_from_path(archive_path) {
-        Ok(manifest) => Ok(manifest),
-        Err(err) => {
-            cc_debug!(
-                "[CursorCustomization] Falling back to inferred manifest for {}: {}",
-                archive_path.display(),
-                err
-            );
-            let pack_name = archive_path
-                .file_stem()
-                .and_then(|s| s.to_str())
-                .unwrap_or("cursor-pack")
-                .to_string();
-            let created_at = crate::utils::library_meta::now_iso8601_utc();
-            let items = infer_items_from_archive(archive_path)?;
-            Ok(CursorPackManifest {
-                version: 1,
-                pack_name,
-                mode: CustomizationMode::Advanced,
-                created_at,
-                items,
-            })
-        }
-    }
+    let pack_name = archive_path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("cursor-pack")
+        .to_string();
+    let created_at = crate::utils::library_meta::now_iso8601_utc();
+    let items = validate_cursor_pack_path(archive_path)?;
+
+    Ok(CursorPackManifest {
+        version: 1,
+        pack_name,
+        mode: CustomizationMode::Advanced,
+        created_at,
+        items,
+    })
 }
 
 #[tauri::command]
@@ -200,19 +320,20 @@ pub fn import_cursor_pack<R: Runtime>(app: AppHandle<R>, filename: String, data:
         return Err("Only .zip cursor packs are supported".to_string());
     }
 
+    // Validate first so we don't persist invalid packs.
+    let validated_items = validate_cursor_pack_bytes(&data)?;
+
     let packs_dir = crate::paths::cursor_packs_dir()?;
     let target_path = prepare_pack_archive_destination(&packs_dir, &filename)?;
 
     fs::write(&target_path, &data).map_err(|e| format!("Failed to save cursor pack: {e}"))?;
 
-    let manifest = read_manifest_or_infer(&target_path)?;
-
     register_pack_in_library(
         &app,
         &target_path,
-        manifest.mode,
-        manifest.items,
-        Some(manifest.created_at),
+        CustomizationMode::Advanced,
+        validated_items,
+        Some(crate::utils::library_meta::now_iso8601_utc()),
     )
 }
 
@@ -330,8 +451,12 @@ pub fn apply_cursor_pack<R: Runtime>(app: AppHandle<R>, state: State<'_, AppStat
     let manifest = read_manifest_or_infer(&archive_path)?;
     let pack_mode = manifest.mode.clone();
 
-    let storage_root = pack_storage_root()?;
-    let extract_folder = pack_extract_folder(&storage_root, &id, &archive_path)?;
+    let extract_folder = archive_path
+        .parent()
+        .ok_or_else(|| "Cursor pack archive missing parent folder".to_string())?
+        .to_path_buf();
+    fs::create_dir_all(&extract_folder)
+        .map_err(|e| format!("Failed to prepare pack folder: {e}"))?;
 
     let file = fs::File::open(&archive_path).map_err(|e| format!("Failed to open pack archive: {e}"))?;
     let mut archive =

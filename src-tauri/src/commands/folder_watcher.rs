@@ -4,6 +4,7 @@ use notify::RecommendedWatcher;
 use std::sync::mpsc;
 use std::sync::Mutex;
 use tauri::{AppHandle, State};
+use notify::RecursiveMode;
 
 /// Global state to track and control the watcher
 pub struct FolderWatcherState {
@@ -47,7 +48,10 @@ pub fn start_library_folder_watcher(
     let cursors_folder = crate::paths::cursors_dir()?;
     let packs_folder = crate::paths::cursor_packs_dir()?;
 
-    let folders = vec![cursors_folder, packs_folder];
+    let folders = vec![
+        (cursors_folder, RecursiveMode::NonRecursive),
+        (packs_folder, RecursiveMode::Recursive),
+    ];
 
     watcher::start_watcher(app, &state, folders)
 }

@@ -10,8 +10,9 @@ pub(super) fn sync_library_with_folder_inner(app: &AppHandle) -> Result<(), Stri
     use super::super::customization::library::{load_library, save_library};
 
     let cursors_folder = crate::paths::cursors_dir()?;
+    let packs_folder = crate::paths::cursor_packs_dir()?;
 
-    let files_on_disk = scan_cursors_folder(&cursors_folder);
+    let files_on_disk = scan_library_files(&cursors_folder, &packs_folder);
     let mut library = load_library(app)?;
 
     let (files_to_add, files_to_remove) = diff_library_vs_disk(&library, &files_on_disk);
@@ -31,14 +32,52 @@ pub(super) fn sync_library_with_folder_inner(app: &AppHandle) -> Result<(), Stri
     Ok(())
 }
 
-fn scan_cursors_folder(cursors_folder: &PathBuf) -> HashSet<String> {
+fn scan_library_files(cursors_folder: &PathBuf, packs_folder: &PathBuf) -> HashSet<String> {
     let mut files_on_disk: HashSet<String> = HashSet::new();
 
     if let Ok(entries) = std::fs::read_dir(cursors_folder) {
         for entry in entries.flatten() {
             let path = entry.path();
-            if is_cursor_file(&path) {
+            if path.is_dir() {
+                continue;
+            }
+
+            let ext = path
+                .extension()
+                .and_then(|s| s.to_str())
+                .unwrap_or("")
+                .to_ascii_lowercase();
+            if ext == "cur" || ext == "ani" || ext == "zip" {
                 files_on_disk.insert(path.to_string_lossy().to_string());
+            }
+        }
+    }
+
+    // Packs: collect only .zip files under cursor-packs recursively.
+    // Do NOT add extracted .cur/.ani from inside pack folders into the library.
+    if packs_folder.exists() {
+        let mut stack: Vec<PathBuf> = vec![packs_folder.clone()];
+        while let Some(dir) = stack.pop() {
+            let entries = match std::fs::read_dir(&dir) {
+                Ok(e) => e,
+                Err(_) => continue,
+            };
+
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    stack.push(path);
+                    continue;
+                }
+
+                let ext = path
+                    .extension()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("")
+                    .to_ascii_lowercase();
+                if ext == "zip" {
+                    files_on_disk.insert(path.to_string_lossy().to_string());
+                }
             }
         }
     }

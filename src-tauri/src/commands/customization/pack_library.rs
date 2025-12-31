@@ -203,11 +203,6 @@ pub fn pack_storage_root() -> Result<PathBuf, String> {
 pub fn pack_extract_folder(storage_root: &Path, pack_id: &str, archive_path: &Path) -> Result<PathBuf, String> {
     // Try to use the parent folder of the archive (where cursor files should already be extracted)
     if let Some(parent) = archive_path.parent() {
-        let cursors_subdir = parent.join("cursors");
-        if cursors_subdir.exists() && cursors_subdir.is_dir() {
-             return Ok(cursors_subdir);
-        }
-        
         if parent.exists() {
             return Ok(parent.to_path_buf());
         }
@@ -337,6 +332,8 @@ pub fn register_pack_in_library_with_data<R: Runtime>(
         previews: None,
         previews_version: None,
     };
+
+    ensure_pack_files_present(pack_path, &mut metadata.items)?;
 
     match generate_pack_previews_from_archive(pack_path) {
         Ok(previews) => {

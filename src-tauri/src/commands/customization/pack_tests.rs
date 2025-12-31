@@ -72,15 +72,11 @@ mod tests {
         assert!(zip_path.extension().unwrap().eq_ignore_ascii_case("zip"));
 
         // Verification 3: Extraction
-        // There should be extracted files in the `cursors` subfolder
-        let cursors_dir = parent_dir.join("cursors");
-        assert!(cursors_dir.exists(), "Cursors subfolder does not exist");
-        assert!(cursors_dir.is_dir(), "Cursors subfolder is not a directory");
-
-        let extracted_normal = cursors_dir.join("Normal.cur");
-        assert!(extracted_normal.exists(), "Normal.cur not extracted to pack/cursors folder");
+        // There should be extracted files alongside the zip
+        let extracted_normal = parent_dir.join("Normal.cur");
+        assert!(extracted_normal.exists(), "Normal.cur not extracted to pack folder");
         
-        let extracted_hand = cursors_dir.join("Hand.cur");
-        assert!(extracted_hand.exists(), "Hand.cur not extracted to pack/cursors folder");
+        let extracted_hand = parent_dir.join("Hand.cur");
+        assert!(extracted_hand.exists(), "Hand.cur not extracted to pack folder");
     }
 }

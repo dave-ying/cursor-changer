@@ -190,11 +190,8 @@ pub async fn export_active_cursor_pack<R: Runtime>(
 
     // Extract ZIP contents to the same folder for immediate access
     if let Some(pack_folder) = target_path.parent() {
-        let cursors_out_dir = pack_folder.join("cursors");
-        if !cursors_out_dir.exists() {
-            fs::create_dir_all(&cursors_out_dir)
-                .map_err(|e| format!("Failed to create cursors output directory: {}", e))?;
-        }
+        fs::create_dir_all(pack_folder)
+            .map_err(|e| format!("Failed to create pack output directory: {}", e))?;
 
         let archive_file = fs::File::open(&target_path)
             .map_err(|e| format!("Failed to open pack archive for extraction: {}", e))?;
@@ -211,7 +208,7 @@ pub async fn export_active_cursor_pack<R: Runtime>(
             }
 
             let entry_name = entry.name().to_string();
-            let out_path = cursors_out_dir.join(&entry_name);
+            let out_path = pack_folder.join(&entry_name);
 
             let mut out_file = fs::File::create(&out_path)
                 .map_err(|e| format!("Failed to create extracted file {}: {}", entry_name, e))?;
