@@ -52,6 +52,47 @@ pub(super) fn start_watcher(
         match event_rx.recv_timeout(Duration::from_millis(200)) {
             Ok(event) => {
                 for path in event.paths.iter() {
+                    let path_str = path.to_string_lossy().to_string();
+                    let is_dir = path.is_dir();
+                    
+                    // For directories, we need to handle them specially in cursor-packs
+                    if is_dir {
+                        if let Ok(cursor_packs_root) = crate::paths::cursor_packs_dir() {
+                            if path.starts_with(&cursor_packs_root) {
+                                // This is a directory under cursor-packs
+                                match &event.kind {
+                                    EventKind::Create(_) => {
+                                        cc_debug!("[FolderWatcher] Pack folder created: {}", path_str);
+                                        // Trigger sync to detect new packs in this folder
+                                        let _ = app_handle.emit(
+                                            events::LIBRARY_FILE_ADDED,
+                                            serde_json::json!({
+                                                "path": path_str,
+                                                "name": path.file_name().and_then(|n| n.to_str()).unwrap_or("unknown")
+                                            }),
+                                        );
+                                    }
+                                    EventKind::Remove(_) => {
+                                        cc_debug!("[FolderWatcher] Pack folder removed: {}", path_str);
+                                        // Trigger sync to remove packs that were in this folder
+                                        let _ = app_handle.emit(
+                                            events::LIBRARY_FILE_REMOVED,
+                                            serde_json::json!({
+                                                "path": path_str,
+                                                "name": path.file_name().and_then(|n| n.to_str()).unwrap_or("unknown")
+                                            }),
+                                        );
+                                    }
+                                    _ => {}
+                                }
+                            }
+                        }
+                        // Skip further processing for directories that aren't cursor files
+                        if !is_cursor_file(path.as_path()) {
+                            continue;
+                        }
+                    }
+                    
                     if !is_cursor_file(path.as_path()) {
                         continue;
                     }
@@ -61,8 +102,6 @@ pub(super) fn start_watcher(
                         .and_then(|n| n.to_str())
                         .unwrap_or("unknown")
                         .to_string();
-
-                    let path_str = path.to_string_lossy().to_string();
 
                     match &event.kind {
                         EventKind::Create(_) => {

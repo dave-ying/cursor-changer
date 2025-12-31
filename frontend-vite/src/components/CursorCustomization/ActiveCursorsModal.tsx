@@ -176,6 +176,10 @@ export function ActiveCursorsModal({
                     e.preventDefault();
                   }
                 }}
+                onBlur={() => {
+                  if (!isEditingPackName) return;
+                  handleSavePackName();
+                }}
               />
 
               {showSanitizationHint && (

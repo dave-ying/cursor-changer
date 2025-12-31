@@ -168,8 +168,53 @@ pub fn remove_cursor_from_library<R: Runtime>(app: AppHandle<R>, id: String) -> 
             ),
         }
 
-        // If this was a pack, also remove any extracted cache under `cursor-packs/<id>`.
+        // If this was a pack, also remove the ZIP file and its containing folder
         if cursor.is_pack {
+            let pack_file_path = std::path::Path::new(&cursor.file_path);
+            
+            // Delete the actual ZIP file
+            match try_delete_library_file(pack_file_path) {
+                Ok(true) => cc_debug!(
+                    "[CursorChanger] Deleted cursor pack file: {}",
+                    cursor.file_path
+                ),
+                Ok(false) => {} // Skipped, not in our folder or doesn't exist
+                Err(e) => cc_warn!(
+                    "[CursorChanger] Failed to delete cursor pack file {}: {}",
+                    cursor.file_path,
+                    e
+                ),
+            }
+            
+            // Try to delete the containing folder if it's empty and within cursor-packs
+            if let Some(parent_folder) = pack_file_path.parent() {
+                if let Ok(cursor_packs_root) = crate::paths::cursor_packs_dir() {
+                    if parent_folder.starts_with(&cursor_packs_root) {
+                        // Only delete if the folder is empty to avoid affecting other packs
+                        match std::fs::read_dir(parent_folder) {
+                            Ok(mut entries) => {
+                                if entries.next().is_none() {
+                                    // Folder is empty, safe to delete
+                                    match std::fs::remove_dir(parent_folder) {
+                                        Ok(()) => cc_debug!(
+                                            "[CursorChanger] Deleted empty cursor pack folder: {}",
+                                            parent_folder.to_string_lossy()
+                                        ),
+                                        Err(e) => cc_warn!(
+                                            "[CursorChanger] Failed to delete empty cursor pack folder {}: {}",
+                                            parent_folder.to_string_lossy(),
+                                            e
+                                        ),
+                                    }
+                                }
+                            }
+                            Err(_) => {} // Folder doesn't exist or can't read, skip
+                        }
+                    }
+                }
+            }
+            
+            // Also remove any extracted cache under `cursor-packs/<id>`.
             if let Ok(cache_root) = crate::paths::pack_cache_dir() {
                 let pack_dir = cache_root.join(&cursor.id);
                 if pack_dir.exists() {

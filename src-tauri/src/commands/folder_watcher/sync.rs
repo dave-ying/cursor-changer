@@ -1,4 +1,4 @@
-use super::{is_cursor_file, read_cursor_hotspot};
+use super::read_cursor_hotspot;
 use std::collections::HashSet;
 use std::path::PathBuf;
 use tauri::AppHandle;
@@ -16,8 +16,13 @@ pub(super) fn sync_library_with_folder_inner(app: &AppHandle) -> Result<(), Stri
     let mut library = load_library(app)?;
 
     let (files_to_add, files_to_remove) = diff_library_vs_disk(&library, &files_on_disk);
+    
+    // Also check for packs in deleted directories
+    let packs_in_deleted_dirs = find_packs_in_deleted_dirs(&library, &packs_folder);
+    let mut files_to_remove_combined = files_to_remove;
+    files_to_remove_combined.extend(packs_in_deleted_dirs);
 
-    let changed = apply_folder_diff(&mut library, files_to_add, files_to_remove);
+    let changed = apply_folder_diff(&mut library, files_to_add, files_to_remove_combined);
 
     if changed {
         save_library(app, &library)?;
@@ -83,6 +88,33 @@ fn scan_library_files(cursors_folder: &PathBuf, packs_folder: &PathBuf) -> HashS
     }
 
     files_on_disk
+}
+
+/// Check if any cursor packs are in directories that no longer exist
+fn find_packs_in_deleted_dirs(
+    library: &super::super::customization::library::LibraryData,
+    _packs_folder: &PathBuf,
+) -> Vec<String> {
+    let mut packs_to_remove: Vec<String> = Vec::new();
+    
+    for cursor in &library.cursors {
+        if cursor.is_pack {
+            let pack_path = std::path::Path::new(&cursor.file_path);
+            if let Some(parent_dir) = pack_path.parent() {
+                // If the parent directory doesn't exist anymore, this pack should be removed
+                if !parent_dir.exists() {
+                    cc_debug!(
+                        "[FolderWatcher] Pack {} in deleted directory {}, removing from library",
+                        cursor.name,
+                        parent_dir.to_string_lossy()
+                    );
+                    packs_to_remove.push(cursor.file_path.clone());
+                }
+            }
+        }
+    }
+    
+    packs_to_remove
 }
 
 fn diff_library_vs_disk(
