@@ -87,14 +87,14 @@ pub fn save_cursor_to_appdata(
     Ok(file_path_str)
 }
 
-/// Get the path to the library cursors folder
+/// Get the path to the library folder
 #[tauri::command]
 pub fn get_library_cursors_folder() -> Result<String, String> {
-    let cursors_dir = crate::paths::cursors_dir()?;
-    Ok(cursors_dir.to_string_lossy().to_string())
+    let library_dir = crate::paths::library_root_dir()?;
+    Ok(library_dir.to_string_lossy().to_string())
 }
 
-/// Open the library cursors folder in Windows Explorer
+/// Open the library folder in Windows Explorer
 #[tauri::command]
 pub fn show_library_cursors_folder() -> Result<(), String> {
     let folder_path = get_library_cursors_folder()?;
@@ -106,4 +106,17 @@ pub fn show_library_cursors_folder() -> Result<(), String> {
         .map_err(|e| format!("Failed to open folder: {}", e))?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_library_cursors_folder() {
+        let path = get_library_cursors_folder().unwrap();
+        // The path should end with "library" and not "library\cursors"
+        assert!(path.ends_with("library"), "Path '{}' should end with 'library'", path);
+        assert!(!path.ends_with("cursors"), "Path '{}' should NOT end with 'cursors'", path);
+    }
 }

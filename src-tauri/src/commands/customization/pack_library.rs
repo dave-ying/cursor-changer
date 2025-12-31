@@ -166,6 +166,55 @@ fn sanitize_folder_name(name: &str) -> String {
     sanitized
 }
 
+/// Derive a unique ID and display name for a pack based on its path.
+/// The ID is based on the archive filename, and the name is the parent folder name.
+fn derive_pack_identity(library: &LibraryData, pack_path: &Path) -> (String, String) {
+    let base_name = pack_path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("cursor-pack")
+        .to_string();
+
+    // Use parent folder name as the display name if available
+    let folder_name = pack_path
+        .parent()
+        .and_then(|p| p.file_name())
+        .and_then(|s| s.to_str())
+        .unwrap_or(&base_name)
+        .to_string();
+
+    // Generate unique ID based on base name
+    let mut id = base_name.clone();
+    let mut counter = 0;
+    while library.cursors.iter().any(|c| c.id == id) {
+        counter += 1;
+        id = format!("{}-{}", base_name, counter);
+    }
+
+    (id, folder_name)
+}
+
+/// Get the root directory for storing extracted pack files.
+pub fn pack_storage_root() -> Result<PathBuf, String> {
+    crate::paths::cursor_packs_dir()
+}
+
+/// Get the extraction folder for a specific pack.
+pub fn pack_extract_folder(storage_root: &Path, pack_id: &str, archive_path: &Path) -> Result<PathBuf, String> {
+    // Try to use the parent folder of the archive (where cursor files should already be extracted)
+    if let Some(parent) = archive_path.parent() {
+        if parent.exists() {
+            return Ok(parent.to_path_buf());
+        }
+    }
+
+    // Fallback: create a folder based on pack_id
+    let folder = storage_root.join(pack_id);
+    fs::create_dir_all(&folder)
+        .map_err(|e| format!("Failed to create pack extract folder: {}", e))?;
+    Ok(folder)
+}
+
 pub fn ensure_pack_files_present(
     archive_path: &Path,
     items: &mut [LibraryPackItem],

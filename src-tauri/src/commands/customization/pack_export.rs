@@ -8,7 +8,6 @@ use crate::cursor_defaults::populate_missing_cursor_paths_with_defaults;
 use crate::state::{AppState, CustomizationMode};
 
 use super::library::LibraryPackItem;
-use super::pack_manifest::{CursorPackManifest, PACK_MANIFEST_FILENAME};
 use super::pack_library::{prepare_pack_archive_destination, register_pack_in_library};
 
 const SIMPLE_MODE_EXPORT_NAMES: [&str; 2] = ["Normal", "Hand"];
@@ -146,11 +145,6 @@ pub async fn export_active_cursor_pack(
     let archive_path_str = target_path.to_string_lossy().to_string();
 
     let created_at = crate::utils::library_meta::now_iso8601_utc();
-    let pack_name = target_path
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .unwrap_or("cursor-pack")
-        .to_string();
 
     let items: Vec<LibraryPackItem> = entries
         .iter()
@@ -175,22 +169,6 @@ pub async fn export_active_cursor_pack(
     let options: FileOptions<'_, ()> =
         FileOptions::default().compression_method(zip::CompressionMethod::Stored);
 
-    let manifest = CursorPackManifest {
-        version: 1,
-        pack_name: pack_name.clone(),
-        mode: current_mode,
-        created_at: created_at.clone(),
-        items: items.clone(),
-    };
-    let manifest_json =
-        serde_json::to_string_pretty(&manifest).map_err(|e| format!("Failed to serialize manifest: {e}"))?;
-    zip_writer
-        .start_file(PACK_MANIFEST_FILENAME, options)
-        .map_err(|e| format!("Failed to start manifest entry: {}", e))?;
-    zip_writer
-        .write_all(manifest_json.as_bytes())
-        .map_err(|e| format!("Failed to write manifest to zip: {}", e))?;
-
     for (_cursor_name, pack_filename, source_path) in &entries {
         let data =
             fs::read(source_path).map_err(|e| format!("Failed to read file {}: {}", source_path.display(), e))?;
@@ -209,6 +187,32 @@ pub async fn export_active_cursor_pack(
     let bytes = writer.into_inner();
 
     fs::write(&target_path, &bytes).map_err(|e| format!("Failed to write cursor pack: {}", e))?;
+
+    // Extract ZIP contents to the same folder for immediate access
+    if let Some(pack_folder) = target_path.parent() {
+        let archive_file = fs::File::open(&target_path)
+            .map_err(|e| format!("Failed to open pack archive for extraction: {}", e))?;
+        let mut archive = zip::ZipArchive::new(archive_file)
+            .map_err(|e| format!("Failed to read pack archive for extraction: {}", e))?;
+
+        for i in 0..archive.len() {
+            let mut entry = archive
+                .by_index(i)
+                .map_err(|e| format!("Failed to read archive entry: {}", e))?;
+
+            if entry.is_dir() {
+                continue;
+            }
+
+            let entry_name = entry.name().to_string();
+            let out_path = pack_folder.join(&entry_name);
+
+            let mut out_file = fs::File::create(&out_path)
+                .map_err(|e| format!("Failed to create extracted file {}: {}", entry_name, e))?;
+            std::io::copy(&mut entry, &mut out_file)
+                .map_err(|e| format!("Failed to extract file {}: {}", entry_name, e))?;
+        }
+    }
 
     register_pack_in_library(
         &app,
