@@ -23,6 +23,9 @@ mod store;
 pub struct AniPreviewData {
     /// Base64 PNG data URLs for each frame
     pub frames: Vec<String>,
+    /// When true, `frames` contains file paths that must be resolved via Tauri file protocol.
+    #[serde(default)]
+    pub frames_are_paths: bool,
     /// Delay in milliseconds for each frame
     pub delays: Vec<u32>,
     /// Total animation duration in milliseconds

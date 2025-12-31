@@ -52,9 +52,8 @@ export function createCursorPreviewService(deps: {
       const isAniFile = filePath?.toLowerCase().endsWith('.ani');
 
       if (isAniFile && filePath) {
-        preloadAniPreview(filePath, fetchers).catch(() => {
-          // Errors are non-fatal for background preloads.
-        });
+        // Intentionally skip preloading ANI previews.
+        // ANI decoding/frame extraction can be expensive; keep UI responsive by loading lazily.
         continue;
       }
 

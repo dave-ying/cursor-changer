@@ -111,6 +111,7 @@ export const createSettingsOperations = (
         if (!tauri.invoke) return;
         await invokeWithFeedback(tauri.invoke, Commands.setDefaultCursorStyle, {
             args: { style },
+            successMessage: undefined,
             showMessage,
             logLabel: 'Failed to set default cursor style:',
             errorMessage: (error) => 'Failed to set default cursor style: ' + String(error),
@@ -118,7 +119,10 @@ export const createSettingsOperations = (
             rethrow: true
         });
         updateCursorState({ defaultCursorStyle: style });
-        showMessage('Default cursors set to Windows style', 'success');
+        showMessage(
+            style === 'mac' ? 'Default cursors set to Mac style' : 'Default cursors set to Windows style',
+            'success'
+        );
     },
 
     resetAllSettings: async () => {

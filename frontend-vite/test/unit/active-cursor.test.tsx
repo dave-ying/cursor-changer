@@ -56,6 +56,7 @@ vi.mock('@/components/CursorCustomization/ActiveCursorContextMenu', () => ({
 describe('ActiveCursor', () => {
   const mockOnBrowse = vi.fn();
   const mockCursor = {
+    id: 0,
     name: 'Normal',
     display_name: 'Normal Pointer',
     image_path: null,
@@ -128,7 +129,10 @@ describe('ActiveCursor', () => {
         expect(screen.getByRole('img')).toBeInTheDocument();
       });
 
-      expect(mockInvoke).toHaveBeenCalledWith('get_system_cursor_preview', { cursor_name: 'Normal' });
+      expect(mockInvoke).toHaveBeenCalledWith(
+        'get_system_cursor_preview',
+        expect.objectContaining({ cursor_name: 'Normal', cursorName: 'Normal' })
+      );
       expect(screen.queryByText('✓')).not.toBeInTheDocument();
     });
 

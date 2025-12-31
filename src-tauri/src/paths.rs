@@ -39,6 +39,14 @@ pub fn pack_cache_dir() -> Result<PathBuf, String> {
     cursor_packs_dir()
 }
 
+pub fn ani_preview_cache_dir() -> Result<PathBuf, String> {
+    let library_dir = library_root_dir()?;
+    let previews_dir = library_dir.join("ani-previews");
+    fs::create_dir_all(&previews_dir)
+        .map_err(|e| format!("Failed to create ANI previews directory: {}", e))?;
+    Ok(previews_dir)
+}
+
 fn ensure_library_layout(library_dir: &Path) -> Result<(), String> {
     let cursors_dir = library_dir.join("cursors");
     let packs_dir = library_dir.join("cursor-packs");

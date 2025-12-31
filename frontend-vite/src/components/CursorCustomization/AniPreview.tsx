@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { AniPreviewData } from '../../types/generated/AniPreviewData';
 import { Commands, invokeCommand } from '../../tauri/commands';
+import { convertFileSrc } from '@tauri-apps/api/core';
 
 // Re-export the type for convenience
 export type { AniPreviewData };
@@ -30,13 +31,21 @@ export function AniPreview({
   style,
   paused = false
 }: AniPreviewProps) {
+  const resolvedFrames = React.useMemo(() => {
+    if (!data.frames?.length) return [];
+    if ((data as any).frames_are_paths) {
+      return data.frames.map((p) => convertFileSrc(p));
+    }
+    return data.frames;
+  }, [data]);
+
   const [currentFrame, setCurrentFrame] = useState(0);
   const frameTimeRef = useRef(0);
   const animationRef = useRef<number | null>(null);
   const lastTimeRef = useRef(0);
 
   const animate = useCallback((timestamp: number) => {
-    if (paused || !data.frames.length) {
+    if (paused || !resolvedFrames.length) {
       animationRef.current = requestAnimationFrame(animate);
       return;
     }
@@ -53,14 +62,14 @@ export function AniPreview({
     const currentDelay = data.delays[currentFrame] || 100;
     if (frameTimeRef.current >= currentDelay) {
       frameTimeRef.current = 0;
-      setCurrentFrame(prev => (prev + 1) % data.frames.length);
+      setCurrentFrame(prev => (prev + 1) % resolvedFrames.length);
     }
 
     animationRef.current = requestAnimationFrame(animate);
-  }, [data.frames.length, data.delays, currentFrame, paused]);
+  }, [resolvedFrames.length, data.delays, currentFrame, paused]);
 
   useEffect(() => {
-    if (data.frames.length > 1) {
+    if (resolvedFrames.length > 1) {
       animationRef.current = requestAnimationFrame(animate);
     }
     return () => {
@@ -68,7 +77,7 @@ export function AniPreview({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [animate, data.frames.length]);
+  }, [animate, resolvedFrames.length]);
 
   // Reset when data changes
   useEffect(() => {
@@ -77,13 +86,13 @@ export function AniPreview({
     lastTimeRef.current = 0;
   }, [data]);
 
-  if (!data.frames.length) {
+  if (!resolvedFrames.length) {
     return null;
   }
 
   return (
     <img
-      src={data.frames[currentFrame]}
+      src={resolvedFrames[currentFrame]}
       alt={alt}
       className={className}
       style={style}

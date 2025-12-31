@@ -267,8 +267,14 @@ describe('Cursor Preview Cache Service', () => {
 
         await preloadCursorPreviews(cursors, mockInvoke);
 
-        expect(mockInvoke).toHaveBeenCalledWith('get_system_cursor_preview', { cursor_name: 'Normal' });
-        expect(mockInvoke).toHaveBeenCalledWith('get_system_cursor_preview', { cursor_name: 'IBeam' });
+        expect(mockInvoke).toHaveBeenCalledWith(
+          'get_system_cursor_preview',
+          expect.objectContaining({ cursor_name: 'Normal', cursorName: 'Normal' })
+        );
+        expect(mockInvoke).toHaveBeenCalledWith(
+          'get_system_cursor_preview',
+          expect.objectContaining({ cursor_name: 'IBeam', cursorName: 'IBeam' })
+        );
       });
 
       it('preloads custom cursors', async () => {
@@ -299,8 +305,14 @@ describe('Cursor Preview Cache Service', () => {
         await preloadCursorPreviews(cursors, mockInvoke);
 
         // Should only call for IBeam, not Normal
-        expect(mockInvoke).not.toHaveBeenCalledWith('get_system_cursor_preview', { cursor_name: 'Normal' });
-        expect(mockInvoke).toHaveBeenCalledWith('get_system_cursor_preview', { cursor_name: 'IBeam' });
+        expect(mockInvoke).not.toHaveBeenCalledWith(
+          'get_system_cursor_preview',
+          expect.objectContaining({ cursor_name: 'Normal', cursorName: 'Normal' })
+        );
+        expect(mockInvoke).toHaveBeenCalledWith(
+          'get_system_cursor_preview',
+          expect.objectContaining({ cursor_name: 'IBeam', cursorName: 'IBeam' })
+        );
       });
 
       it('skips ANI files (they are loaded separately)', async () => {

@@ -335,20 +335,6 @@ pub fn register_pack_in_library_with_data<R: Runtime>(
 
     ensure_pack_files_present(pack_path, &mut metadata.items)?;
 
-    match generate_pack_previews_from_archive(pack_path) {
-        Ok(previews) => {
-            metadata.previews = Some(previews);
-            metadata.previews_version = Some(CURRENT_PREVIEW_CACHE_VERSION);
-        }
-        Err(err) => {
-            cc_warn!(
-                "[CursorCustomization] Failed to cache previews for pack {}: {}",
-                pack_name,
-                err
-            );
-        }
-    }
-
     let cursor = LibraryCursor {
         id: id.clone(),
         name: pack_name,

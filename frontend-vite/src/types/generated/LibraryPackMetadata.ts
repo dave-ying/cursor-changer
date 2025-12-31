@@ -2,4 +2,4 @@
 import type { CustomizationMode } from "./CustomizationMode";
 import type { LibraryPackItem } from "./LibraryPackItem";
 
-export type LibraryPackMetadata = { mode: CustomizationMode, archive_path: string, items: Array<LibraryPackItem>, previews?: Record<string, string>, };
+export type LibraryPackMetadata = { mode: CustomizationMode, archive_path: string, items: Array<LibraryPackItem>, previews: { [key in string]?: string } | null, };

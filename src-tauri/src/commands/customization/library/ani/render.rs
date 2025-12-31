@@ -51,11 +51,10 @@ pub(super) fn frame_to_rgba(frame_data: &[u8]) -> Result<ImageBuffer<Rgba<u8>, V
         .ok_or(AniError::InvalidFormat("failed to decode DIB frame"))
 }
 
-pub(super) fn frame_to_png_data_url(frame_data: &[u8]) -> Result<String, AniError> {
+pub(super) fn frame_to_png_bytes(frame_data: &[u8]) -> Result<Vec<u8>, AniError> {
     if let Some(png_data) = super::super::preview::extract_embedded_png(frame_data) {
         if png_data.len() > 100 {
-            let base64 = base64_encode(&png_data);
-            return Ok(format!("data:image/png;base64,{}", base64));
+            return Ok(png_data);
         }
     }
 
@@ -78,8 +77,7 @@ pub(super) fn frame_to_png_data_url(frame_data: &[u8]) -> Result<String, AniErro
             if image_data.len() >= 8
                 && &image_data[0..8] == &[0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A]
             {
-                let base64 = base64_encode(image_data);
-                return Ok(format!("data:image/png;base64,{}", base64));
+                return Ok(image_data.to_vec());
             }
         }
     }
@@ -103,6 +101,11 @@ pub(super) fn frame_to_png_data_url(frame_data: &[u8]) -> Result<String, AniErro
         )
         .map_err(|e| AniError::ImageEncode(e.to_string()))?;
 
+    Ok(png_bytes)
+}
+
+pub(super) fn frame_to_png_data_url(frame_data: &[u8]) -> Result<String, AniError> {
+    let png_bytes = frame_to_png_bytes(frame_data)?;
     let base64 = base64_encode(&png_bytes);
     Ok(format!("data:image/png;base64,{}", base64))
 }

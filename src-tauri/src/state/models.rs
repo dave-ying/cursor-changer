@@ -71,18 +71,21 @@ impl Default for ThemeMode {
 #[ts(export, export_to = "../../frontend-vite/src/types/generated/")]
 pub enum DefaultCursorStyle {
     Windows,
+    Mac,
 }
 
 impl DefaultCursorStyle {
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Windows => "windows",
+            Self::Mac => "mac",
         }
     }
 
     pub fn from_str(s: &str) -> Option<Self> {
         match s.trim().to_lowercase().as_str() {
             "windows" => Some(Self::Windows),
+            "mac" => Some(Self::Mac),
             _ => None,
         }
     }

@@ -42,11 +42,6 @@ fn preview_data_from_bytes(bytes: &[u8], ext_hint: Option<&str>) -> Result<Strin
     let ext = ext_hint.unwrap_or_default();
 
     if ext == "ani" {
-        if let Some(gif_bytes) = super::ani::convert_ani_to_gif(bytes) {
-            let base64 = base64_encode(&gif_bytes);
-            return Ok(format!("data:image/gif;base64,{}", base64));
-        }
-
         if let Some(frame_data) = super::ani::extract_ani_first_frame(bytes) {
             if let Some(png) = extract_embedded_png(&frame_data) {
                 let png = ensure_square_png_bytes(&png).unwrap_or(png);

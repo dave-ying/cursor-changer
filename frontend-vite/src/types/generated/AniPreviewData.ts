@@ -14,6 +14,10 @@ export type AniPreviewData = {
  */
 frames: Array<string>, 
 /**
+ * When true, `frames` contains file paths that must be resolved via Tauri file protocol.
+ */
+frames_are_paths: boolean, 
+/**
  * Delay in milliseconds for each frame
  */
 delays: Array<number>, 
