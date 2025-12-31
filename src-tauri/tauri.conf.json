@@ -6,7 +6,7 @@
     "devUrl": "http://localhost:5173",
     "frontendDist": "../frontend-vite/dist",
     "beforeDevCommand": "node src-tauri/scripts/start-frontend-if-needed.cjs",
-    "beforeBuildCommand": "npm --prefix frontend-vite run build"
+    "beforeBuildCommand": "npm --prefix frontend-vite run build:clean"
   },
   "app": {
     "windows": [
