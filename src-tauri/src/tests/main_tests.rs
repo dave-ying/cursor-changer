@@ -15,12 +15,16 @@ mod tests {
         let cfg = PersistedConfig {
             shortcut: None,
             shortcut_enabled: None,
+            app_shortcut: None,
+            app_shortcut_enabled: None,
+            app_enabled: None,
             minimize_to_tray: None,
             run_on_startup: None,
             cursor_size: None,
             accent_color: None,
             theme_mode: None,
             default_cursor_style: None,
+            customization_mode: None,
         };
 
         let normalized = normalize_persisted_config(cfg);
@@ -36,12 +40,16 @@ mod tests {
         let cfg = PersistedConfig {
             shortcut: Some("Ctrl+Shift+Z".to_string()),
             shortcut_enabled: Some(true),
+            app_shortcut: None,
+            app_shortcut_enabled: None,
+            app_enabled: None,
             minimize_to_tray: Some(false),
             run_on_startup: None,
             cursor_size: None,
             accent_color: None,
             theme_mode: None,
             default_cursor_style: None,
+            customization_mode: None,
         };
 
         let s = serde_json::to_string(&cfg).expect("serialize");
@@ -88,12 +96,16 @@ mod tests {
         let cfg = PersistedConfig {
             shortcut: Some("Ctrl+Alt+T".to_string()),
             shortcut_enabled: Some(true),
+            app_shortcut: None,
+            app_shortcut_enabled: None,
+            app_enabled: None,
             minimize_to_tray: Some(false),
             run_on_startup: None,
             cursor_size: None,
             accent_color: None,
             theme_mode: None,
             default_cursor_style: None,
+            customization_mode: None,
         };
 
         let result = write_config(&dir, &cfg);
@@ -138,12 +150,16 @@ mod tests {
         let config1 = PersistedConfig {
             shortcut: Some("Ctrl+Old".to_string()),
             shortcut_enabled: None,
+            app_shortcut: None,
+            app_shortcut_enabled: None,
+            app_enabled: None,
             minimize_to_tray: Some(false),
             run_on_startup: None,
             cursor_size: None,
             accent_color: None,
             theme_mode: None,
             default_cursor_style: None,
+            customization_mode: None,
         };
 
         write_config(&dir, &config1).expect("first write");
@@ -151,12 +167,16 @@ mod tests {
         let config2 = PersistedConfig {
             shortcut: Some("Ctrl+New".to_string()),
             shortcut_enabled: None,
+            app_shortcut: None,
+            app_shortcut_enabled: None,
+            app_enabled: None,
             minimize_to_tray: Some(true),
             run_on_startup: None,
             cursor_size: None,
             accent_color: None,
             theme_mode: None,
             default_cursor_style: None,
+            customization_mode: None,
         };
 
         write_config(&dir, &config2).expect("second write");
@@ -220,12 +240,16 @@ mod tests {
         let old_config = PersistedConfig {
             shortcut: Some("Ctrl+Shift+F9".to_string()),
             shortcut_enabled: None,
+            app_shortcut: None,
+            app_shortcut_enabled: None,
+            app_enabled: None,
             minimize_to_tray: None,
             run_on_startup: None,
             cursor_size: None,
             accent_color: None,
             theme_mode: None,
             default_cursor_style: None,
+            customization_mode: None,
         };
 
         let normalized = normalize_persisted_config(old_config);
@@ -278,12 +302,16 @@ mod tests {
             let config = PersistedConfig {
                 shortcut: Some(format!("Ctrl+{}", i)),
                 shortcut_enabled: None,
+                app_shortcut: None,
+                app_shortcut_enabled: None,
+                app_enabled: None,
                 minimize_to_tray: Some(i % 2 == 0),
                 run_on_startup: None,
                 cursor_size: None,
                 accent_color: None,
                 theme_mode: None,
                 default_cursor_style: None,
+                customization_mode: None,
             };
 
             write_config(&dir, &config).expect("write");

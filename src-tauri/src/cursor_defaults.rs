@@ -1,6 +1,6 @@
 use std::{collections::HashMap, path::PathBuf};
 
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, Runtime};
 
 use crate::system;
 
@@ -21,28 +21,39 @@ pub const SIMPLE_MODE_CURSOR_NAMES: [&str; 14] = [
     "Pen",
 ];
 
-fn default_cursors_dir_candidates(app: &AppHandle, cursor_style: &str) -> Vec<PathBuf> {
+fn default_cursors_dir_candidates<R: Runtime>(app: &AppHandle<R>, cursor_style: &str) -> Vec<PathBuf> {
     let mut candidates = Vec::new();
 
     if let Ok(resource_dir) = app.path().resource_dir() {
-        candidates.push(resource_dir.join("default-cursors").join(cursor_style));
-    }
-
-    if let Ok(cwd) = std::env::current_dir() {
-        // If the current dir is the repo root, expect default-cursors under src-tauri/
         candidates.push(
-            cwd.join("src-tauri")
+            resource_dir
+                .join("default-assets")
                 .join("default-cursors")
                 .join(cursor_style),
         );
-        // If running from src-tauri (cargo tauri dev default), default-cursors sits directly under cwd
-        candidates.push(cwd.join("default-cursors").join(cursor_style));
+    }
+
+    if let Ok(cwd) = std::env::current_dir() {
+        // If the current dir is the repo root, expect default-assets under src-tauri/
+        candidates.push(
+            cwd.join("src-tauri")
+                .join("default-assets")
+                .join("default-cursors")
+                .join(cursor_style),
+        );
+        // If running from src-tauri (cargo tauri dev default), default-assets sits directly under cwd
+        candidates.push(
+            cwd.join("default-assets")
+                .join("default-cursors")
+                .join(cursor_style),
+        );
     }
 
     if let Ok(app_data_dir) = std::env::var("APPDATA") {
         candidates.push(
             PathBuf::from(app_data_dir)
                 .join("cursor-changer")
+                .join("default-assets")
                 .join("default-cursors")
                 .join(cursor_style),
         );
@@ -51,7 +62,7 @@ fn default_cursors_dir_candidates(app: &AppHandle, cursor_style: &str) -> Vec<Pa
     candidates
 }
 
-pub fn resolve_default_cursors_dir(app: &AppHandle, cursor_style: &str) -> Result<PathBuf, String> {
+pub fn resolve_default_cursors_dir<R: Runtime>(app: &AppHandle<R>, cursor_style: &str) -> Result<PathBuf, String> {
     let candidates = default_cursors_dir_candidates(app, cursor_style);
 
     for candidate in &candidates {
@@ -67,8 +78,8 @@ pub fn resolve_default_cursors_dir(app: &AppHandle, cursor_style: &str) -> Resul
     Err("Failed to resolve default cursors directory".to_string())
 }
 
-pub fn resolve_default_cursor_paths(
-    app: &AppHandle,
+pub fn resolve_default_cursor_paths<R: Runtime>(
+    app: &AppHandle<R>,
     cursor_style: &str,
 ) -> Result<HashMap<String, PathBuf>, String> {
     let cur_dir = resolve_default_cursors_dir(app, cursor_style)?;
@@ -95,8 +106,8 @@ pub fn resolve_default_cursor_paths(
     Ok(cursor_paths)
 }
 
-pub fn resolve_default_cursor_path(
-    app: &AppHandle,
+pub fn resolve_default_cursor_path<R: Runtime>(
+    app: &AppHandle<R>,
     cursor_style: &str,
     cursor_name: &str,
 ) -> Result<Option<PathBuf>, String> {
@@ -116,8 +127,8 @@ pub fn resolve_default_cursor_path(
     Ok(None)
 }
 
-pub fn populate_missing_cursor_paths_with_defaults(
-    app: &AppHandle,
+pub fn populate_missing_cursor_paths_with_defaults<R: Runtime>(
+    app: &AppHandle<R>,
     cursor_style: &str,
     cursor_paths: &mut HashMap<String, String>,
 ) -> Result<(), String> {

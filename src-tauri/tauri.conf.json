@@ -37,8 +37,9 @@
       "icons/icon.ico"
     ],
     "resources": [
-      "default-cursors/windows/*",
-      "default-cursors/library/*"
+      "default-assets/default-cursors/windows/*",
+      "default-assets/library/cursors/*",
+      "default-assets/library/cursor-packs/**/*"
     ],
     "windows": {
       "nsis": {

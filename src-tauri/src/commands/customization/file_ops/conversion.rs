@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use crate::cursor_converter;
 use crate::paths;
 use image::{imageops::FilterType, ImageBuffer, Rgba};
-use tauri::AppHandle;
+use tauri::{AppHandle, Runtime};
 
 enum ConversionInput<'a> {
     Path(&'a str),
@@ -137,7 +137,7 @@ fn convert_to_cur_impl(
 
 /// Convert an image file to .CUR format
 /// Returns the path to the converted .CUR file
-pub fn convert_image_to_cur(input_path: &str, _app: &AppHandle) -> Result<String, String> {
+pub fn convert_image_to_cur<R: Runtime>(input_path: &str, _app: &AppHandle<R>) -> Result<String, String> {
     convert_to_cur_impl(
         ConversionInput::Path(input_path),
         cursor_converter::MAX_CURSOR_SIZE,
@@ -152,10 +152,10 @@ pub fn convert_image_to_cur(input_path: &str, _app: &AppHandle) -> Result<String
 /// Convert image bytes directly to .CUR format WITHOUT saving the source image.
 /// This is the preferred method for uploads to avoid leaving source images on disk.
 /// Returns the path to the converted .CUR file.
-pub fn convert_image_bytes_to_cur(
+pub fn convert_image_bytes_to_cur<R: Runtime>(
     data: &[u8],
     filename: &str,
-    _app: &AppHandle,
+    _app: &AppHandle<R>,
 ) -> Result<String, String> {
     convert_to_cur_impl(
         ConversionInput::Bytes { data, filename },
@@ -270,8 +270,8 @@ fn load_raster_image_from_bytes(
 /// Convert an image file to .CUR format with an explicit click point and size.
 /// Returns the path to the converted .CUR file.
 #[tauri::command]
-pub fn convert_image_to_cur_with_click_point(
-    _app: AppHandle,
+pub fn convert_image_to_cur_with_click_point<R: Runtime>(
+    _app: AppHandle<R>,
     input_path: String,
     size: u32,
     click_point_x: u16,

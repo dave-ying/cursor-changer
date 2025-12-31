@@ -1,11 +1,11 @@
 use std::io::Cursor as IoCursor;
 use std::{fs, io::Write};
 
-use tauri::AppHandle;
+use tauri::{AppHandle, Runtime};
 use tauri_plugin_dialog::DialogExt;
 use zip::write::FileOptions;
 
-pub(super) async fn export_library_cursors(app: AppHandle) -> Result<Option<String>, String> {
+pub(super) async fn export_library_cursors<R: Runtime>(app: AppHandle<R>) -> Result<Option<String>, String> {
     use std::path::Path;
 
     let library = super::store::load_library(&app)?;
@@ -82,3 +82,4 @@ pub(super) async fn export_library_cursors(app: AppHandle) -> Result<Option<Stri
         None => Ok(None),
     }
 }
+

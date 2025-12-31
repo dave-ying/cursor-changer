@@ -33,14 +33,8 @@ export function ActiveSection({
 }: ActiveSectionProps) {
   const safeVisibleCursors = Array.isArray(visibleCursors) ? visibleCursors : [];
 
-  const [showModeToggle, setShowModeToggle] = usePersistentBoolean({
-    key: persistentKeys.activeSection.showModeToggle,
-    defaultValue: false
-  });
-  const [showMoreOptions, setShowMoreOptions] = usePersistentBoolean({
-    key: persistentKeys.activeSection.showMoreOptions,
-    defaultValue: false
-  });
+  const [showModeToggle, setShowModeToggle] = React.useState(false);
+  const [showMoreOptions, setShowMoreOptions] = React.useState(false);
   const [showCursorNames, setShowCursorNames] = usePersistentBoolean({
     key: persistentKeys.activeSection.showCursorNames,
     defaultValue: true

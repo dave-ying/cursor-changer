@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
-use tauri::AppHandle;
+use tauri::{AppHandle, Runtime};
 
 use crate::state::CustomizationMode;
 
@@ -72,26 +72,26 @@ pub struct LibraryData {
 }
 
 /// Load the library data from disk
-pub fn load_library(app: &AppHandle) -> Result<LibraryData, String> {
+pub fn load_library<R: Runtime>(app: &AppHandle<R>) -> Result<LibraryData, String> {
     store::load_library(app)
 }
 
 /// Save the library data to disk
-pub fn save_library(app: &AppHandle, library: &LibraryData) -> Result<(), String> {
+pub fn save_library<R: Runtime>(app: &AppHandle<R>, library: &LibraryData) -> Result<(), String> {
     store::save_library(app, library)
 }
 
 /// Get all cursors in the library
 #[tauri::command]
-pub fn get_library_cursors(app: AppHandle) -> Result<Vec<LibraryCursor>, String> {
+pub fn get_library_cursors<R: Runtime>(app: AppHandle<R>) -> Result<Vec<LibraryCursor>, String> {
     let library = load_library(&app)?;
     Ok(library.cursors)
 }
 
 /// Add a cursor to the library
 #[tauri::command]
-pub fn add_cursor_to_library(
-    app: AppHandle,
+pub fn add_cursor_to_library<R: Runtime>(
+    app: AppHandle<R>,
     name: String,
     file_path: String,
     click_point_x: u16,
@@ -145,7 +145,7 @@ pub fn try_delete_library_file(file_path: &std::path::Path) -> Result<bool, std:
 
 /// Remove a cursor from the library and delete the associated .CUR file
 #[tauri::command]
-pub fn remove_cursor_from_library(app: AppHandle, id: String) -> Result<(), String> {
+pub fn remove_cursor_from_library<R: Runtime>(app: AppHandle<R>, id: String) -> Result<(), String> {
     let mut library = load_library(&app)?;
 
     // Find the cursor to get its file path before removing
@@ -199,8 +199,8 @@ pub fn remove_cursor_from_library(app: AppHandle, id: String) -> Result<(), Stri
 
 /// Rename a cursor in the library
 #[tauri::command]
-pub fn rename_cursor_in_library(
-    app: AppHandle,
+pub fn rename_cursor_in_library<R: Runtime>(
+    app: AppHandle<R>,
     id: String,
     new_name: String,
 ) -> Result<(), String> {
@@ -311,8 +311,8 @@ fn generate_unique_path(dir: &Path, base: &str, ext: &str) -> PathBuf {
 
 /// Update an existing cursor entry in the library (replace file path, click point and name)
 #[tauri::command]
-pub fn update_cursor_in_library(
-    app: AppHandle,
+pub fn update_cursor_in_library<R: Runtime>(
+    app: AppHandle<R>,
     id: String,
     name: String,
     file_path: String,
@@ -352,7 +352,7 @@ pub fn update_cursor_in_library(
 /// Reorder the library cursors. `order` is an array of cursor IDs in the
 /// desired order. Any IDs not included will be appended in their original order.
 #[tauri::command]
-pub fn reorder_library_cursors(app: AppHandle, order: Vec<String>) -> Result<(), String> {
+pub fn reorder_library_cursors<R: Runtime>(app: AppHandle<R>, order: Vec<String>) -> Result<(), String> {
     let mut library = load_library(&app)?;
 
     // Keep the original order so any missing IDs can be appended
@@ -412,12 +412,12 @@ pub async fn get_ani_preview_data(file_path: String) -> Result<AniPreviewData, S
 
 /// Export all library cursors into a single ZIP archive and prompt user to save it.
 #[tauri::command]
-pub async fn export_library_cursors(app: AppHandle) -> Result<Option<String>, String> {
+pub async fn export_library_cursors<R: Runtime>(app: AppHandle<R>) -> Result<Option<String>, String> {
     export::export_library_cursors(app).await
 }
 
 /// Clean up orphaned pack extraction folders that don't have corresponding ZIP files in the library
-pub fn cleanup_orphaned_pack_folders(app: &AppHandle) -> Result<(), String> {
+pub fn cleanup_orphaned_pack_folders<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
     let library = load_library(app)?;
     
     // Get all valid pack IDs from the library
@@ -461,31 +461,52 @@ pub fn cleanup_orphaned_pack_folders(app: &AppHandle) -> Result<(), String> {
 
 /// Reset the library by removing all user cursors and restoring default cursors
 #[tauri::command]
-pub fn reset_library(app: AppHandle) -> Result<(), String> {
-    let library = load_library(&app)?;
-    
-    // Delete all cursor files in our cursors folder
-    for cursor in &library.cursors {
-        let file_path = std::path::Path::new(&cursor.file_path);
-        match try_delete_library_file(file_path) {
-            Ok(true) => cc_debug!("[CursorChanger] Deleted cursor file: {}", cursor.file_path),
-            Ok(false) => {} // Skipped, not in our folder or doesn't exist
-            Err(e) => cc_warn!(
-                "[CursorChanger] Failed to delete cursor file {}: {}",
-                cursor.file_path,
-                e
-            ),
+pub fn reset_library<R: Runtime>(app: AppHandle<R>) -> Result<(), String> {
+    // Aggressively wipe the cursors directory to ensure no stale files remain
+    if let Ok(cursors_dir) = crate::paths::cursors_dir() {
+        if cursors_dir.exists() {
+             match std::fs::remove_dir_all(&cursors_dir) {
+                Ok(()) => {
+                    cc_debug!(
+                        "[CursorChanger] Wiped cursors directory: {}",
+                        cursors_dir.to_string_lossy()
+                    );
+                    // Recreate it immediately so it's ready for defaults
+                    if let Err(e) = std::fs::create_dir_all(&cursors_dir) {
+                         cc_warn!(
+                            "[CursorChanger] Failed to recreate cursors directory {}: {}",
+                            cursors_dir.to_string_lossy(),
+                            e
+                        );
+                    }
+                },
+                Err(e) => cc_warn!(
+                    "[CursorChanger] Failed to wipe cursors directory {}: {}",
+                    cursors_dir.to_string_lossy(),
+                    e
+                ),
+            }
         }
     }
-    
+
     // Clean up all extracted pack caches under `cursor-packs/`
     if let Ok(cache_root) = crate::paths::pack_cache_dir() {
         if cache_root.exists() {
             match std::fs::remove_dir_all(&cache_root) {
-                Ok(()) => cc_debug!(
-                    "[CursorChanger] Deleted all cursor pack extracted caches: {}",
-                    cache_root.to_string_lossy()
-                ),
+                Ok(()) => {
+                    cc_debug!(
+                        "[CursorChanger] Deleted all cursor pack extracted caches: {}",
+                        cache_root.to_string_lossy()
+                    );
+                    // Recreate it immediately
+                     if let Err(e) = std::fs::create_dir_all(&cache_root) {
+                         cc_warn!(
+                            "[CursorChanger] Failed to recreate packs directory {}: {}",
+                            cache_root.to_string_lossy(),
+                            e
+                        );
+                    }
+                },
                 Err(e) => cc_warn!(
                     "[CursorChanger] Failed to delete packs directory {}: {}",
                     cache_root.to_string_lossy(),

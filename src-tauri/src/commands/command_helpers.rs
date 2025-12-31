@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Emitter, State};
+use tauri::{AppHandle, Emitter, Runtime, State};
 
 use crate::events;
 use crate::state::config::{persist_config, PersistedConfig};
@@ -47,8 +47,8 @@ fn build_payload_and_config(
     (payload, config)
 }
 
-pub fn update_state<F>(
-    app: &AppHandle,
+pub fn update_state<F, R: Runtime>(
+    app: &AppHandle<R>,
     state: &State<AppState>,
     persist: bool,
     f: F,
@@ -72,8 +72,8 @@ where
     Ok(payload)
 }
 
-pub fn update_state_and_emit<F>(
-    app: &AppHandle,
+pub fn update_state_and_emit<F, R: Runtime>(
+    app: &AppHandle<R>,
     state: &State<AppState>,
     persist: bool,
     f: F,
@@ -86,14 +86,14 @@ where
     Ok(payload)
 }
 
-pub fn update_state_with_result<F, R>(
-    app: &AppHandle,
+pub fn update_state_with_result<F, Res, R: Runtime>(
+    app: &AppHandle<R>,
     state: &State<AppState>,
     persist: bool,
     f: F,
-) -> Result<(CursorStatePayload, R), String>
+) -> Result<(CursorStatePayload, Res), String>
 where
-    F: FnOnce(&mut crate::state::app_state::AppStateWriteGuard<'_>) -> Result<R, String>,
+    F: FnOnce(&mut crate::state::app_state::AppStateWriteGuard<'_>) -> Result<Res, String>,
 {
     let ((payload, result), config) = {
         let mut guard = state.write_all()?;
@@ -113,14 +113,14 @@ where
     Ok((payload, result))
 }
 
-pub fn update_state_and_emit_with_result<F, R>(
-    app: &AppHandle,
+pub fn update_state_and_emit_with_result<F, Res, R: Runtime>(
+    app: &AppHandle<R>,
     state: &State<AppState>,
     persist: bool,
     f: F,
-) -> Result<(CursorStatePayload, R), String>
+) -> Result<(CursorStatePayload, Res), String>
 where
-    F: FnOnce(&mut crate::state::app_state::AppStateWriteGuard<'_>) -> Result<R, String>,
+    F: FnOnce(&mut crate::state::app_state::AppStateWriteGuard<'_>) -> Result<Res, String>,
 {
     let (payload, result) = update_state_with_result(app, state, persist, f)?;
     let _ = app.emit(events::CURSOR_STATE, payload.clone());
@@ -128,7 +128,7 @@ where
 }
 
 #[allow(dead_code)]
-pub fn emit_state(app: &AppHandle, state: &State<AppState>) -> Result<CursorStatePayload, String> {
+pub fn emit_state<R: Runtime>(app: &AppHandle<R>, state: &State<AppState>) -> Result<CursorStatePayload, String> {
     let payload = CursorStatePayload::try_from(&**state)?;
 
     let _ = app.emit(events::CURSOR_STATE, payload.clone());

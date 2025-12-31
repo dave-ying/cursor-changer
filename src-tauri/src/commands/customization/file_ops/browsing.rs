@@ -42,3 +42,4 @@ pub async fn browse_cursor_file(app: AppHandle) -> Result<Option<String>, String
         None => Ok(None), // User cancelled
     }
 }
+

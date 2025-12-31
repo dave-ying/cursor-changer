@@ -1,11 +1,8 @@
 use std::ptr::null_mut;
-
-use winapi::ctypes::c_void;
-use winapi::shared::windef::HCURSOR;
-use winapi::shared::ntdef::HANDLE;
-use winapi::um::winuser::{
-    CopyImage, CreateCursor, LoadImageW, SetSystemCursor, SystemParametersInfoW, IMAGE_CURSOR,
-    LR_LOADFROMFILE, SPIF_SENDCHANGE, SPI_SETCURSORS,
+use windows::Win32::Foundation::HANDLE;
+use windows::Win32::UI::WindowsAndMessaging::{
+    CopyImage, CreateCursor, LoadImageW, SetSystemCursor, SystemParametersInfoW, HCURSOR,
+    IMAGE_CURSOR, LR_LOADFROMFILE, SPIF_SENDCHANGE, SPI_SETCURSORS, SYSTEM_CURSOR_ID,
 };
 
 use crate::win_common::to_wide;
@@ -17,14 +14,14 @@ unsafe fn create_blank_cursor() -> HCURSOR {
     let xor_plane = [0u8; CURSOR_PLANE_BYTES];
 
     CreateCursor(
-        null_mut(),
+        None,
         0,
         0,
         CURSOR_DIMENSION,
         CURSOR_DIMENSION,
-        and_plane.as_ptr().cast::<c_void>(),
-        xor_plane.as_ptr().cast::<c_void>(),
-    )
+        and_plane.as_ptr().cast(),
+        xor_plane.as_ptr().cast(),
+    ).expect("Failed to create blank cursor")
 }
 
 /// Replace common system cursors with a transparent cursor. Returns true on success.
@@ -37,7 +34,7 @@ pub unsafe fn apply_blank_system_cursors() -> bool {
     let mut success = true;
     for &cursor_id in &CURSOR_IDS {
         let cursor = create_blank_cursor();
-        if cursor.is_null() || SetSystemCursor(cursor, cursor_id) == 0 {
+        if cursor.is_invalid() || SetSystemCursor(cursor, SYSTEM_CURSOR_ID(cursor_id)).is_err() {
             success = false;
         }
     }
@@ -47,38 +44,21 @@ pub unsafe fn apply_blank_system_cursors() -> bool {
     success
 }
 
-/// Restore system cursors using `SystemParametersInfoW(SPI_SETCURSORS)`.
-///
-/// Note: We use `SPIF_SENDCHANGE` without `SPIF_UPDATEINIFILE` to avoid permission issues.
-///
-/// # Safety
-/// This function is unsafe because it calls Windows API functions.
 #[must_use]
 pub unsafe fn restore_system_cursors() -> bool {
     // First attempt: Standard approach with SPIF_SENDCHANGE only
-    let result = SystemParametersInfoW(SPI_SETCURSORS, 0, null_mut(), SPIF_SENDCHANGE);
+    let result = SystemParametersInfoW(SPI_SETCURSORS, 0, Some(null_mut()), SPIF_SENDCHANGE);
 
-    if result != 0 {
+    if result.is_ok() {
         return true;
     }
 
     // Second attempt: Try without any flags
-    let result = SystemParametersInfoW(SPI_SETCURSORS, 0, null_mut(), 0);
+    let result = SystemParametersInfoW(SPI_SETCURSORS, 0, Some(null_mut()), Default::default());
 
-    result != 0
+    result.is_ok()
 }
 
-/// Refresh cursor settings to apply changes from registry.
-///
-/// This should be called after modifying cursor-related registry values
-/// to make Windows reload and apply the changes immediately.
-/// Uses `SPIF_SENDCHANGE` to broadcast the change (`SPIF_UPDATEINIFILE` can cause permission issues).
-///
-/// # Safety
-/// This function is unsafe because it calls Windows API functions.
-///
-/// # Panics
-/// May panic if the mock mutex is poisoned (test code only).
 #[must_use]
 pub unsafe fn refresh_cursor_settings() -> bool {
     #[cfg(test)]
@@ -94,66 +74,50 @@ pub unsafe fn refresh_cursor_settings() -> bool {
             }
         }
     }
-    SystemParametersInfoW(SPI_SETCURSORS, 0, null_mut(), SPIF_SENDCHANGE) != 0
+    SystemParametersInfoW(SPI_SETCURSORS, 0, Some(null_mut()), SPIF_SENDCHANGE).is_ok()
 }
 
-/// Load a cursor from a file and apply it to a specific cursor type with explicit size.
-/// This allows overriding the system cursor size by loading the cursor at a specific dimension.
-///
-/// For multi-resolution .cur files, passing the desired size to `LoadImageW` allows Windows
-/// to select the best matching resolution from the file, preventing pixelation when scaling.
-///
-/// # Arguments
-/// * `file_path` - Path to the .cur or .ani file
-/// * `cursor_id` - The cursor ID (e.g., `OCR_NORMAL`, `OCR_HAND`)
-/// * `size` - Desired cursor size in pixels (e.g., 32, 48, 64)
-///
-/// # Returns
-/// `true` if successful, `false` otherwise
-///
-/// # Safety
-/// This function is unsafe because it calls Windows API functions.
 #[must_use]
 pub unsafe fn apply_cursor_from_file_with_size(file_path: &str, cursor_id: u32, size: i32) -> bool {
     // Convert path to wide string
     let wide_path = to_wide(file_path);
+    let path_pcwstr = windows::core::PCWSTR::from_raw(wide_path.as_ptr());
 
     // Try loading at the exact requested size first
     let mut cursor = LoadImageW(
-        null_mut(),
-        wide_path.as_ptr(),
+        None,
+        path_pcwstr,
         IMAGE_CURSOR,
         size,
         size,
         LR_LOADFROMFILE,
-    ) as HCURSOR;
+    ).map(|h| HCURSOR(h.0)).unwrap_or(HCURSOR::default());
 
     // If exact size fails, try common sizes from largest to smallest
-    if cursor.is_null() {
+    if cursor.is_invalid() {
         let fallback_sizes: [i32; 8] = [256, 192, 160, 144, 128, 96, 64, 32];
         
         for &candidate in &fallback_sizes {
             cursor = LoadImageW(
-                null_mut(),
-                wide_path.as_ptr(),
+                None,
+                path_pcwstr,
                 IMAGE_CURSOR,
                 candidate,
                 candidate,
                 LR_LOADFROMFILE,
-            ) as HCURSOR;
-            if !cursor.is_null() {
+            ).map(|h| HCURSOR(h.0)).unwrap_or(HCURSOR::default());
+
+            if !cursor.is_invalid() {
                 // Successfully loaded at fallback size, now scale to requested size
-                let scaled = CopyImage(
-                    cursor as HANDLE,
+                if let Ok(scaled_h) = CopyImage(
+                    HANDLE(cursor.0),
                     IMAGE_CURSOR,
                     size,
                     size,
-                    0, // Don't delete original in case scaling fails
-                ) as HCURSOR;
-
-                if !scaled.is_null() {
+                    Default::default(), // Don't delete original in case scaling fails
+                ) {
                     // Scaling succeeded, use scaled cursor
-                    cursor = scaled;
+                    cursor = HCURSOR(scaled_h.0);
                 }
                 // If scaling failed, use the fallback-sized cursor as-is
                 break;
@@ -161,15 +125,15 @@ pub unsafe fn apply_cursor_from_file_with_size(file_path: &str, cursor_id: u32, 
         }
     }
 
-    if cursor.is_null() {
+    if cursor.is_invalid() {
         eprintln!("LoadImageW failed for {file_path} at size {size}");
         return false;
     }
 
     // Apply the cursor to the system
-    let result = SetSystemCursor(cursor, cursor_id);
+    let result = SetSystemCursor(cursor, SYSTEM_CURSOR_ID(cursor_id));
 
-    if result == 0 {
+    if result.is_err() {
         eprintln!("SetSystemCursor failed for cursor ID {cursor_id}");
         return false;
     }

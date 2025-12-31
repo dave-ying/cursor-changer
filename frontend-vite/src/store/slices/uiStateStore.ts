@@ -56,18 +56,8 @@ export const createUIStateSlice: StateCreator<
     setCustomizationMode: (mode) => set({ customizationMode: mode ?? 'simple' }),
     setActiveSection: (section) => {
         const newSection = section ?? 'cursor-customization';
-        
-        // Auto-close customize panels when leaving cursor-customization section
-        if (newSection !== 'cursor-customization') {
-            // Clear active section customize panel state
-            localStorage.removeItem(persistentKeys.activeSection.showModeToggle);
-            localStorage.removeItem(persistentKeys.activeSection.showMoreOptions);
-            
-            // Clear library customize panel state
-            localStorage.removeItem(persistentKeys.library.showCustomizePanel);
-            localStorage.removeItem(persistentKeys.library.showMoreOptions);
-        }
-        
+
+
         set({ activeSection: newSection });
     },
 

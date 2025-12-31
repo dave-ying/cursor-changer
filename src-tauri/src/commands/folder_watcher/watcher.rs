@@ -9,17 +9,14 @@ use tauri::{AppHandle, Emitter};
 pub(super) fn start_watcher(
     app: AppHandle,
     state: &Mutex<FolderWatcherState>,
-    cursors_folder: PathBuf,
+    folders: Vec<PathBuf>,
 ) -> Result<(), String> {
     let mut guard = state.lock().map_err(|e| format!("Lock error: {}", e))?;
     if guard.running {
         return Ok(());
     }
 
-    cc_debug!(
-        "[FolderWatcher] Starting watcher for: {}",
-        cursors_folder.display()
-    );
+    cc_debug!("[FolderWatcher] Starting watcher for folders: {:?}", folders);
 
     let app_handle = app.clone();
     let (event_tx, event_rx) = mpsc::channel();
@@ -33,9 +30,19 @@ pub(super) fn start_watcher(
         })
         .map_err(|e| format!("Failed to create watcher: {}", e))?;
 
-    watcher
-        .watch(&cursors_folder, RecursiveMode::NonRecursive)
-        .map_err(|e| format!("Failed to watch folder: {}", e))?;
+    for folder in &folders {
+        if folder.exists() {
+            watcher
+                .watch(folder, RecursiveMode::NonRecursive)
+                .map_err(|e| format!("Failed to watch folder {:?}: {}", folder, e))?;
+        } else {
+            // Just warn, don't fail if one folder is missing (e.g. nested packs might not exist yet)
+            cc_warn!(
+                "[FolderWatcher] Skipping watch on non-existent folder: {:?}",
+                folder
+            );
+        }
+    }
 
     let join_handle = std::thread::spawn(move || loop {
         if stop_rx.try_recv().is_ok() {

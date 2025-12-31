@@ -1,5 +1,6 @@
 // Windows-specific cleanup hooks to ensure cursor restoration on any exit
 #[cfg(debug_assertions)]
+#[cfg(not(test))]
 use crate::commands::window_commands::restore_on_exit;
 #[cfg(debug_assertions)]
 use crate::system;
@@ -55,6 +56,7 @@ fn perform_emergency_cleanup(context: impl std::fmt::Display) {
         Some(app) => {
             // Use blocking cleanup in a new thread
             let _ = thread::spawn(move || {
+                #[cfg(not(test))]
                 restore_on_exit(&app);
             });
         }

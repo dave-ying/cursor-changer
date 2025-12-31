@@ -2,7 +2,7 @@ use super::app_state::AppState;
 use super::models::{CustomizationMode, DefaultCursorStyle, ThemeMode};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, Runtime};
 
 #[derive(Serialize, Deserialize, Default, Debug)]
 pub struct PersistedConfig {
@@ -72,14 +72,14 @@ impl From<&AppState> for PersistedConfig {
     }
 }
 
-pub fn config_path(app: &AppHandle) -> Result<PathBuf, String> {
+pub fn config_path<R: Runtime>(app: &AppHandle<R>) -> Result<PathBuf, String> {
     app.path()
         .app_config_dir()
         .map_err(|e| e.to_string())
         .map(|p| p.join("cursor-changer"))
 }
 
-pub fn persist_config(app: &AppHandle, config: &PersistedConfig) -> Result<(), String> {
+pub fn persist_config<R: Runtime>(app: &AppHandle<R>, config: &PersistedConfig) -> Result<(), String> {
     let dir = config_path(app)?;
     write_config(&dir, config)
 }
@@ -96,11 +96,11 @@ pub fn write_config(dir: &PathBuf, config: &PersistedConfig) -> Result<(), Strin
 }
 
 #[allow(dead_code)]
-pub fn persist_preferences(app: &AppHandle, state: &AppState) -> Result<(), String> {
+pub fn persist_preferences<R: Runtime>(app: &AppHandle<R>, state: &AppState) -> Result<(), String> {
     persist_config(app, &PersistedConfig::from(state))
 }
 
-pub fn load_persisted_config(app: &AppHandle) -> Result<PersistedConfig, String> {
+pub fn load_persisted_config<R: Runtime>(app: &AppHandle<R>) -> Result<PersistedConfig, String> {
     let dir = config_path(app)?;
     let file = dir.join("config.json");
     if !file.exists() {

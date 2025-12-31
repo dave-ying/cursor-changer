@@ -27,9 +27,11 @@ pub mod commands;
 #[path = "cleanup_hooks.rs"]
 pub mod cleanup_hooks;
 
+#[cfg(not(test))]
 #[path = "tray.rs"]
 pub mod tray;
 
+#[cfg(not(test))]
 #[path = "window_setup.rs"]
 pub mod window_setup;
 
@@ -38,21 +40,26 @@ pub mod window_setup;
 pub mod system;
 
 // Include shortcuts module for commands
+#[cfg(not(test))]
 #[path = "shortcuts.rs"]
 pub mod shortcuts;
 
 // Include startup module for commands
+#[cfg(not(test))]
 #[path = "startup.rs"]
 pub mod startup;
 
 // Include startup_config module for commands
+#[cfg(not(test))]
 #[path = "startup_config/mod.rs"]
 pub mod startup_config;
 
+#[cfg(not(test))]
 #[path = "window_events.rs"]
 pub mod window_events;
 
 // Include window module for commands
+#[cfg(not(test))]
 #[path = "window/mod.rs"]
 pub mod window;
 
@@ -63,3 +70,5 @@ pub mod utils;
 // Centralized event name constants
 #[path = "events.rs"]
 pub mod events;
+
+mod minimal_test;

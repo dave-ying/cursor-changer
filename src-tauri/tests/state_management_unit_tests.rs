@@ -175,12 +175,16 @@ fn test_persisted_config_serialization() {
     let config = PersistedConfig {
         shortcut: Some("Ctrl+Shift+C".to_string()),
         shortcut_enabled: Some(true),
+        app_shortcut: Some("Ctrl+Shift+Q".to_string()),
+        app_shortcut_enabled: Some(false),
+        app_enabled: Some(true),
         minimize_to_tray: Some(false),
         run_on_startup: Some(true),
         cursor_size: Some(64),
         accent_color: Some("#ff0000".to_string()),
         theme_mode: Some(ThemeMode::Light),
         default_cursor_style: Some(DefaultCursorStyle::Windows),
+        customization_mode: Some(CustomizationMode::Simple),
     };
 
     let json = serde_json::to_string(&config).expect("serialize");
@@ -205,12 +209,16 @@ fn test_persisted_config_persistence_round_trip() {
     let config = PersistedConfig {
         shortcut: Some("Ctrl+Alt+C".to_string()),
         shortcut_enabled: Some(true),
+        app_shortcut: Some("Ctrl+Alt+Q".to_string()),
+        app_shortcut_enabled: Some(true),
+        app_enabled: Some(true),
         minimize_to_tray: Some(true),
         run_on_startup: Some(false),
         cursor_size: Some(72),
         accent_color: Some("#0000ff".to_string()),
         theme_mode: Some(ThemeMode::Light),
         default_cursor_style: Some(DefaultCursorStyle::Windows),
+        customization_mode: Some(CustomizationMode::Simple),
     };
 
     // Write config manually
@@ -250,6 +258,9 @@ fn test_cursor_state_payload_from_app_state() {
         let mut prefs = state.prefs.write().unwrap();
         prefs.shortcut = Some(DEFAULT_SHORTCUT.to_string());
         prefs.shortcut_enabled = true;
+        prefs.app_shortcut = Some("Ctrl+Shift+Q".to_string());
+        prefs.app_shortcut_enabled = true;
+        prefs.app_enabled = true;
         prefs.minimize_to_tray = false;
         prefs.run_on_startup = false;
         prefs.cursor_size = 64;
@@ -282,12 +293,16 @@ fn test_state_restoration_from_persisted_config() {
     let config = PersistedConfig {
         shortcut: Some("Ctrl+Q".to_string()),
         shortcut_enabled: Some(false),
+        app_shortcut: Some("Ctrl+Alt+A".to_string()),
+        app_shortcut_enabled: Some(true),
+        app_enabled: Some(true),
         minimize_to_tray: Some(true),
         run_on_startup: Some(false),
         cursor_size: Some(80),
         accent_color: Some("#123456".to_string()),
         theme_mode: Some(ThemeMode::Dark),
         default_cursor_style: Some(DefaultCursorStyle::Windows),
+        customization_mode: Some(CustomizationMode::Advanced),
     };
 
     let state = AppState::default();

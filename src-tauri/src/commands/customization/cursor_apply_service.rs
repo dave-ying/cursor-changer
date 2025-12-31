@@ -3,7 +3,7 @@ use crate::state::{AppState, CursorInfo, CursorStatePayload};
 use crate::system;
 use cursor_changer::CURSOR_TYPES;
 use std::collections::HashMap;
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Runtime, State};
 
 use super::set_cursor_focus::refocus_main_window_later;
 use super::set_cursor_validation::{validate_cursor_file, validate_cursor_size};
@@ -20,7 +20,7 @@ pub(crate) fn apply_cursor_paths_for_mode(
     }
 }
 
-pub(crate) fn sync_active_cursor_update(app: &AppHandle, old_path: &str, new_path: &str) {
+pub(crate) fn sync_active_cursor_update<R: Runtime>(app: &AppHandle<R>, old_path: &str, new_path: &str) {
     use crate::system;
     use tauri::Manager;
 
@@ -85,10 +85,10 @@ pub(crate) fn sync_active_cursor_update(app: &AppHandle, old_path: &str, new_pat
     }
 }
 
-pub(super) fn set_all_cursors(
+pub(super) fn set_all_cursors<R: Runtime>(
     image_path: String,
     state: State<AppState>,
-    app: AppHandle,
+    app: AppHandle<R>,
 ) -> Result<Vec<CursorInfo>, String> {
     let cursor_types = &CURSOR_TYPES;
     let mut result = Vec::new();
@@ -121,11 +121,11 @@ pub(super) fn set_all_cursors(
     Ok(result)
 }
 
-pub(super) fn set_all_cursors_with_size(
+pub(super) fn set_all_cursors_with_size<R: Runtime>(
     image_path: String,
     size: i32,
     state: State<AppState>,
-    app: AppHandle,
+    app: AppHandle<R>,
 ) -> Result<Vec<CursorInfo>, String> {
     let cursor_types = &CURSOR_TYPES;
     let mut result = Vec::new();
@@ -169,12 +169,12 @@ pub(super) fn set_all_cursors_with_size(
     Ok(result)
 }
 
-pub(super) fn set_single_cursor_with_size(
+pub(super) fn set_single_cursor_with_size<R: Runtime>(
     cursor_name: String,
     image_path: String,
     size: i32,
     state: State<AppState>,
-    app: AppHandle,
+    app: AppHandle<R>,
 ) -> Result<CursorInfo, String> {
     let cursor_type = CURSOR_TYPES
         .iter()
@@ -218,12 +218,12 @@ pub(super) fn set_single_cursor_with_size(
     Ok(info)
 }
 
-pub(super) fn set_multiple_cursors_with_size(
+pub(super) fn set_multiple_cursors_with_size<R: Runtime>(
     cursor_names: Vec<String>,
     image_path: String,
     size: i32,
     state: State<AppState>,
-    app: AppHandle,
+    app: AppHandle<R>,
 ) -> Result<Vec<CursorInfo>, String> {
     let mut result = Vec::new();
 
@@ -273,10 +273,10 @@ pub(super) fn set_multiple_cursors_with_size(
     Ok(result)
 }
 
-pub(super) fn set_cursor_size(
+pub(super) fn set_cursor_size<R: Runtime>(
     size: i32,
     state: State<AppState>,
-    app: AppHandle,
+    app: AppHandle<R>,
 ) -> Result<CursorStatePayload, String> {
     validate_cursor_size(size)?;
 

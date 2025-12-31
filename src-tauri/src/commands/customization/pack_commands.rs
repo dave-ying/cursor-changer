@@ -4,7 +4,7 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Runtime, State};
 use zip::ZipArchive;
 
 use crate::commands::command_helpers;
@@ -27,8 +27,8 @@ fn is_zip(path: &Path) -> bool {
 }
 
 #[tauri::command]
-pub fn get_cached_pack_previews(
-    app: AppHandle,
+pub fn get_cached_pack_previews<R: Runtime>(
+    app: AppHandle<R>,
     pack_id: String,
 ) -> Result<HashMap<String, String>, String> {
     ensure_pack_previews(&app, &pack_id)
@@ -191,7 +191,7 @@ pub(crate) fn read_manifest_or_infer(
 }
 
 #[tauri::command]
-pub fn import_cursor_pack(app: AppHandle, filename: String, data: Vec<u8>) -> Result<LibraryCursor, String> {
+pub fn import_cursor_pack<R: Runtime>(app: AppHandle<R>, filename: String, data: Vec<u8>) -> Result<LibraryCursor, String> {
     let ext = Path::new(&filename)
         .extension()
         .and_then(|s| s.to_str())
@@ -306,7 +306,7 @@ pub(super) fn extract_entry_to_folder<R: Read>(
 }
 
 #[tauri::command]
-pub fn apply_cursor_pack(app: AppHandle, state: State<'_, AppState>, id: String) -> Result<(), String> {
+pub fn apply_cursor_pack<R: Runtime>(app: AppHandle<R>, state: State<'_, AppState>, id: String) -> Result<(), String> {
     let library = load_library(&app)?;
     let pack = library
         .cursors

@@ -16,6 +16,9 @@ fn arb_app_state() -> impl Strategy<Value = AppState> {
         any::<bool>(),
         prop::option::of("[A-Za-z0-9+]+"),
         any::<bool>(),
+        prop::option::of("[A-Za-z0-9+]+"),
+        any::<bool>(),
+        any::<bool>(),
         any::<bool>(),
         any::<bool>(),
         16i32..=256i32,
@@ -47,8 +50,17 @@ fn arb_app_state() -> impl Strategy<Value = AppState> {
             CursorRuntimeState, ModeCustomizationState, PreferencesState, RestorationState,
         };
 
-        let (hidden, shortcut, shortcut_enabled, run_on_startup, minimize_to_tray, cursor_size) =
-            basic;
+        let (
+            hidden,
+            shortcut,
+            shortcut_enabled,
+            app_shortcut,
+            app_shortcut_enabled,
+            app_enabled,
+            run_on_startup,
+            minimize_to_tray,
+            cursor_size,
+        ) = basic;
         let (
             last_loaded_cursor_path,
             cursor_paths,
@@ -66,6 +78,9 @@ fn arb_app_state() -> impl Strategy<Value = AppState> {
             prefs: RwLock::new(PreferencesState {
                 shortcut,
                 shortcut_enabled,
+                app_shortcut,
+                app_shortcut_enabled,
+                app_enabled,
                 run_on_startup,
                 minimize_to_tray,
                 cursor_size,
@@ -90,6 +105,9 @@ fn arb_persisted_config() -> impl Strategy<Value = PersistedConfig> {
     (
         prop::option::of("[A-Za-z0-9+]+"),
         prop::option::of(any::<bool>()),
+        prop::option::of("[A-Za-z0-9+]+"),
+        prop::option::of(any::<bool>()),
+        prop::option::of(any::<bool>()),
         prop::option::of(any::<bool>()),
         prop::option::of(any::<bool>()),
         prop::option::of(16i32..=256i32),
@@ -100,27 +118,39 @@ fn arb_persisted_config() -> impl Strategy<Value = PersistedConfig> {
             Just(ThemeMode::System)
         ]),
         prop::option::of(Just(DefaultCursorStyle::Windows)),
+        prop::option::of(prop_oneof![
+            Just(CustomizationMode::Simple),
+            Just(CustomizationMode::Advanced)
+        ]),
     )
         .prop_map(
             |(
                 shortcut,
                 shortcut_enabled,
+                app_shortcut,
+                app_shortcut_enabled,
+                app_enabled,
                 minimize_to_tray,
                 run_on_startup,
                 cursor_size,
                 accent_color,
                 theme_mode,
                 default_cursor_style,
+                customization_mode,
             )| {
                 PersistedConfig {
                     shortcut,
                     shortcut_enabled,
+                    app_shortcut,
+                    app_shortcut_enabled,
+                    app_enabled,
                     minimize_to_tray,
                     run_on_startup,
                     cursor_size,
                     accent_color,
                     theme_mode,
                     default_cursor_style,
+                    customization_mode,
                 }
             },
         )
@@ -437,6 +467,9 @@ proptest! {
         prop_assert_eq!(&loaded_config.cursor_size, &config.cursor_size, "Cursor size mismatch");
         prop_assert_eq!(&loaded_config.accent_color, &config.accent_color, "Accent color mismatch");
         prop_assert_eq!(&loaded_config.theme_mode, &config.theme_mode, "Theme mode mismatch");
+        prop_assert_eq!(&loaded_config.app_enabled, &config.app_enabled, "App enabled mismatch");
+        prop_assert_eq!(&loaded_config.app_shortcut, &config.app_shortcut, "App shortcut mismatch");
+        prop_assert_eq!(&loaded_config.app_shortcut_enabled, &config.app_shortcut_enabled, "App shortcut enabled mismatch");
     }
 }
 
@@ -454,12 +487,16 @@ proptest! {
         let config = PersistedConfig {
             shortcut: prefs.shortcut.clone(),
             shortcut_enabled: Some(prefs.shortcut_enabled),
+            app_shortcut: prefs.app_shortcut.clone(),
+            app_shortcut_enabled: Some(prefs.app_shortcut_enabled),
+            app_enabled: Some(prefs.app_enabled),
             minimize_to_tray: Some(prefs.minimize_to_tray),
             run_on_startup: Some(prefs.run_on_startup),
             cursor_size: Some(prefs.cursor_size),
             accent_color: Some(prefs.accent_color.clone()),
             theme_mode: Some(prefs.theme_mode.clone()),
             default_cursor_style: Some(prefs.default_cursor_style.clone()),
+            customization_mode: Some(state.modes.read().unwrap().customization_mode),
         };
 
         // Serialize and deserialize
@@ -709,7 +746,7 @@ proptest! {
         }
 
         // Verify payload conversion is consistent
-        let payload = CursorStatePayload::from(&*guard);
+        let payload = CursorStatePayload::try_from(&*guard).expect("Application state poisoned");
         prop_assert_eq!(
             payload.cursor_paths.len(),
             guard.cursor.read().unwrap().cursor_paths.len(),
@@ -788,12 +825,16 @@ mod unit_tests {
         let config = PersistedConfig {
             shortcut: Some("Ctrl+Alt+C".to_string()),
             shortcut_enabled: Some(true),
+            app_shortcut: Some("Ctrl+Alt+Q".to_string()),
+            app_shortcut_enabled: Some(false),
+            app_enabled: Some(true),
             minimize_to_tray: Some(false),
             run_on_startup: Some(true),
             cursor_size: Some(128),
             accent_color: Some("#ff0000".to_string()),
             theme_mode: Some(ThemeMode::Light),
             default_cursor_style: Some(DefaultCursorStyle::Windows),
+            customization_mode: Some(CustomizationMode::Simple),
         };
 
         // Serialize
@@ -818,12 +859,16 @@ mod unit_tests {
         let mut config = PersistedConfig {
             shortcut: Some("Ctrl+C".to_string()),
             shortcut_enabled: None,
+            app_shortcut: None,
+            app_shortcut_enabled: None,
+            app_enabled: None,
             minimize_to_tray: None,
             run_on_startup: None,
             cursor_size: None,
             accent_color: None,
             theme_mode: None,
             default_cursor_style: None,
+            customization_mode: None,
         };
 
         config = normalize_persisted_config(config);

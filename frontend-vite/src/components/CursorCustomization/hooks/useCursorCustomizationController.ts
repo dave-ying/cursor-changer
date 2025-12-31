@@ -75,39 +75,6 @@ export function useCursorCustomizationController() {
   const [packFilePreviews, setPackFilePreviews] = useState<Record<string, string>>({});
   const [isApplyingPack, setIsApplyingPack] = useState(false);
 
-  const resetCustomizePanels = useCallback(() => {
-    if (typeof window === 'undefined' || !window.localStorage) {
-      return;
-    }
-
-    try {
-      const storage = window.localStorage;
-      const keysToClose = [
-        persistentKeys.activeSection.showModeToggle,
-        persistentKeys.activeSection.showMoreOptions,
-        persistentKeys.library.showCustomizePanel,
-        persistentKeys.library.showMoreOptions
-      ];
-
-      keysToClose.forEach((key) => {
-        storage.setItem(key, 'false');
-      });
-    } catch (error) {
-      logger.warn('[CursorCustomization] Failed to reset customize panel state:', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    resetCustomizePanels();
-  }, [resetCustomizePanels]);
-
-  useEffect(() => {
-    if (currentView === 'cursors') {
-      return;
-    }
-
-    resetCustomizePanels();
-  }, [currentView, resetCustomizePanels]);
 
   const applyLibraryCursor = useCallback(async (libCursor: LibraryCursor, targetCursor: CursorInfo | null) => {
     await library.applyLibraryCursor({ libCursor, targetCursor });
@@ -291,35 +258,35 @@ export function useCursorCustomizationController() {
 
     const loadManifest = needsManifest
       ? (async () => {
-          const manifestResult = await invokeWithFeedback(invoke, Commands.getCursorPackManifest, {
-            args: { archive_path: archivePath },
-            logLabel: '[CursorCustomization] Failed to load cursor pack manifest:',
-            errorMessage: 'Failed to load cursor pack details',
-            errorType: 'error'
-          });
+        const manifestResult = await invokeWithFeedback(invoke, Commands.getCursorPackManifest, {
+          args: { archive_path: archivePath },
+          logLabel: '[CursorCustomization] Failed to load cursor pack manifest:',
+          errorMessage: 'Failed to load cursor pack details',
+          errorType: 'error'
+        });
 
-          if (manifestResult.status === 'success') {
-            const manifest = manifestResult.value as {
-              pack_name?: string;
-              mode: LibraryCursor['pack_metadata'] extends infer T ? T extends { mode: infer M } ? M : never : never;
-              items: NonNullable<LibraryCursor['pack_metadata']>['items'];
+        if (manifestResult.status === 'success') {
+          const manifest = manifestResult.value as {
+            pack_name?: string;
+            mode: LibraryCursor['pack_metadata'] extends infer T ? T extends { mode: infer M } ? M : never : never;
+            items: NonNullable<LibraryCursor['pack_metadata']>['items'];
+          };
+
+          setPackDetails((prev) => {
+            const base = prev ?? cursor;
+            return {
+              ...base,
+              name: manifest.pack_name || base.name,
+              is_pack: true,
+              pack_metadata: {
+                archive_path: archivePath,
+                mode: manifest.mode as NonNullable<LibraryCursor['pack_metadata']>['mode'],
+                items: manifest.items
+              }
             };
-
-            setPackDetails((prev) => {
-              const base = prev ?? cursor;
-              return {
-                ...base,
-                name: manifest.pack_name || base.name,
-                is_pack: true,
-                pack_metadata: {
-                  archive_path: archivePath,
-                  mode: manifest.mode as NonNullable<LibraryCursor['pack_metadata']>['mode'],
-                  items: manifest.items
-                }
-              };
-            });
-          }
-        })()
+          });
+        }
+      })()
       : Promise.resolve();
 
     const loadCachedPreviews = (async () => {

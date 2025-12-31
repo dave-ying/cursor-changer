@@ -1,7 +1,7 @@
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::{fs, io::Write, path::{Path, PathBuf}};
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, Runtime};
 use tempfile::NamedTempFile;
 
 use super::{LibraryCursor, LibraryData};
@@ -25,7 +25,7 @@ struct LegacyLibraryData {
     pub cursors: Vec<LegacyLibraryCursor>,
 }
 
-fn library_path(app: &AppHandle) -> Result<PathBuf, String> {
+fn library_path<R: Runtime>(app: &AppHandle<R>) -> Result<PathBuf, String> {
     let app_data_dir = match app.path().app_data_dir() {
         Ok(p) => p,
         Err(e) => {
@@ -43,7 +43,7 @@ fn library_path(app: &AppHandle) -> Result<PathBuf, String> {
     Ok(library_path)
 }
 
-pub fn load_library(app: &AppHandle) -> Result<LibraryData, String> {
+pub fn load_library<R: Runtime>(app: &AppHandle<R>) -> Result<LibraryData, String> {
     let path = library_path(app)?;
 
     if !path.exists() {
@@ -79,7 +79,7 @@ pub fn load_library(app: &AppHandle) -> Result<LibraryData, String> {
     }
 }
 
-pub(super) fn save_library(app: &AppHandle, library: &LibraryData) -> Result<(), String> {
+pub(super) fn save_library<R: Runtime>(app: &AppHandle<R>, library: &LibraryData) -> Result<(), String> {
     let path = library_path(app)?;
     let parent_dir = path
         .parent()
@@ -113,32 +113,39 @@ pub(super) fn save_library(app: &AppHandle, library: &LibraryData) -> Result<(),
     Ok(())
 }
 
-/// Get candidate paths for the default library cursors directory
-fn default_library_cursors_dir_candidates(app: &AppHandle) -> Vec<std::path::PathBuf> {
+/// Get candidate paths for the default library root directory
+fn default_library_root_candidates<R: Runtime>(app: &AppHandle<R>) -> Vec<std::path::PathBuf> {
     let mut candidates = Vec::new();
 
     // Resource directory (for production builds)
     if let Ok(resource_dir) = app.path().resource_dir() {
-        candidates.push(resource_dir.join("default-cursors").join("library"));
+        candidates.push(
+            resource_dir
+                .join("default-assets")
+                .join("library"),
+        );
     }
 
     // Development: current working directory
     if let Ok(cwd) = std::env::current_dir() {
         candidates.push(
             cwd.join("src-tauri")
-                .join("default-cursors")
+                .join("default-assets")
                 .join("library"),
         );
-        // If running from src-tauri (cargo tauri dev default), default-cursors sits directly under cwd
-        candidates.push(cwd.join("default-cursors").join("library"));
+        // If running from src-tauri (cargo tauri dev default), default-assets sits directly under cwd
+        candidates.push(
+            cwd.join("default-assets")
+                .join("library"),
+        );
     }
 
     candidates
 }
 
-/// Resolve the default library cursors directory (from bundled resources)
-fn resolve_default_library_cursors_dir(app: &AppHandle) -> Result<std::path::PathBuf, String> {
-    let candidates = default_library_cursors_dir_candidates(app);
+/// Resolve the default library root directory (from bundled resources)
+fn resolve_default_library_root_dir<R: Runtime>(app: &AppHandle<R>) -> Result<std::path::PathBuf, String> {
+    let candidates = default_library_root_candidates(app);
 
     for candidate in &candidates {
         if candidate.exists() {
@@ -146,7 +153,7 @@ fn resolve_default_library_cursors_dir(app: &AppHandle) -> Result<std::path::Pat
         }
     }
 
-    Err("Failed to resolve default library cursors directory".to_string())
+    Err("Failed to resolve default library root directory".to_string())
 }
 
 /// Enumerate cursor files in a directory (.cur/.ani only)
@@ -166,21 +173,62 @@ fn list_default_library_cursor_files(dir: &Path) -> Result<Vec<PathBuf>, String>
     Ok(cursor_files)
 }
 
-/// Enumerate cursor pack archives (.zip) in a directory
-fn list_default_library_packs(dir: &Path) -> Result<Vec<PathBuf>, String> {
-    let entries =
-        fs::read_dir(dir).map_err(|e| format!("Failed to read default library directory: {}", e))?;
+/// Structure representing a default cursor pack directory
+struct DefaultPackStructure {
+    pub name: String,
+    pub zip_path: PathBuf,
+    pub extracted_cursors_path: Option<PathBuf>,
+}
 
-    let packs: Vec<PathBuf> = entries
-        .filter_map(|e| e.ok())
-        .map(|e| e.path())
-        .filter(|path| {
-            path.extension()
-                .and_then(|s| s.to_str())
-                .map(|ext| ext.eq_ignore_ascii_case("zip"))
-                .unwrap_or(false)
-        })
-        .collect();
+/// Enumerate default cursor packs in the new subdirectory structure
+/// Structure:
+/// library/cursor-packs/
+///   ├── PackName/
+///   │   ├── PackName.zip (or any .zip)
+///   │   └── cursors/ (optional, contains .cur/.ani files)
+fn list_default_pack_structures(dir: &Path) -> Result<Vec<DefaultPackStructure>, String> {
+    if !dir.exists() {
+        return Ok(Vec::new());
+    }
+
+    let entries = fs::read_dir(dir).map_err(|e| format!("Failed to read default packs directory: {}", e))?;
+    let mut packs = Vec::new();
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            let dir_name = path.file_name().and_then(|s| s.to_str()).unwrap_or_default().to_string();
+            
+            // Find the zip file inside
+            let mut zip_path = None;
+            let mut cursors_path = None;
+
+            if let Ok(sub_entries) = fs::read_dir(&path) {
+                for sub_entry in sub_entries.flatten() {
+                    let sub_path = sub_entry.path();
+                    if sub_path.is_file() {
+                        if let Some(ext) = sub_path.extension().and_then(|s| s.to_str()) {
+                            if ext.eq_ignore_ascii_case("zip") {
+                                zip_path = Some(sub_path);
+                            }
+                        }
+                    } else if sub_path.is_dir() {
+                        if sub_path.file_name().and_then(|s| s.to_str()) == Some("cursors") {
+                            cursors_path = Some(sub_path);
+                        }
+                    }
+                }
+            }
+
+            if let Some(zip) = zip_path {
+                packs.push(DefaultPackStructure {
+                    name: dir_name,
+                    zip_path: zip,
+                    extracted_cursors_path: cursors_path,
+                });
+            }
+        }
+    }
 
     Ok(packs)
 }
@@ -242,18 +290,38 @@ fn copy_default_cursor_to_user_dir(
     Ok(dest_path)
 }
 
+fn copy_dir_contents(src: &Path, dst: &Path) -> std::io::Result<()> {
+    fs::create_dir_all(dst)?;
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        let entry_path = entry.path();
+        let dest_path = dst.join(entry.file_name());
+        if entry_path.is_file() {
+            fs::copy(&entry_path, &dest_path)?;
+        }
+        // Not handling recursive subdirectories for now as structure is flat
+    }
+    Ok(())
+}
+
 /// Initialize the library with default cursors by copying from bundled resources
-pub fn initialize_library_with_defaults(app: &AppHandle) -> Result<LibraryData, String> {
-    let default_dir = resolve_default_library_cursors_dir(app)?;
+pub fn initialize_library_with_defaults<R: Runtime>(app: &AppHandle<R>) -> Result<LibraryData, String> {
+    let default_root = resolve_default_library_root_dir(app)?;
+    let default_cursors_dir = default_root.join("cursors");
+    let default_packs_dir = default_root.join("cursor-packs");
     let cursors_dir = crate::paths::cursors_dir()?;
 
     cc_debug!(
         "[CursorChanger] Initializing library with defaults from: {}",
-        default_dir.display()
+        default_root.display()
     );
 
     // Deterministic ordering: numeric filename prefixes first (ascending), then case-insensitive name
-    let mut cursor_files = list_default_library_cursor_files(&default_dir)?;
+    let mut cursor_files = if default_cursors_dir.exists() {
+        list_default_library_cursor_files(&default_cursors_dir)?
+    } else {
+        Vec::new()
+    };
     cursor_files.sort_by_key(|path| cursor_sort_key(path));
 
     let now = Utc::now();
@@ -306,25 +374,27 @@ pub fn initialize_library_with_defaults(app: &AppHandle) -> Result<LibraryData, 
     library.cursors.extend(entries);
 
     // Also register any bundled cursor packs (zip archives)
-    let pack_archives = list_default_library_packs(&default_dir)?;
+    let pack_structures = list_default_pack_structures(&default_packs_dir)?;
     let mut pack_count = 0usize;
-    for pack_path in pack_archives {
-        let file_name = pack_path
-            .file_name()
-            .and_then(|s| s.to_str())
-            .unwrap_or("cursor-pack.zip");
-
-        // Copy archive into user cursors dir to keep everything under user data
+    
+    // Ensure we have a place to put them. using cursor_packs_dir() as defined in paths.rs
+    // This is typically library/cursor-packs/
+    let user_packs_dir = crate::paths::cursor_packs_dir()?;
+    
+    for pack in pack_structures {
+        // Copy archive into user cursor-packs dir
         let dest_path = {
-            if let Some(parent) = cursors_dir.parent() {
-                fs::create_dir_all(parent)
-                    .map_err(|e| format!("Failed to create cursors directory: {}", e))?;
-            }
+            let file_name = pack.zip_path
+                .file_name()
+                .and_then(|s| s.to_str())
+                .unwrap_or("cursor-pack.zip");
+
             let target_path = crate::commands::customization::pack_library::ensure_unique_filename(
-                &cursors_dir,
+                &user_packs_dir,
                 file_name,
             );
-            fs::copy(&pack_path, &target_path).map_err(|e| {
+            
+            fs::copy(&pack.zip_path, &target_path).map_err(|e| {
                 format!(
                     "Failed to copy default cursor pack {}: {}",
                     file_name, e
@@ -335,26 +405,46 @@ pub fn initialize_library_with_defaults(app: &AppHandle) -> Result<LibraryData, 
 
         match read_manifest_or_infer(&dest_path) {
             Ok(manifest) => {
-                if let Err(err) = register_pack_in_library(
+                // Register the pack to get the LibraryCursor and ID
+                match register_pack_in_library(
                     app,
                     &dest_path,
                     manifest.mode,
                     manifest.items,
                     Some(manifest.created_at),
-                )
-                {
-                    cc_warn!(
-                        "[CursorChanger] Failed to register default cursor pack {}: {}",
-                        file_name,
-                        err
-                    );
-                } else {
-                    pack_count += 1;
+                ) {
+                    Ok(cursor) => {
+                        pack_count += 1;
+                        
+                        // If we have pre-extracted cursors, hydrate the cache
+                        if let Some(src_cursors_dir) = pack.extracted_cursors_path {
+                            // Resolve the cache folder for this pack
+                            // pack_library::pack_extract_folder normally does this logic
+                            let cache_dir = user_packs_dir.join(&cursor.id);
+                            
+                             if let Err(e) = copy_dir_contents(&src_cursors_dir, &cache_dir) {
+                                  cc_warn!(
+                                    "[CursorChanger] Failed to pre-hydrate cache for pack {}: {}",
+                                    cursor.name,
+                                    e
+                                );
+                             } else {
+                                 cc_debug!("[CursorChanger] Pre-hydrated cache for pack {}", cursor.name);
+                             }
+                        }
+                    }
+                    Err(err) => {
+                         cc_warn!(
+                            "[CursorChanger] Failed to register default cursor pack {}: {}",
+                            pack.name,
+                            err
+                        );
+                    }
                 }
             }
             Err(err) => cc_warn!(
                 "[CursorChanger] Skipping default cursor pack {} (manifest inference failed): {}",
-                file_name,
+                pack.name,
                 err
             ),
         }
@@ -407,6 +497,7 @@ fn read_cursor_click_point(path: &std::path::Path) -> Option<(u16, u16)> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::TimeZone;
     use tempfile::tempdir;
 
     #[test]
@@ -424,6 +515,8 @@ mod tests {
             click_point_x: 10,
             click_point_y: 15,
             created_at: "2025-01-01T00:00:00Z".to_string(),
+            is_pack: false,
+            pack_metadata: None,
         };
 
         let json = serde_json::to_string(&cursor).expect("serialize");

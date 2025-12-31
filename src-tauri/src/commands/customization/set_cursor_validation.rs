@@ -2,7 +2,7 @@ use super::file_ops::convert_image_to_cur;
 use crate::cursor_converter;
 /// File validation utilities for cursor operations
 use std::path::Path;
-use tauri::AppHandle;
+use tauri::{AppHandle, Runtime};
 
 const SUPPORTED_IMAGE_EXTS: [&str; 6] = ["svg", "png", "ico", "bmp", "jpg", "jpeg"];
 const SUPPORTED_CURSOR_EXTS: [&str; 2] = ["cur", "ani"];
@@ -23,7 +23,7 @@ fn is_supported_cursor_ext(ext: &str) -> bool {
 }
 
 /// Validate and process a cursor file
-pub fn validate_cursor_file(image_path: &str, app: &AppHandle) -> Result<String, String> {
+pub fn validate_cursor_file<R: Runtime>(image_path: &str, app: &AppHandle<R>) -> Result<String, String> {
     if image_path.is_empty() {
         return Ok(image_path.to_string());
     }

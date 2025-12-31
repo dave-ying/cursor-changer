@@ -38,14 +38,8 @@ export function LibrarySection({
   const { invoke } = useApp();
   const loadLibraryCursors = useAppStore((s) => s.operations.loadLibraryCursors);
   const { showMessage } = useMessage();
-  const [showCustomizePanel, setShowCustomizePanel] = usePersistentBoolean({
-    key: persistentKeys.library.showCustomizePanel,
-    defaultValue: false
-  });
-  const [showMoreOptions, setShowMoreOptions] = usePersistentBoolean({
-    key: persistentKeys.library.showMoreOptions,
-    defaultValue: false
-  });
+  const [showCustomizePanel, setShowCustomizePanel] = React.useState(false);
+  const [showMoreOptions, setShowMoreOptions] = React.useState(false);
 
   const [resetLibraryDialogOpen, setResetLibraryDialogOpen] = React.useState(false);
   const scaleMin = 0.6;
@@ -122,9 +116,9 @@ export function LibrarySection({
     // For large scales, use flexible columns to better utilize available width
     // For smaller scales, use fixed columns to maintain grid structure
     const useFlexibleColumns = libraryPreviewScale >= 1.5; // Use flexible layout for large cursors
-    
+
     return {
-      '--cursor-grid-template': useFlexibleColumns 
+      '--cursor-grid-template': useFlexibleColumns
         ? `repeat(auto-fill, minmax(${cardSize}px, 1fr))`
         : `repeat(auto-fill, minmax(${cardSize}px, ${cardSize}px))`,
       '--cursor-grid-min': `${cardSize}px`,

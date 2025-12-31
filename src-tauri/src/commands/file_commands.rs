@@ -47,6 +47,7 @@ pub async fn save_cursor_file(
     }
 }
 
+
 /// Save a cursor file to a temporary location without user dialog
 #[tauri::command]
 pub fn save_temp_cursor_file(

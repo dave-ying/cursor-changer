@@ -1,7 +1,7 @@
 use std::io::Cursor as IoCursor;
 use std::{fs, io::Write, path::PathBuf};
 
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Runtime, State};
 use zip::write::FileOptions;
 
 use crate::cursor_defaults::populate_missing_cursor_paths_with_defaults;
@@ -112,8 +112,8 @@ fn collect_cursor_entries(
 /// Export the currently active cursors into a cursor pack ZIP file.
 /// Simple mode exports Normal + Hand, Advanced exports all 15 cursor types.
 #[tauri::command]
-pub async fn export_active_cursor_pack(
-    app: AppHandle,
+pub async fn export_active_cursor_pack<R: Runtime>(
+    app: AppHandle<R>,
     state: State<'_, AppState>,
     pack_name: Option<String>,
 ) -> Result<Option<String>, String> {
@@ -190,6 +190,12 @@ pub async fn export_active_cursor_pack(
 
     // Extract ZIP contents to the same folder for immediate access
     if let Some(pack_folder) = target_path.parent() {
+        let cursors_out_dir = pack_folder.join("cursors");
+        if !cursors_out_dir.exists() {
+            fs::create_dir_all(&cursors_out_dir)
+                .map_err(|e| format!("Failed to create cursors output directory: {}", e))?;
+        }
+
         let archive_file = fs::File::open(&target_path)
             .map_err(|e| format!("Failed to open pack archive for extraction: {}", e))?;
         let mut archive = zip::ZipArchive::new(archive_file)
@@ -205,7 +211,7 @@ pub async fn export_active_cursor_pack(
             }
 
             let entry_name = entry.name().to_string();
-            let out_path = pack_folder.join(&entry_name);
+            let out_path = cursors_out_dir.join(&entry_name);
 
             let mut out_file = fs::File::create(&out_path)
                 .map_err(|e| format!("Failed to create extracted file {}: {}", entry_name, e))?;

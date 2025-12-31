@@ -24,8 +24,11 @@ impl Default for FolderWatcherState {
     }
 }
 
-/// Check if a file is a cursor file (.cur or .ani)
+/// Check if a file is a cursor file (.cur, .ani, .zip) or a directory (potential pack)
 fn is_cursor_file(path: &std::path::Path) -> bool {
+    if path.is_dir() {
+        return true;
+    }
     path.extension()
         .and_then(|ext| ext.to_str())
         .map(|ext| {
@@ -42,8 +45,11 @@ pub fn start_library_folder_watcher(
     state: State<'_, Mutex<FolderWatcherState>>,
 ) -> Result<(), String> {
     let cursors_folder = crate::paths::cursors_dir()?;
+    let packs_folder = crate::paths::cursor_packs_dir()?;
 
-    watcher::start_watcher(app, &state, cursors_folder)
+    let folders = vec![cursors_folder, packs_folder];
+
+    watcher::start_watcher(app, &state, folders)
 }
 
 /// Stop watching the library cursors folder

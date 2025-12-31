@@ -3,7 +3,7 @@ use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
-use tauri::AppHandle;
+use tauri::{AppHandle, Runtime};
 use zip::ZipArchive;
 
 use crate::state::CustomizationMode;
@@ -203,6 +203,11 @@ pub fn pack_storage_root() -> Result<PathBuf, String> {
 pub fn pack_extract_folder(storage_root: &Path, pack_id: &str, archive_path: &Path) -> Result<PathBuf, String> {
     // Try to use the parent folder of the archive (where cursor files should already be extracted)
     if let Some(parent) = archive_path.parent() {
+        let cursors_subdir = parent.join("cursors");
+        if cursors_subdir.exists() && cursors_subdir.is_dir() {
+             return Ok(cursors_subdir);
+        }
+        
         if parent.exists() {
             return Ok(parent.to_path_buf());
         }
@@ -268,8 +273,8 @@ pub fn ensure_pack_files_present(
     Ok(())
 }
 
-pub fn update_pack_item_paths(
-    app: &AppHandle,
+pub fn update_pack_item_paths<R: Runtime>(
+    app: &AppHandle<R>,
     pack_id: &str,
     file_map: &HashMap<String, String>,
 ) -> Result<(), String> {
@@ -302,8 +307,8 @@ pub fn update_pack_item_paths(
     Ok(())
 }
 
-pub fn register_pack_in_library(
-    app: &AppHandle,
+pub fn register_pack_in_library<R: Runtime>(
+    app: &AppHandle<R>,
     pack_path: &Path,
     mode: CustomizationMode,
     items: Vec<LibraryPackItem>,
@@ -352,8 +357,8 @@ pub fn register_pack_in_library(
     Ok(cursor)
 }
 
-pub fn ensure_pack_previews(
-    app: &AppHandle,
+pub fn ensure_pack_previews<R: Runtime>(
+    app: &AppHandle<R>,
     pack_id: &str,
 ) -> Result<HashMap<String, String>, String> {
     let mut library = load_library(app)?;

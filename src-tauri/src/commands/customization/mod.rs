@@ -18,6 +18,8 @@ pub mod set_cursor_state;
 pub mod set_cursor_validation;
 // Temporarily disabled due to compilation issues
 // pub mod set_cursor_tests;
+#[cfg(test)]
+pub mod pack_tests;
 pub mod defaults;
 pub mod library;
 
