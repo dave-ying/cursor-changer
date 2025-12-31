@@ -382,6 +382,15 @@ pub fn initialize_library_with_defaults<R: Runtime>(app: &AppHandle<R>) -> Resul
     let user_packs_dir = crate::paths::cursor_packs_dir()?;
     
     for pack in pack_structures {
+        let pack_dir = user_packs_dir.join(&pack.name);
+        fs::create_dir_all(&pack_dir).map_err(|e| {
+            format!(
+                "Failed to create default cursor pack folder {}: {}",
+                pack_dir.display(),
+                e
+            )
+        })?;
+
         // Copy archive into user cursor-packs dir
         let dest_path = {
             let file_name = pack.zip_path
@@ -390,7 +399,7 @@ pub fn initialize_library_with_defaults<R: Runtime>(app: &AppHandle<R>) -> Resul
                 .unwrap_or("cursor-pack.zip");
 
             let target_path = crate::commands::customization::pack_library::ensure_unique_filename(
-                &user_packs_dir,
+                &pack_dir,
                 file_name,
             );
             
@@ -420,7 +429,7 @@ pub fn initialize_library_with_defaults<R: Runtime>(app: &AppHandle<R>) -> Resul
                         if let Some(src_cursors_dir) = pack.extracted_cursors_path {
                             // Resolve the cache folder for this pack
                             // pack_library::pack_extract_folder normally does this logic
-                            let cache_dir = user_packs_dir.join(&cursor.id);
+                            let cache_dir = pack_dir.join("cursors");
                             
                              if let Err(e) = copy_dir_contents(&src_cursors_dir, &cache_dir) {
                                   cc_warn!(

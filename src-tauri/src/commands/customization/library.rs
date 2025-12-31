@@ -419,13 +419,14 @@ pub async fn export_library_cursors<R: Runtime>(app: AppHandle<R>) -> Result<Opt
 /// Clean up orphaned pack extraction folders that don't have corresponding ZIP files in the library
 pub fn cleanup_orphaned_pack_folders<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
     let library = load_library(app)?;
-    
-    // Get all valid pack IDs from the library
-    let valid_pack_ids: std::collections::HashSet<String> = library
+
+    // Keep pack folders that are actually referenced by pack archive paths in the library.
+    // Packs may be stored under cursor-packs/<pack-folder>/<archive.zip>.
+    let valid_pack_dirs: std::collections::HashSet<std::path::PathBuf> = library
         .cursors
         .iter()
         .filter(|c| c.is_pack)
-        .map(|c| c.id.clone())
+        .filter_map(|c| std::path::Path::new(&c.file_path).parent().map(|p| p.to_path_buf()))
         .collect();
     
     if let Ok(cache_root) = crate::paths::pack_cache_dir() {
@@ -435,19 +436,17 @@ pub fn cleanup_orphaned_pack_folders<R: Runtime>(app: &AppHandle<R>) -> Result<(
                     let path = entry.path();
 
                     if path.is_dir() {
-                        if let Some(folder_name) = path.file_name().and_then(|n| n.to_str()) {
-                            if !valid_pack_ids.contains(folder_name) {
-                                match std::fs::remove_dir_all(&path) {
-                                    Ok(()) => cc_debug!(
-                                        "[CursorChanger] Cleaned up orphaned pack folder: {}",
-                                        path.to_string_lossy()
-                                    ),
-                                    Err(e) => cc_warn!(
-                                        "[CursorChanger] Failed to clean up orphaned pack folder {}: {}",
-                                        path.to_string_lossy(),
-                                        e
-                                    ),
-                                }
+                        if !valid_pack_dirs.contains(&path) {
+                            match std::fs::remove_dir_all(&path) {
+                                Ok(()) => cc_debug!(
+                                    "[CursorChanger] Cleaned up orphaned pack folder: {}",
+                                    path.to_string_lossy()
+                                ),
+                                Err(e) => cc_warn!(
+                                    "[CursorChanger] Failed to clean up orphaned pack folder {}: {}",
+                                    path.to_string_lossy(),
+                                    e
+                                ),
                             }
                         }
                     }
