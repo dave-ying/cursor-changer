@@ -20,6 +20,71 @@ pub(crate) fn apply_cursor_paths_for_mode(
     }
 }
 
+pub(crate) fn sync_active_cursor_update(app: &AppHandle, old_path: &str, new_path: &str) {
+    use crate::system;
+    use tauri::Manager;
+
+    // We need to access the app state
+    let state: tauri::State<AppState> = app.state();
+
+    let (cursor_size, cursor_paths) = {
+        let cursor_guard = match state.cursor.read() {
+            Ok(g) => g,
+            Err(e) => {
+                eprintln!("Failed to read cursor state: {}", e);
+                return;
+            }
+        };
+        let prefs_guard = match state.prefs.read() {
+            Ok(g) => g,
+            Err(e) => {
+                eprintln!("Failed to read prefs state: {}", e);
+                return;
+            }
+        };
+        (prefs_guard.cursor_size, cursor_guard.cursor_paths.clone())
+    };
+
+    let mut updates_needed = false;
+    let mut new_cursor_paths = cursor_paths.clone();
+
+    // Check if our updated file is being used by any active cursor
+    for (cursor_name, active_path) in &cursor_paths {
+        // Compare paths
+        if active_path == old_path {
+            // Find the ID for this cursor type
+            if let Some(cursor_type) = CURSOR_TYPES.iter().find(|ct| ct.name == *cursor_name) {
+                println!(
+                    "Re-applying updated cursor {} (ID {}) due to library update",
+                    cursor_name, cursor_type.id
+                );
+                // Re-apply the cursor with the new file content (and new hotspot)
+                if system::apply_cursor_from_file_with_size(new_path, cursor_type.id, cursor_size) {
+                    if old_path != new_path {
+                        new_cursor_paths.insert(cursor_name.clone(), new_path.to_string());
+                        updates_needed = true;
+                    }
+                }
+            }
+        }
+    }
+
+    if updates_needed {
+        // Update the state if paths changed (e.g. rename)
+        // We use a separate block/thread logic usually, but here we just update the RwLock
+        // We do strictly need to update the state so UI reflects the new path if queried
+        if let Ok(mut cursor_guard) = state.cursor.write() {
+             cursor_guard.cursor_paths = new_cursor_paths;
+             // Also update last loaded if it matches
+             if let Some(last) = &cursor_guard.last_loaded_cursor_path {
+                 if last == old_path {
+                     cursor_guard.last_loaded_cursor_path = Some(new_path.to_string());
+                 }
+             }
+        }
+    }
+}
+
 pub(super) fn set_all_cursors(
     image_path: String,
     state: State<AppState>,

@@ -248,6 +248,16 @@ pub fn rename_cursor_in_library(
         }
     }
     save_library(&app, &library)?;
+    
+    // Sync active cursors if the path changed
+    if target_path != current_path {
+        crate::commands::customization::cursor_apply_service::sync_active_cursor_update(
+            &app, 
+            &current_path.to_string_lossy(),
+            &target_path.to_string_lossy()
+        );
+    }
+    
     Ok(())
 }
 
@@ -323,7 +333,17 @@ pub fn update_cursor_in_library(
 
         // mutable borrow has ended; safe to save and then clone the updated entry
         save_library(&app, &library)?;
-        Ok(library.cursors[idx].clone())
+        
+        let updated_entry = library.cursors[idx].clone();
+        
+        // Sync active cursors (even if path didn't change, the content might have - e.g. hotspot)
+        crate::commands::customization::cursor_apply_service::sync_active_cursor_update(
+            &app,
+            &updated_entry.file_path, // We pass the same path as both old and new
+            &updated_entry.file_path  // because the file content changed in place
+        );
+        
+        Ok(updated_entry)
     } else {
         Err(format!("Cursor with id {} not found", id))
     }

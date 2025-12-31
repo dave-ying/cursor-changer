@@ -70,5 +70,9 @@ pub fn update_library_cursor_click_point(
         click_point_y,
     )?;
 
+    // Start of new sync logic
+    // REFACTOR: This Logic has been moved to update_cursor_in_library to be centralized
+    // The call to update_cursor_in_library above will handle syncing active cursors.
+
     Ok(updated_cursor)
 }

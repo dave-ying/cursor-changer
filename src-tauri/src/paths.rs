@@ -42,6 +42,12 @@ pub fn pack_cache_dir() -> Result<PathBuf, String> {
 fn ensure_library_layout(library_dir: &Path) -> Result<(), String> {
     let cursors_dir = library_dir.join("cursors");
     let packs_dir = library_dir.join("cursor-packs");
+    let obsolete_packs_dir = library_dir.join(".packs");
+
+    if obsolete_packs_dir.exists() && obsolete_packs_dir.is_dir() {
+        cc_debug!("[paths] Cleaning up obsolete .packs directory");
+        let _ = fs::remove_dir_all(&obsolete_packs_dir);
+    }
 
     fs::create_dir_all(&cursors_dir)
         .map_err(|e| format!("Failed to create cursors directory: {}", e))?;
