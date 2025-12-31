@@ -315,7 +315,18 @@ pub fn register_pack_in_library<R: Runtime>(
     created_at_override: Option<String>,
 ) -> Result<LibraryCursor, String> {
     let mut library = load_library(app)?;
-    let (id, pack_name) = derive_pack_identity(&library, pack_path);
+    register_pack_in_library_with_data(app, &mut library, pack_path, mode, items, created_at_override)
+}
+
+pub fn register_pack_in_library_with_data<R: Runtime>(
+    app: &AppHandle<R>,
+    library: &mut LibraryData,
+    pack_path: &Path,
+    mode: CustomizationMode,
+    items: Vec<LibraryPackItem>,
+    created_at_override: Option<String>,
+) -> Result<LibraryCursor, String> {
+    let (id, pack_name) = derive_pack_identity(library, pack_path);
     let created_at = created_at_override.unwrap_or_else(now_iso8601_utc);
     let archive_path = pack_path.to_string_lossy().to_string();
 
@@ -353,7 +364,7 @@ pub fn register_pack_in_library<R: Runtime>(
     };
 
     library.cursors.push(cursor.clone());
-    save_library(app, &library)?;
+    save_library(app, library)?;
     Ok(cursor)
 }
 

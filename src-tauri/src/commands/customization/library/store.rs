@@ -415,8 +415,9 @@ pub fn initialize_library_with_defaults<R: Runtime>(app: &AppHandle<R>) -> Resul
         match read_manifest_or_infer(&dest_path) {
             Ok(manifest) => {
                 // Register the pack to get the LibraryCursor and ID
-                match register_pack_in_library(
+                match crate::commands::customization::pack_library::register_pack_in_library_with_data(
                     app,
+                    &mut library,
                     &dest_path,
                     manifest.mode,
                     manifest.items,
