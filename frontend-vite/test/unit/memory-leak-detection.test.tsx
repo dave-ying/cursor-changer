@@ -9,6 +9,15 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, cleanup } from '@testing-library/react';
 import { useSafeAsync, useSafeTimer, useSafeEventListener } from '@/hooks/useSafeAsync';
 
+vi.mock('@/utils/logger', () => ({
+  logger: {
+    warn: vi.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+  }
+}));
+
 describe('Memory leak detection tests', () => {
   afterEach(() => {
     cleanup();
@@ -20,20 +29,20 @@ describe('Memory leak detection tests', () => {
    */
   it('should not leak memory with repeated mount/unmount cycles', () => {
     const iterations = 100;
-    
+
     for (let i = 0; i < iterations; i++) {
       const { result, unmount } = renderHook(() => useSafeAsync());
-      
+
       // Use the hook
       result.current.safeAsync(async () => {
         return Promise.resolve('test');
       });
-      
+
       // Cleanup
       result.current.cleanup();
       unmount();
     }
-    
+
     // If we got here without running out of memory, the test passes
     expect(true).toBe(true);
   });
@@ -43,22 +52,22 @@ describe('Memory leak detection tests', () => {
    */
   it('should not leak memory with repeated timer operations', () => {
     const iterations = 100;
-    
+
     for (let i = 0; i < iterations; i++) {
       const { result, unmount } = renderHook(() => useSafeTimer());
-      
+
       // Create multiple timers
       const timeoutIds = [];
       for (let j = 0; j < 10; j++) {
-        const id = result.current.safeSetTimeout(() => {}, 1000);
+        const id = result.current.safeSetTimeout(() => { }, 1000);
         if (id) timeoutIds.push(id);
       }
-      
+
       // Cleanup all timers
       result.current.clearAll();
       unmount();
     }
-    
+
     expect(true).toBe(true);
   });
 
@@ -68,21 +77,21 @@ describe('Memory leak detection tests', () => {
   it('should not leak memory with repeated event listener operations', () => {
     const iterations = 100;
     const mockElement = document.createElement('div');
-    
+
     for (let i = 0; i < iterations; i++) {
       const { result, unmount } = renderHook(() => useSafeEventListener());
-      
+
       // Add multiple event listeners
       for (let j = 0; j < 10; j++) {
         const handler = vi.fn();
         result.current.addEventListener(mockElement, `event${j}`, handler);
       }
-      
+
       // Cleanup
       result.current.cleanup();
       unmount();
     }
-    
+
     expect(true).toBe(true);
   });
 
@@ -91,10 +100,10 @@ describe('Memory leak detection tests', () => {
    */
   it('should not leak memory with repeated async operations', async () => {
     const iterations = 100;
-    
+
     for (let i = 0; i < iterations; i++) {
       const { result, unmount } = renderHook(() => useSafeAsync());
-      
+
       // Perform multiple async operations
       const promises = [];
       for (let j = 0; j < 10; j++) {
@@ -103,15 +112,15 @@ describe('Memory leak detection tests', () => {
         });
         promises.push(promise);
       }
-      
+
       // Wait for all to complete
       await Promise.all(promises);
-      
+
       // Cleanup
       result.current.cleanup();
       unmount();
     }
-    
+
     expect(true).toBe(true);
   });
 
@@ -120,10 +129,10 @@ describe('Memory leak detection tests', () => {
    */
   it('should not leak memory with cancelled async operations', () => {
     const iterations = 100;
-    
+
     for (let i = 0; i < iterations; i++) {
       const { result, unmount } = renderHook(() => useSafeAsync());
-      
+
       // Create promises and cancel them
       const promises = [];
       for (let j = 0; j < 10; j++) {
@@ -132,15 +141,15 @@ describe('Memory leak detection tests', () => {
         );
         promises.push({ promise, cancel });
       }
-      
+
       // Cancel all promises
       promises.forEach(({ cancel }) => cancel());
-      
+
       // Cleanup
       result.current.cleanup();
       unmount();
     }
-    
+
     expect(true).toBe(true);
   });
 
@@ -149,17 +158,17 @@ describe('Memory leak detection tests', () => {
    */
   it('should maintain stable memory with many timers', () => {
     const { result } = renderHook(() => useSafeTimer());
-    
+
     // Create many timers
     const timerIds = [];
     for (let i = 0; i < 100; i++) {
-      const id = result.current.safeSetTimeout(() => {}, 10000);
+      const id = result.current.safeSetTimeout(() => { }, 10000);
       if (id) timerIds.push(id);
     }
-    
+
     // Clear all timers
     result.current.clearAll();
-    
+
     // Verify cleanup
     expect(result.current.isMounted()).toBe(false);
   });
@@ -169,10 +178,10 @@ describe('Memory leak detection tests', () => {
    */
   it('should not leak with repeated promise cancellation', () => {
     const iterations = 50;
-    
+
     for (let i = 0; i < iterations; i++) {
       const { result, unmount } = renderHook(() => useSafeAsync());
-      
+
       // Create and immediately cancel promises
       for (let j = 0; j < 20; j++) {
         const { cancel } = result.current.safePromise(
@@ -180,11 +189,11 @@ describe('Memory leak detection tests', () => {
         );
         cancel();
       }
-      
+
       result.current.cleanup();
       unmount();
     }
-    
+
     expect(true).toBe(true);
   });
 
@@ -193,10 +202,10 @@ describe('Memory leak detection tests', () => {
    */
   it('should not leak memory when handling errors', async () => {
     const iterations = 100;
-    
+
     for (let i = 0; i < iterations; i++) {
       const { result, unmount } = renderHook(() => useSafeAsync());
-      
+
       // Perform operations that throw errors
       const promises = [];
       for (let j = 0; j < 10; j++) {
@@ -212,14 +221,14 @@ describe('Memory leak detection tests', () => {
         );
         promises.push(promise);
       }
-      
+
       // Wait for all to complete (with errors)
       await Promise.all(promises);
-      
+
       result.current.cleanup();
       unmount();
     }
-    
+
     expect(true).toBe(true);
   });
 
@@ -229,28 +238,28 @@ describe('Memory leak detection tests', () => {
   it('should not leak memory with mixed async, timer, and event operations', () => {
     const iterations = 50;
     const mockElement = document.createElement('div');
-    
+
     for (let i = 0; i < iterations; i++) {
       // Use all three hooks together
       const asyncHook = renderHook(() => useSafeAsync());
       const timerHook = renderHook(() => useSafeTimer());
       const eventHook = renderHook(() => useSafeEventListener());
-      
+
       // Perform mixed operations
       asyncHook.result.current.safeAsync(async () => Promise.resolve('test'));
-      timerHook.result.current.safeSetTimeout(() => {}, 1000);
+      timerHook.result.current.safeSetTimeout(() => { }, 1000);
       eventHook.result.current.addEventListener(mockElement, 'click', vi.fn());
-      
+
       // Cleanup all
       asyncHook.result.current.cleanup();
       timerHook.result.current.clearAll();
       eventHook.result.current.cleanup();
-      
+
       asyncHook.unmount();
       timerHook.unmount();
       eventHook.unmount();
     }
-    
+
     expect(true).toBe(true);
   });
 });

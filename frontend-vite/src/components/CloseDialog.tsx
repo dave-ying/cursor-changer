@@ -47,7 +47,7 @@ export function CloseDialog({ isOpen, onClose }: CloseDialogProps) {
 
   return (
     <AlertDialog open={isOpen} onOpenChange={(val) => { if (!val) onClose && onClose(); }}>
-      <AlertDialogContent>
+      <AlertDialogContent aria-describedby="close-dialog-text">
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure you want to close this app?</AlertDialogTitle>
           <AlertDialogDescription id="close-dialog-text">

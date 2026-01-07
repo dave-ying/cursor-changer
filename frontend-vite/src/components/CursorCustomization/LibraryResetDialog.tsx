@@ -34,10 +34,10 @@ export function LibraryResetDialog({
           Reset Library to Default
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent aria-describedby="library-reset-desc">
         <AlertDialogHeader>
           <AlertDialogTitle>Reset Library</AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogDescription id="library-reset-desc">
             Are you sure you want to reset your library?
           </AlertDialogDescription>
         </AlertDialogHeader>

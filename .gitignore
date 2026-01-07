@@ -60,7 +60,14 @@ cargo_test_output*.txt
 test-output.txt
 test_failures.txt
 *_errors.txt
+*_errors.txt
 *_errors_current.txt
+
+# === Test Reports ===
+vitest-report.xml
+junit.xml
+test-results/
+
 
 # === Caches / dev server artifacts ===
 *.cache

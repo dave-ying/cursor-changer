@@ -2,6 +2,10 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 
+vi.mock('@tauri-apps/api/event', () => ({
+  listen: vi.fn(() => Promise.resolve(() => { })),
+}));
+
 describe('CursorCustomization/FileUpload/BrowseModal', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -99,7 +103,7 @@ describe('CursorCustomization/FileUpload/BrowseModal', () => {
   it('ignores unsupported extension and does not close', async () => {
     const { BrowseModal } = await import('@/components/CursorCustomization/FileUpload/BrowseModal');
 
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
 
     const onClose = vi.fn();
     const handleFileSelect = vi.fn();

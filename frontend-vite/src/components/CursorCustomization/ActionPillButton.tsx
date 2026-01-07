@@ -16,7 +16,7 @@ export function ActionPillButton({
   ...props
 }: ActionPillButtonProps) {
   const iconWithSizing = React.cloneElement(icon, {
-    className: cn('!h-5 !w-5', icon.props.className),
+    className: cn('!h-[18px] !w-[18px]', icon.props.className),
     'aria-hidden': true
   });
 
@@ -24,7 +24,7 @@ export function ActionPillButton({
     <Button
       variant={variant}
       className={cn(
-        'inline-flex items-center gap-4 rounded-full px-4 transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]',
+        'inline-flex items-center gap-2 rounded-full px-5 transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]',
         variant === 'secondary'
           ? 'bg-foreground/10 text-foreground hover:bg-foreground/15 border border-border/60'
           : 'bg-primary text-primary-foreground shadow-none hover:bg-primary/70 focus-visible:ring-0',
@@ -33,7 +33,7 @@ export function ActionPillButton({
       {...props}
     >
       {iconWithSizing}
-      <span className="text-base font-medium">{children}</span>
+      <span className="text-sm font-semibold">{children}</span>
     </Button>
   );
 }

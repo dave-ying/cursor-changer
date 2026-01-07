@@ -14,6 +14,15 @@ vi.mock('@/context/AppContext', () => ({
   })
 }));
 
+vi.mock('@/utils/logger', () => ({
+  logger: {
+    warn: vi.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+  }
+}));
+
 vi.mock('@/store/useAppStore', () => ({
   useAppStore: (selector: any) =>
     selector({
@@ -54,7 +63,7 @@ vi.mock('@dnd-kit/sortable', () => ({
   useSortable: () => ({
     attributes: {},
     listeners: {},
-    setNodeRef: () => {},
+    setNodeRef: () => { },
     transform: null,
     transition: '',
     isDragging: false
