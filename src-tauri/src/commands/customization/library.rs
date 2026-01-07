@@ -125,17 +125,22 @@ pub fn add_cursor_to_library<R: Runtime>(
     Ok(cursor)
 }
 
-/// Safely delete a library file if it's within the allowed cursors folder.
+/// Safely delete a library file if it's within the allowed library folders.
 /// Returns Ok(true) if file was deleted, Ok(false) if skipped (not in folder or doesn't exist),
 /// Err if deletion failed.
 pub fn try_delete_library_file(file_path: &std::path::Path) -> Result<bool, std::io::Error> {
-    let cursors_folder = match crate::paths::cursors_dir() {
-        Ok(folder) => folder,
-        Err(_) => return Ok(false), // Can't determine folder, skip deletion
-    };
+    let cursors_folder = crate::paths::cursors_dir().ok();
+    let packs_folder = crate::paths::cursor_packs_dir().ok();
 
-    if !file_path.starts_with(&cursors_folder) {
-        return Ok(false); // Not in our folder, skip
+    let in_cursors = cursors_folder
+        .as_ref()
+        .map_or(false, |f| file_path.starts_with(f));
+    let in_packs = packs_folder
+        .as_ref()
+        .map_or(false, |f| file_path.starts_with(f));
+
+    if !in_cursors && !in_packs {
+        return Ok(false); // Not in our folders, skip
     }
 
     if !file_path.exists() {
