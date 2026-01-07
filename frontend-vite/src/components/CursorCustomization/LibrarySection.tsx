@@ -135,6 +135,13 @@ export function LibrarySection({
     } as React.CSSProperties;
   }, [libraryPreviewScale]);
 
+  // Filter out packs when user is selecting from library (active_first mode)
+  const isInActiveFirstSelectionMode = selectingFromLibrary && selectedCursor && !pendingLibraryCursor;
+  const filteredDisplayLibrary = React.useMemo(() => {
+    if (!isInActiveFirstSelectionMode) return displayLibrary;
+    return displayLibrary.filter(lib => !lib.is_pack && !lib.pack_metadata);
+  }, [displayLibrary, isInActiveFirstSelectionMode]);
+
   return (
     <section
       id={id}
@@ -183,12 +190,12 @@ export function LibrarySection({
             style={gridStyle}
           >
 
-            {displayLibrary && displayLibrary.length > 0 ? (
-              <SortableContext items={displayLibrary.map(l => l.id)} strategy={rectSortingStrategy}>
-                {displayLibrary.map((lib, index) => (
+            {filteredDisplayLibrary && filteredDisplayLibrary.length > 0 ? (
+              <SortableContext items={filteredDisplayLibrary.map(l => l.id)} strategy={rectSortingStrategy}>
+                {filteredDisplayLibrary.map((lib, index) => (
                   <LibraryCursor
                     key={lib.id}
-                    displayOrderIds={displayLibrary.map(item => item.id)}
+                    displayOrderIds={filteredDisplayLibrary.map(item => item.id)}
                     item={lib}
                     previewScale={libraryPreviewScale}
                     selectionMode={Boolean(selectingFromLibrary && selectedCursor)}
