@@ -62,21 +62,21 @@ const mockAppWindow = {
   isMinimized: () => Promise.resolve(false),
   isVisible: () => Promise.resolve(true),
   setTitle: () => Promise.resolve(),
-  listen: vi.fn(() => Promise.resolve(() => {})),
-  once: vi.fn(() => Promise.resolve(() => {})),
+  listen: vi.fn(() => Promise.resolve(() => { })),
+  once: vi.fn(() => Promise.resolve(() => { })),
   emit: vi.fn(() => Promise.resolve()),
 };
 
 beforeEach(() => {
   mockInvoke.mockClear();
-  
+
   const tauriMock = {
     invoke: mockInvoke,
-    listen: vi.fn(() => Promise.resolve(() => {})),
+    listen: vi.fn(() => Promise.resolve(() => { })),
     event: {
-      listen: vi.fn(() => Promise.resolve(() => {})),
+      listen: vi.fn(() => Promise.resolve(() => { })),
       emit: vi.fn(),
-      once: vi.fn(() => Promise.resolve(() => {})),
+      once: vi.fn(() => Promise.resolve(() => { })),
     },
     window: {
       getCurrentWindow: () => mockAppWindow,
@@ -87,7 +87,7 @@ beforeEach(() => {
     core: { invoke: mockInvoke },
     tauri: { invoke: mockInvoke, appWindow: mockAppWindow },
   };
-  
+
   (window as any).__TAURI__ = tauriMock;
   (globalThis as any).__TAURI__ = tauriMock;
   (window as any).__TAURI_INTERNALS__ = { invoke: mockInvoke };
@@ -113,7 +113,7 @@ describe('Cursor Workflow Integration', () => {
       renderApp();
 
       await waitFor(() => {
-        expect(screen.getByText('Normal Pointer')).toBeInTheDocument();
+        expect(screen.getByTestId('cursor-card-Normal')).toBeInTheDocument();
       });
     });
 

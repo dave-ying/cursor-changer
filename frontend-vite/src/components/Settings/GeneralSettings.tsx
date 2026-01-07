@@ -51,6 +51,7 @@ export function GeneralSettings() {
       // Reset other Library-related localStorage items
       localStorage.removeItem(persistentKeys.library.showCustomizePanel);
       localStorage.removeItem(persistentKeys.library.showMoreOptions);
+      localStorage.removeItem(persistentKeys.activeSection.showCursorNames);
       setResetDialogOpen(false);
       // Reload page to ensure all components re-read their default values
       // (delay ensures localStorage writes are fully committed before reload)

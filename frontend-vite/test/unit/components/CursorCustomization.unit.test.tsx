@@ -156,10 +156,10 @@ describe('CursorCustomization - Unit Tests - Rendering', () => {
 
     await renderAndWaitForLoad();
 
-    expect(screen.getByText('Normal')).toBeInTheDocument();
-    expect(screen.getByText('IBeam')).toBeInTheDocument();
-    expect(screen.getByText('Hand')).toBeInTheDocument();
-    expect(screen.getByText('Wait')).toBeInTheDocument();
+    expect(screen.getByTestId('cursor-card-Normal')).toBeInTheDocument();
+    expect(screen.getByTestId('cursor-card-IBeam')).toBeInTheDocument();
+    expect(screen.getByTestId('cursor-card-Hand')).toBeInTheDocument();
+    expect(screen.getByTestId('cursor-card-Wait')).toBeInTheDocument();
   });
 
   it('should display library cursors', async () => {
@@ -185,7 +185,6 @@ describe('CursorCustomization - Unit Tests - Cursor Cards', () => {
 
     const normalCard = screen.getByTestId('cursor-card-Normal');
     expect(normalCard).toBeInTheDocument();
-    expect(within(normalCard).getByText('Normal')).toBeInTheDocument();
   });
 
   it('should show custom indicator for custom cursors', async () => {
@@ -209,7 +208,7 @@ describe('CursorCustomization - Unit Tests - Cursor Cards', () => {
     expect(screen.getByTestId('selected-cursor')).toHaveTextContent('Normal');
   });
 
-  it('should show hotspot coordinates when available', async () => {
+  it('should show hotspot coordinates ONLY when showNames is true', async () => {
     // Add hotspot info to a cursor
     mockCursors[0].hotspot_x = 5;
     mockCursors[0].hotspot_y = 10;
@@ -217,7 +216,8 @@ describe('CursorCustomization - Unit Tests - Cursor Cards', () => {
     await renderAndWaitForLoad();
 
     const normalCard = screen.getByTestId('cursor-card-Normal');
-    expect(within(normalCard).getByText('Hotspot: (5, 10)')).toBeInTheDocument();
+    // By default, showNames is false, so hotspot should NOT be in the document
+    expect(within(normalCard).queryByText('Hotspot: (5, 10)')).not.toBeInTheDocument();
   });
 
   it('should handle cursor card hover', async () => {

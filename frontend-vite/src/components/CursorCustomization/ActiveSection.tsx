@@ -36,7 +36,7 @@ export function ActiveSection({
   const [showModeToggle, setShowModeToggle] = React.useState(false);
   const [showCursorNames, setShowCursorNames] = usePersistentBoolean({
     key: persistentKeys.activeSection.showCursorNames,
-    defaultValue: true
+    defaultValue: false
   });
   const handleToggleCustomizePanel = React.useCallback(() => {
     setShowModeToggle((prev) => !prev);
