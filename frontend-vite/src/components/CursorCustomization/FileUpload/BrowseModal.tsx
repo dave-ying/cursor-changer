@@ -1,8 +1,16 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { listen, UnlistenFn } from '@tauri-apps/api/event';
+import { invoke } from '@tauri-apps/api/core';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { logger } from '../../../utils/logger';
+
+// Tauri drag-drop event payload type
+interface DragDropPayload {
+  paths: string[];
+  position: { x: number; y: number };
+}
 
 /**
  * BrowseModal
@@ -39,6 +47,115 @@ export function BrowseModal({
   const handleClose = useCallback(() => {
     onClose?.();
   }, [onClose]);
+
+  // Helper helper to convert base64 to Blob
+  const base64ToBlob = (base64: string, type: string) => {
+    const binStr = atob(base64);
+    const len = binStr.length;
+    const arr = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      arr[i] = binStr.charCodeAt(i);
+    }
+    return new Blob([arr], { type: type });
+  }
+
+  // Helper function to process a file path from Tauri's native drop event
+  const processFilePath = useCallback(async (filePath: string) => {
+    const fileName = filePath.split(/[\\/]/).pop() || '';
+    const ext = (fileName.split('.').pop() || '').toLowerCase();
+
+    // Validate file extension
+    if (!SUPPORTED_EXTENSIONS.includes(ext)) {
+      logger.warn(`Unsupported file type: .${ext}`);
+      return;
+    }
+
+    // Common logic to read file via backend command
+    const readFile = async (): Promise<File> => {
+      const base64Data = await invoke<string>('read_file_content', { path: filePath });
+      // Determine mime type (simple approximation)
+      let mimeType = 'application/octet-stream';
+      if (['png', 'jpg', 'jpeg', 'bmp', 'svg', 'ico'].includes(ext)) {
+        mimeType = `image/${ext === 'svg' ? 'svg+xml' : ext}`;
+      }
+      const blob = base64ToBlob(base64Data, mimeType);
+      return new File([blob], fileName, { type: mimeType });
+    };
+
+    // For image files, we need to read the file and create a File object
+    if (SUPPORTED_IMAGE_EXTENSIONS.includes(ext)) {
+      try {
+        const file = await readFile();
+        onImageFileSelected?.(file, clickPointItemId || '');
+        onClose?.();
+      } catch (error) {
+        logger.error('Failed to read image file:', error);
+      }
+      return;
+    }
+
+    // For cursor files (.cur / .ani) and packs (.zip), invoke the backend
+    if (SUPPORTED_CURSOR_EXTENSIONS.includes(ext) && handleFileSelect) {
+      try {
+        const file = await readFile();
+
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+
+        const syntheticEvent = {
+          target: {
+            files: dataTransfer.files
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+
+        handleFileSelect(syntheticEvent);
+      } catch (error) {
+        logger.error('Failed to read cursor file:', error);
+      }
+    } else {
+      logger.warn('handleFileSelect function not provided to BrowseModal');
+    }
+    onClose?.();
+  }, [onImageFileSelected, handleFileSelect, clickPointItemId, onClose]);
+
+  // Listen for Tauri's native file drop events when modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let unlistenDrop: UnlistenFn | undefined;
+    let unlistenEnter: UnlistenFn | undefined;
+    let unlistenLeave: UnlistenFn | undefined;
+
+    const setupListeners = async () => {
+      unlistenDrop = await listen<DragDropPayload>('tauri://drag-drop', (event) => {
+        logger.info('Tauri file drop event received:', event.payload);
+        setIsDragging(false);
+        const paths = event.payload.paths;
+        if (paths && paths.length > 0) {
+          // Process the first dropped file
+          processFilePath(paths[0]);
+        }
+      });
+
+      unlistenEnter = await listen('tauri://drag-enter', () => {
+        logger.info('Tauri drag enter event');
+        setIsDragging(true);
+      });
+
+      unlistenLeave = await listen('tauri://drag-leave', () => {
+        logger.info('Tauri drag leave event');
+        setIsDragging(false);
+      });
+    };
+
+    setupListeners();
+
+    return () => {
+      if (unlistenDrop) unlistenDrop();
+      if (unlistenEnter) unlistenEnter();
+      if (unlistenLeave) unlistenLeave();
+    };
+  }, [isOpen, processFilePath]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -184,11 +301,10 @@ export function BrowseModal({
         <CardContent className="pt-2 pb-8 flex-1 flex flex-col">
           {/* Drop area with compact, focused design and accessibility */}
           <label
-            className={`group flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-6 text-center transition-all min-h-[140px] w-full max-w-lg cursor-pointer mx-auto ${
-              isDragging
-                ? 'border-primary bg-primary/10 scale-[1.02]'
-                : 'border-border bg-muted/30 hover:border-primary hover:bg-accent/50'
-            }`}
+            className={`group flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-6 text-center transition-all min-h-[140px] w-full max-w-lg cursor-pointer mx-auto ${isDragging
+              ? 'border-primary bg-primary/10 scale-[1.02]'
+              : 'border-border bg-muted/30 hover:border-primary hover:bg-accent/50'
+              }`}
             role="button"
             tabIndex={0}
             aria-label="File upload area. Click to browse for files or drag and drop cursor files here. Supports .cur, .ani, .svg, .png, .ico, .bmp, .jpg, .jpeg files."

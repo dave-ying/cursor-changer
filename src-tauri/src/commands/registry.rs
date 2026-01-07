@@ -22,6 +22,7 @@ pub fn register(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wr
         crate::commands::file_commands::save_cursor_to_appdata,
         crate::commands::file_commands::get_library_cursors_folder,
         crate::commands::file_commands::show_library_cursors_folder,
+        crate::commands::file_commands::read_file_content,
         crate::commands::effects_commands::save_effects_config,
         crate::commands::effects_commands::load_effects_config,
         crate::commands::folder_watcher::start_library_folder_watcher,

@@ -21,6 +21,7 @@ export const Commands = {
   saveCursorToAppdata: 'save_cursor_to_appdata',
   getLibraryCursorsFolder: 'get_library_cursors_folder',
   showLibraryCursorsFolder: 'show_library_cursors_folder',
+  readFileContent: 'read_file_content',
   saveEffectsConfig: 'save_effects_config',
   loadEffectsConfig: 'load_effects_config',
   startLibraryFolderWatcher: 'start_library_folder_watcher',

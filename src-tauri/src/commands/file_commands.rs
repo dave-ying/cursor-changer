@@ -1,6 +1,17 @@
 use std::path::PathBuf;
 use tauri::AppHandle;
 use tauri_plugin_dialog::DialogExt;
+use base64::{Engine as _, engine::general_purpose};
+
+/// Read a file and return its content as base64 string
+#[tauri::command]
+pub fn read_file_content(path: String) -> Result<String, String> {
+    let content = std::fs::read(&path)
+        .map_err(|e| format!("Failed to read file: {}", e))?;
+    
+    Ok(general_purpose::STANDARD.encode(content))
+}
+
 
 /// Save a .cur file with a file save dialog
 #[tauri::command]
