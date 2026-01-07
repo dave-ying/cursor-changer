@@ -39,7 +39,6 @@ export function LibrarySection({
   const loadLibraryCursors = useAppStore((s) => s.operations.loadLibraryCursors);
   const { showMessage } = useMessage();
   const [showCustomizePanel, setShowCustomizePanel] = React.useState(false);
-  const [showMoreOptions, setShowMoreOptions] = React.useState(false);
 
   const [resetLibraryDialogOpen, setResetLibraryDialogOpen] = React.useState(false);
   const scaleMin = 0.6;
@@ -63,7 +62,6 @@ export function LibrarySection({
   });
 
   const handleToggleCustomizePanel = React.useCallback(() => {
-    setShowMoreOptions(false);
     setShowCustomizePanel((prev) => !prev);
   }, []);
 
@@ -159,11 +157,9 @@ export function LibrarySection({
       {!selectingFromLibrary && !pendingLibraryCursor && (
         <LibraryCustomizePanel
           showCustomizePanel={showCustomizePanel}
-          showMoreOptions={showMoreOptions}
           resetLibraryDialogOpen={resetLibraryDialogOpen}
           sortBy={sortBy}
           sortDirections={sortDirections}
-          onToggleMoreOptions={() => setShowMoreOptions((prev) => !prev)}
           onSortSelection={handleSortSelection}
           previewScale={libraryPreviewScale}
           onPreviewScaleChange={setLibraryPreviewScale}

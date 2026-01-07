@@ -23,7 +23,20 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' tauri://localhost; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: data:; font-src 'self' asset: data:; media-src 'self' asset: data:; connect-src 'self' https: http://localhost:{{port}} ws://localhost:{{port}}; frame-src 'none'"
+      "csp": "default-src 'self' tauri://localhost; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: data: http://asset.localhost https://asset.localhost; font-src 'self' asset: data:; media-src 'self' asset: data:; connect-src 'self' https: http://localhost:{{port}} ws://localhost:{{port}}; frame-src 'none'",
+      "assetProtocol": {
+        "enable": true,
+        "scope": [
+          "$DATA/cursor-changer/library/ani-previews/**",
+          "$DATA\\cursor-changer\\library\\ani-previews\\**",
+          "$DATA/cursor-changer/library/ani-previews/**/*",
+          "$DATA\\cursor-changer\\library\\ani-previews\\**/*",
+          "$APPDATA/cursor-changer/library/ani-previews/**",
+          "$APPDATA\\cursor-changer\\library\\ani-previews\\**",
+          "$APPDATA/cursor-changer/library/ani-previews/**/*",
+          "$APPDATA\\cursor-changer\\library\\ani-previews\\**/*"
+        ]
+      }
     },
     "withGlobalTauri": true
   },

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -29,9 +29,9 @@ export function LibraryResetDialog({
         <Button
           id="reset-library-btn"
           variant="destructive"
-          className="sm:w-auto rounded-full"
+          className="w-[65%] mx-auto flex justify-center rounded-full px-4 py-2 h-auto"
         >
-          Reset Library
+          Reset Library to Default
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

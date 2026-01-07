@@ -34,14 +34,11 @@ export function ActiveSection({
   const safeVisibleCursors = Array.isArray(visibleCursors) ? visibleCursors : [];
 
   const [showModeToggle, setShowModeToggle] = React.useState(false);
-  const [showMoreOptions, setShowMoreOptions] = React.useState(false);
   const [showCursorNames, setShowCursorNames] = usePersistentBoolean({
     key: persistentKeys.activeSection.showCursorNames,
     defaultValue: true
   });
-
   const handleToggleCustomizePanel = React.useCallback(() => {
-    setShowMoreOptions(false);
     setShowModeToggle((prev) => !prev);
   }, []);
 
@@ -123,11 +120,11 @@ export function ActiveSection({
       {!pendingLibraryCursor && (
         <div
           className={cn(
-            'px-6 pb-4 border-b border-border/50 bg-muted/30 overflow-hidden transition-[max-height,opacity] duration-300 ease-out',
+            'px-6 pb-6 border-b border-border/50 bg-muted/30 overflow-hidden transition-[max-height,opacity] duration-300 ease-out',
             showModeToggle ? 'opacity-100' : 'opacity-0'
           )}
           style={{
-            maxHeight: showModeToggle ? (showMoreOptions ? '400px' : '260px') : '0px',
+            maxHeight: showModeToggle ? '400px' : '0px',
             overflow: 'hidden',
             flexShrink: 0
           }}
@@ -143,54 +140,31 @@ export function ActiveSection({
                 onValueChange={onModeChange}
               />
             </div>
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-1">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">Create Cursor Pack</p>
+                <p className="text-sm font-semibold text-foreground">
+                  Show cursor names
+                </p>
               </div>
-              <Button
-                className="rounded-full"
-                onClick={onShowActiveCursorsModal}
-              >
-                Create
-              </Button>
+              <Switch
+                checked={showCursorNames}
+                onCheckedChange={setShowCursorNames}
+                aria-label="Toggle cursor name visibility"
+              />
             </div>
-            <CollapsibleSection
-              id="active-cursors-more-options"
-              open={showMoreOptions}
-              onToggle={() => setShowMoreOptions((prev) => !prev)}
-              closedLabel="Show more"
-              openLabel="Hide options"
-              maxHeight={300}
-              className="space-y-2 mt-4"
-              contentClassName="pt-1 pb-1 space-y-2"
+            <Button
+              className="w-[65%] mx-auto flex justify-center rounded-full px-4 py-2 h-auto"
+              onClick={onShowActiveCursorsModal}
             >
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-1">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">
-                    Show cursor names
-                  </p>
-                </div>
-                <Switch
-                  checked={showCursorNames}
-                  onCheckedChange={setShowCursorNames}
-                  aria-label="Toggle cursor name visibility"
-                />
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-1">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">
-                    Reset All Active Cursors to Default
-                  </p>
-                </div>
-                <Button
-                  variant="destructive"
-                  className="sm:w-auto rounded-full"
-                  onClick={onResetCursors}
-                >
-                  Reset Active Cursors
-                </Button>
-              </div>
-            </CollapsibleSection>
+              Create Cursor Pack
+            </Button>
+            <Button
+              variant="destructive"
+              className="w-[65%] mx-auto flex justify-center rounded-full px-4 py-2 h-auto"
+              onClick={onResetCursors}
+            >
+              Reset Active Cursors to Default
+            </Button>
           </div>
         </div>
       )}

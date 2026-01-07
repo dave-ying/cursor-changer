@@ -18,7 +18,7 @@ nursery = "warn"
 cargo = "warn"
 
 [dependencies]
-tauri = { version = "2.9.3", features = [ "tray-icon", "image-ico"] }
+tauri = { version = "2.9.3", features = ["protocol-asset", "tray-icon", "image-ico"] }
 tauri-plugin-global-shortcut = "2.3.1"
 tauri-plugin-dialog = "2.4.2"
 tauri-plugin-shell = "2.0.0"

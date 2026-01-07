@@ -9,12 +9,10 @@ import { LibraryResetDialog } from './LibraryResetDialog';
 
 interface LibraryCustomizePanelProps {
   showCustomizePanel: boolean;
-  showMoreOptions: boolean;
   resetLibraryDialogOpen: boolean;
   sortBy: 'custom' | 'date';
   sortDirections: Record<'date', 'asc' | 'desc'>;
   previewScale: number;
-  onToggleMoreOptions: () => void;
   onSortSelection: (sortBy: 'custom' | 'date') => void;
   onPreviewScaleChange: (scale: number) => void;
   onOpenFolder: () => void;
@@ -24,12 +22,10 @@ interface LibraryCustomizePanelProps {
 
 export function LibraryCustomizePanel({
   showCustomizePanel,
-  showMoreOptions,
   resetLibraryDialogOpen,
   sortBy,
   sortDirections,
   previewScale,
-  onToggleMoreOptions,
   onSortSelection,
   onPreviewScaleChange,
   onOpenFolder,
@@ -40,7 +36,7 @@ export function LibraryCustomizePanel({
     <div
       className={`px-6 pb-4 border-b border-border/50 bg-muted/30 overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${showCustomizePanel ? 'opacity-100' : 'opacity-0'}`}
       style={{
-        maxHeight: showCustomizePanel ? '320px' : '0px',
+        maxHeight: showCustomizePanel ? '400px' : '0px',
         overflow: 'hidden'
       }}
       aria-expanded={showCustomizePanel}
@@ -66,8 +62,8 @@ export function LibraryCustomizePanel({
                 Date Created
                 {sortBy === 'date'
                   ? (sortDirections['date'] === 'asc'
-                      ? <ArrowUp className="h-3.5 w-3.5" />
-                      : <ArrowDown className="h-3.5 w-3.5" />)
+                    ? <ArrowUp className="h-3.5 w-3.5" />
+                    : <ArrowDown className="h-3.5 w-3.5" />)
                   : <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />}
               </span>
             </ToggleGroupItem>
@@ -101,40 +97,20 @@ export function LibraryCustomizePanel({
             <span className="text-xs text-muted-foreground whitespace-nowrap">Large</span>
           </div>
         </div>
-        <CollapsibleSection
-          id="library-more-options"
-          open={showMoreOptions}
-          onToggle={onToggleMoreOptions}
-          closedLabel="Show more"
-          openLabel="Hide options"
-          maxHeight={300}
-          className="space-y-2 mt-4"
-          contentClassName="pb-0"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 pb-1">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground">Library Folder</p>
-            </div>
-            <Button
-              id="show-library-folder-btn"
-              className="rounded-full"
-              onClick={onOpenFolder}
-            >
-              Open Folder
-            </Button>
-          </div>
-          <Separator className="my-1" />
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-1 mt-2">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground">Reset All Cursors in Library</p>
-            </div>
-            <LibraryResetDialog
-              open={resetLibraryDialogOpen}
-              onOpenChange={onResetLibraryDialogChange}
-              onReset={onResetLibrary}
-            />
-          </div>
-        </CollapsibleSection>
+        <div className="pt-4 space-y-4">
+          <Button
+            id="show-library-folder-btn"
+            className="w-[65%] mx-auto flex justify-center rounded-full px-4 py-2 h-auto"
+            onClick={onOpenFolder}
+          >
+            Open Library Folder on Computer
+          </Button>
+          <LibraryResetDialog
+            open={resetLibraryDialogOpen}
+            onOpenChange={onResetLibraryDialogChange}
+            onReset={onResetLibrary}
+          />
+        </div>
       </div>
     </div>
   );
