@@ -100,7 +100,7 @@ export function LibraryCustomizePanel({
         <div className="pt-4 space-y-4">
           <Button
             id="show-library-folder-btn"
-            className="w-[65%] mx-auto flex justify-center rounded-full px-4 py-2 h-auto"
+            className="w-[65%] mx-auto flex justify-center rounded-full px-4 py-2 h-auto transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]"
             onClick={onOpenFolder}
           >
             Open Library Folder on Computer

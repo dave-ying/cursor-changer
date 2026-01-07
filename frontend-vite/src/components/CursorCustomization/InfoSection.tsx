@@ -72,7 +72,7 @@ export function InfoSection() {
                   href="https://buymeacoffee.com/daveying"
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="mt-2 inline-flex items-center justify-center transition hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="mt-2 inline-flex items-center justify-center transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   onClick={async (e) => {
                     e.preventDefault();
                     await openLink('https://buymeacoffee.com/daveying');
@@ -114,7 +114,7 @@ export function InfoSection() {
                   href="https://github.com/dave-ying/cursor-changer"
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="mt-2 inline-flex items-center justify-center rounded-full border border-border/70 bg-background/80 px-6 py-4 shadow-sm transition hover:-translate-y-[1px] hover:border-primary/50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="mt-2 inline-flex items-center justify-center rounded-full border border-border/70 bg-background/80 px-6 py-4 shadow-sm transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99] hover:border-primary/50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   onClick={async (e) => {
                     e.preventDefault();
                     await openLink('https://github.com/dave-ying/cursor-changer');

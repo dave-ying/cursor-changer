@@ -247,7 +247,7 @@ export function ActiveCursorsModal({
           <Button
             onClick={handleCreateCursorPack}
             size="lg"
-            className="create-pack-close-button"
+            className="create-pack-close-button transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]"
             disabled={isExporting || displayCursors.length === 0}
           >
             {isExporting ? 'Creating...' : 'Create Cursor Pack'}

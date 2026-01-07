@@ -56,9 +56,9 @@ export function CloseDialog({ isOpen, onClose }: CloseDialogProps) {
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogAction id="confirm-close" onClick={handleClose} variant="destructive">Close</AlertDialogAction>
-          <AlertDialogAction id="confirm-minimize" onClick={handleMinimize} variant="default">Minimize</AlertDialogAction>
-          <AlertDialogCancel id="cancel-close" onClick={handleCancel}>Cancel</AlertDialogCancel>
+          <AlertDialogAction id="confirm-close" onClick={handleClose} variant="destructive" className="transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]">Close</AlertDialogAction>
+          <AlertDialogAction id="confirm-minimize" onClick={handleMinimize} variant="default" className="transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]">Minimize</AlertDialogAction>
+          <AlertDialogCancel id="cancel-close" onClick={handleCancel} className="transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]">Cancel</AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

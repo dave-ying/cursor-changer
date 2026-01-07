@@ -95,7 +95,7 @@ export function GeneralSettings() {
         <div className="mt-6 flex justify-center">
           <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
             <AlertDialogTrigger asChild>
-              <Button id="reset-all-settings-btn" variant="destructive" className="w-full sm:w-auto rounded-full">Reset All Settings</Button>
+              <Button id="reset-all-settings-btn" variant="destructive" className="w-full sm:w-auto rounded-full transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]">Reset All Settings</Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -123,7 +123,7 @@ export function GeneralSettings() {
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleResetAllSettings} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Reset All Settings</AlertDialogAction>
+                <AlertDialogAction onClick={handleResetAllSettings} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]">Reset All Settings</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

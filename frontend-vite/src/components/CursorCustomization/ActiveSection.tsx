@@ -153,14 +153,14 @@ export function ActiveSection({
               />
             </div>
             <Button
-              className="w-[65%] mx-auto flex justify-center rounded-full px-4 py-2 h-auto"
+              className="w-[65%] mx-auto flex justify-center rounded-full px-4 py-2 h-auto transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]"
               onClick={onShowActiveCursorsModal}
             >
               Create Cursor Pack
             </Button>
             <Button
               variant="destructive"
-              className="w-[65%] mx-auto flex justify-center rounded-full px-4 py-2 h-auto"
+              className="w-[65%] mx-auto flex justify-center rounded-full px-4 py-2 h-auto transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]"
               onClick={onResetCursors}
             >
               Reset Active Cursors to Default

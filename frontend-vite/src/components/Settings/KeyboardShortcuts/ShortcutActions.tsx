@@ -1,14 +1,14 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 
- type ShortcutActionsProps = {
-     isEditing: boolean;
-     capturedShortcut?: string | null;
-     onEdit?: () => void;
-     onApply?: () => void;
-     onCancel?: () => void;
-     onReset: () => void;
- };
+type ShortcutActionsProps = {
+    isEditing: boolean;
+    capturedShortcut?: string | null;
+    onEdit?: () => void;
+    onApply?: () => void;
+    onCancel?: () => void;
+    onReset: () => void;
+};
 
 /**
  * ShortcutActions - Action buttons for keyboard shortcut management
@@ -36,7 +36,7 @@ export function ShortcutActions({
                     id="cancel-btn"
                     onClick={onCancel}
                     variant="destructive"
-                    className="flex-1 sm:flex-initial rounded-full"
+                    className="flex-1 sm:flex-initial rounded-full transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]"
                 >
                     Cancel
                 </Button>
@@ -45,7 +45,7 @@ export function ShortcutActions({
                     onClick={onApply}
                     disabled={!capturedShortcut}
                     variant="default"
-                    className="flex-1 sm:flex-initial rounded-full"
+                    className="flex-1 sm:flex-initial rounded-full transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]"
                 >
                     Apply
                 </Button>
@@ -53,7 +53,7 @@ export function ShortcutActions({
                     id="reset-shortcut-btn"
                     variant="secondary"
                     onClick={onReset}
-                    className="flex-1 sm:flex-initial rounded-full"
+                    className="flex-1 sm:flex-initial rounded-full transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]"
                 >
                     Reset
                 </Button>
@@ -68,7 +68,7 @@ export function ShortcutActions({
                 id="edit-btn"
                 onClick={onEdit}
                 variant="default"
-                className="flex-1 sm:flex-initial rounded-full"
+                className="flex-1 sm:flex-initial rounded-full transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]"
             >
                 Edit
             </Button>
@@ -76,7 +76,7 @@ export function ShortcutActions({
                 id="reset-shortcut-btn"
                 variant="secondary"
                 onClick={onReset}
-                className="flex-1 sm:flex-initial rounded-full"
+                className="flex-1 sm:flex-initial rounded-full transition-all duration-250 ease-out will-change-transform hover:-translate-y-[3px] hover:scale-[1.01] active:translate-y-0 active:scale-[0.99]"
             >
                 Reset
             </Button>
