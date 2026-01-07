@@ -238,12 +238,21 @@ pub fn register_pack_in_library_with_data<R: Runtime>(
     let created_at = created_at_override.unwrap_or_else(now_iso8601_utc);
     let archive_path = pack_path.to_string_lossy().to_string();
 
+    // Generate previews immediately so they are available in the frontend without a refresh
+    let (previews, previews_version) = match generate_pack_previews_from_archive(pack_path) {
+        Ok(p) => (Some(p), Some(CURRENT_PREVIEW_CACHE_VERSION)),
+        Err(e) => {
+             cc_warn!("[CursorChanger] Failed to generate pack previews for {}: {}", pack_name, e);
+             (None, None)
+        }
+    };
+
     let mut metadata = LibraryPackMetadata {
         mode,
         archive_path: archive_path.clone(),
         items,
-        previews: None,
-        previews_version: None,
+        previews,
+        previews_version,
     };
 
     ensure_pack_files_present(pack_path, &mut metadata.items)?;
