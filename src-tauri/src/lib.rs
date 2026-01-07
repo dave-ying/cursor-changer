@@ -71,4 +71,3 @@ pub mod utils;
 #[path = "events.rs"]
 pub mod events;
 
-mod minimal_test;
