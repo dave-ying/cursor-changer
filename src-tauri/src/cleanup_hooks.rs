@@ -1,7 +1,7 @@
 // Windows-specific cleanup hooks to ensure cursor restoration on any exit
 #[cfg(debug_assertions)]
 #[cfg(not(test))]
-use crate::commands::window_commands::restore_on_exit;
+use crate::commands::shutdown::restore_on_exit;
 #[cfg(debug_assertions)]
 use crate::system;
 #[cfg(debug_assertions)]
