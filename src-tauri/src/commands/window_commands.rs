@@ -23,9 +23,7 @@ pub fn restore_state(state: &mut AppState) -> bool {
     shutdown::restore_state(state)
 }
 
-pub fn restore_on_exit(app: &AppHandle) {
-    shutdown::restore_on_exit(app)
-}
+
 
 pub fn show_main_window(app: &AppHandle) {
     visibility::show_main_window(app)

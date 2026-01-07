@@ -217,78 +217,7 @@ pub(crate) fn extract_pack_assets(
     Ok(extracted)
 }
 
-fn infer_items_from_archive(archive_path: &Path) -> Result<Vec<LibraryPackItem>, String> {
-    let file = fs::File::open(archive_path).map_err(|e| format!("Failed to open pack archive: {e}"))?;
-    let mut archive =
-        ZipArchive::new(file).map_err(|e| format!("Failed to read archive contents: {e}"))?;
 
-    let mut items: Vec<LibraryPackItem> = Vec::new();
-    
-    cc_debug!("[infer_items_from_archive] Processing archive: {}", archive_path.display());
-
-    for i in 0..archive.len() {
-        let file = archive
-            .by_index(i)
-            .map_err(|e| format!("Failed to read archive entry: {e}"))?;
-        if file.is_dir() {
-            continue;
-        }
-
-        let name_in_zip = file.name().to_string();
-        let file_name = Path::new(&name_in_zip)
-            .file_name()
-            .and_then(|s| s.to_str())
-            .unwrap_or(&name_in_zip)
-            .to_string();
-
-        cc_debug!("[infer_items_from_archive] Found file: {}", file_name);
-
-        if file_name.eq_ignore_ascii_case(PACK_MANIFEST_FILENAME) {
-            cc_debug!("[infer_items_from_archive] Skipping manifest file");
-            continue;
-        }
-
-        let stem = Path::new(&file_name)
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("");
-
-        let cursor_name = cursor_changer::DEFAULT_CURSOR_BASE_NAMES
-            .iter()
-            .find(|(_cursor_name, base_name)| *base_name == stem)
-            .map(|(_, base_name)| (*base_name).to_string())
-            .unwrap_or_else(|| stem.to_string());
-
-        let display_name = if cursor_name.is_empty() {
-            stem.to_string()
-        } else {
-            // Map kebab-case cursor_name back to Windows cursor name for display lookup
-            cursor_changer::DEFAULT_CURSOR_BASE_NAMES
-                .iter()
-                .find(|(_, base_name)| *base_name == cursor_name)
-                .and_then(|(windows_name, _)| {
-                    cursor_changer::CURSOR_TYPES
-                        .iter()
-                        .find(|ct| ct.name == *windows_name)
-                        .map(|ct| ct.display_name.to_string())
-                })
-                .unwrap_or_else(|| cursor_name.clone())
-        };
-
-        cc_debug!("[infer_items_from_archive] Creating item: cursor_name={}, display_name={}, file_name={}", 
-                 cursor_name, display_name, file_name);
-
-        items.push(LibraryPackItem {
-            cursor_name,
-            display_name,
-            file_name,
-            file_path: None,
-        });
-    }
-
-    cc_debug!("[infer_items_from_archive] Total items found: {}", items.len());
-    Ok(items)
-}
 
 pub(crate) fn read_manifest_or_infer(
     archive_path: &Path,

@@ -28,5 +28,20 @@ export default defineConfig({
     ],
     exclude: [],
     force: true
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('onnxruntime-web')) {
+              return 'ort';
+            }
+            return 'vendor';
+          }
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
   }
 })

@@ -1,4 +1,4 @@
-mod gif;
+
 mod parser;
 mod preview;
 mod render;
@@ -11,7 +11,7 @@ use super::AniPreviewData;
 pub(super) enum AniError {
     InvalidFormat(&'static str),
     NoFrames,
-    ImageDecode(String),
+
     ImageEncode(String),
 }
 
@@ -20,7 +20,7 @@ impl fmt::Display for AniError {
         match self {
             AniError::InvalidFormat(msg) => write!(f, "{}", msg),
             AniError::NoFrames => write!(f, "ANI file has no frames"),
-            AniError::ImageDecode(msg) => write!(f, "{}", msg),
+
             AniError::ImageEncode(msg) => write!(f, "{}", msg),
         }
     }
@@ -43,6 +43,4 @@ pub(super) fn extract_ani_first_frame(data: &[u8]) -> Option<Vec<u8>> {
     parser::extract_ani_first_frame(data)
 }
 
-pub(super) fn convert_ani_to_gif(data: &[u8]) -> Option<Vec<u8>> {
-    gif::convert_ani_to_gif(data)
-}
+

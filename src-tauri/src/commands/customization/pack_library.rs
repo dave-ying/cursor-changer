@@ -104,13 +104,7 @@ pub fn prepare_pack_archive_destination(
     Ok(target_folder.join(fallback_name))
 }
 
-pub fn prepare_pack_folder(root: &Path, desired_name: &str) -> Result<PathBuf, String> {
-    let sanitized = sanitize_folder_name(desired_name);
-    let folder = ensure_unique_folder(root, &sanitized);
-    fs::create_dir_all(&folder)
-        .map_err(|e| format!("Failed to create pack folder {}: {}", folder.display(), e))?;
-    Ok(folder)
-}
+
 
 fn pack_folder_from_archive(archive_path: &Path) -> Result<PathBuf, String> {
     archive_path
@@ -119,38 +113,7 @@ fn pack_folder_from_archive(archive_path: &Path) -> Result<PathBuf, String> {
         .ok_or_else(|| "Cursor pack archive missing parent folder".to_string())
 }
 
-pub fn ensure_folder_matches_pack_name(
-    packs_root: &Path,
-    current_folder: &Path,
-    desired_name: &str,
-) -> Result<PathBuf, String> {
-    let sanitized = sanitize_folder_name(desired_name);
-    if sanitized.is_empty() {
-        return Ok(current_folder.to_path_buf());
-    }
 
-    let target = packs_root.join(&sanitized);
-    let final_target = if target == current_folder {
-        current_folder.to_path_buf()
-    } else if target.exists() {
-        ensure_unique_folder(packs_root, &sanitized)
-    } else {
-        target
-    };
-
-    if final_target != current_folder {
-        fs::create_dir_all(
-            final_target
-                .parent()
-                .ok_or_else(|| "Pack folder target missing parent".to_string())?,
-        )
-        .map_err(|e| format!("Failed to prepare parent folder: {}", e))?;
-        fs::rename(current_folder, &final_target)
-            .map_err(|e| format!("Failed to rename pack folder: {}", e))?;
-    }
-
-    Ok(final_target)
-}
 
 fn sanitize_folder_name(name: &str) -> String {
     const INVALID: [char; 9] = ['<', '>', ':', '"', '/', '\\', '|', '?', '*'];
@@ -195,25 +158,7 @@ fn derive_pack_identity(library: &LibraryData, pack_path: &Path) -> (String, Str
 }
 
 /// Get the root directory for storing extracted pack files.
-pub fn pack_storage_root() -> Result<PathBuf, String> {
-    crate::paths::cursor_packs_dir()
-}
 
-/// Get the extraction folder for a specific pack.
-pub fn pack_extract_folder(storage_root: &Path, pack_id: &str, archive_path: &Path) -> Result<PathBuf, String> {
-    // Try to use the parent folder of the archive (where cursor files should already be extracted)
-    if let Some(parent) = archive_path.parent() {
-        if parent.exists() {
-            return Ok(parent.to_path_buf());
-        }
-    }
-
-    // Fallback: create a folder based on pack_id
-    let folder = storage_root.join(pack_id);
-    fs::create_dir_all(&folder)
-        .map_err(|e| format!("Failed to create pack extract folder: {}", e))?;
-    Ok(folder)
-}
 
 pub fn ensure_pack_files_present(
     archive_path: &Path,
@@ -268,39 +213,7 @@ pub fn ensure_pack_files_present(
     Ok(())
 }
 
-pub fn update_pack_item_paths<R: Runtime>(
-    app: &AppHandle<R>,
-    pack_id: &str,
-    file_map: &HashMap<String, String>,
-) -> Result<(), String> {
-    let mut library = load_library(app)?;
-    let cursor = library
-        .cursors
-        .iter_mut()
-        .find(|c| c.id == pack_id)
-        .ok_or_else(|| format!("Cursor pack with id {} not found", pack_id))?;
 
-    let metadata = cursor
-        .pack_metadata
-        .as_mut()
-        .ok_or_else(|| "Cursor is not a pack".to_string())?;
-
-    let mut changed = false;
-    for item in metadata.items.iter_mut() {
-        if let Some(path) = file_map.get(&item.file_name) {
-            if item.file_path.as_ref() != Some(path) {
-                item.file_path = Some(path.clone());
-                changed = true;
-            }
-        }
-    }
-
-    if changed {
-        save_library(app, &library)?;
-    }
-
-    Ok(())
-}
 
 pub fn register_pack_in_library<R: Runtime>(
     app: &AppHandle<R>,

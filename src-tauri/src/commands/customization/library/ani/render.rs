@@ -4,52 +4,7 @@ use crate::utils::encoding::base64_encode;
 
 use super::AniError;
 
-pub(super) fn frame_to_rgba(frame_data: &[u8]) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>, AniError> {
-    if let Some(png_data) = super::super::preview::extract_embedded_png(frame_data) {
-        let img =
-            image::load_from_memory(&png_data).map_err(|e| AniError::ImageDecode(e.to_string()))?;
-        return Ok(img.to_rgba8());
-    }
 
-    if frame_data.len() < 22 {
-        return Err(AniError::InvalidFormat("frame data too small"));
-    }
-
-    let count = u16::from_le_bytes([frame_data[4], frame_data[5]]);
-    if count == 0 {
-        return Err(AniError::InvalidFormat("ico directory contains no images"));
-    }
-
-    let offset = u32::from_le_bytes([
-        frame_data[18],
-        frame_data[19],
-        frame_data[20],
-        frame_data[21],
-    ]) as usize;
-    let size = u32::from_le_bytes([
-        frame_data[14],
-        frame_data[15],
-        frame_data[16],
-        frame_data[17],
-    ]) as usize;
-
-    if offset >= frame_data.len() || offset + size > frame_data.len() {
-        return Err(AniError::InvalidFormat("invalid image offset/size"));
-    }
-
-    let image_data = &frame_data[offset..offset + size];
-
-    if image_data.len() >= 8
-        && &image_data[0..8] == &[0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A]
-    {
-        let img = image::load_from_memory(image_data)
-            .map_err(|e| AniError::ImageDecode(e.to_string()))?;
-        return Ok(img.to_rgba8());
-    }
-
-    super::super::preview::frame_to_rgba_dib_only(frame_data)
-        .ok_or(AniError::InvalidFormat("failed to decode DIB frame"))
-}
 
 pub(super) fn frame_to_png_bytes(frame_data: &[u8]) -> Result<Vec<u8>, AniError> {
     if let Some(png_data) = super::super::preview::extract_embedded_png(frame_data) {
@@ -104,8 +59,4 @@ pub(super) fn frame_to_png_bytes(frame_data: &[u8]) -> Result<Vec<u8>, AniError>
     Ok(png_bytes)
 }
 
-pub(super) fn frame_to_png_data_url(frame_data: &[u8]) -> Result<String, AniError> {
-    let png_bytes = frame_to_png_bytes(frame_data)?;
-    let base64 = base64_encode(&png_bytes);
-    Ok(format!("data:image/png;base64,{}", base64))
-}
+
