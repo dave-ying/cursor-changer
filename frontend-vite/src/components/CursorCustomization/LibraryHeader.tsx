@@ -72,7 +72,7 @@ export function LibraryHeader({
             onClick={onAddCursor}
             aria-label="Add a cursor to library"
           >
-            Add Cursor
+            Add
           </ActionPillButton>
           <ActionPillButton
             icon={<SlidersHorizontal />}
