@@ -34,11 +34,17 @@ Easily change your Windows cursor or create a custom one from any image. No tech
 <a id="download"></a>
 ## 📥 Download & Installation (v1.0.0)
 
-To start using Cursor Changer on Windows:
+You can install Cursor Changer in two ways:
 
-1.  **Download the latest installer**: [Cursor.Changer_1.0.0_x64-setup.exe](https://github.com/dave-ying/cursor-changer/releases/download/v1.0.0/Cursor.Changer_1.0.0_x64-setup.exe)
-2.  **Run the .exe file** and follow the on-screen instructions.
-3.  **Launch the app** and start customizing your cursors!
+### 🏪 Microsoft Store (Recommended)
+<div align="center">
+  <a href="https://apps.microsoft.com/store/detail/9NKWG9X10811?cid=github-readme">
+    <img src="assets/badges/get-it-from-microsoft-store-dark.svg" alt="Get it from Microsoft Store" style="max-width: 200px;">
+  </a>
+</div>
+
+### 🔧 Direct Download
+Or download the installer directly: [Cursor.Changer_1.0.0_x64-setup.exe](https://github.com/dave-ying/cursor-changer/releases/download/v1.0.0/Cursor.Changer_1.0.0_x64-setup.exe) and follow the installation prompts.
 
 You can also find all releases on the [GitHub Releases](https://github.com/dave-ying/cursor-changer/releases) page.
 
@@ -76,10 +82,14 @@ This project is built using a modern, high-performance stack:
 <a id="important-commands"></a>
 ## 💻 Important Commands
 
-To work with this repository, you will need **Rust** and **Node.js** installed.
-
 <a id="run-in-development-mode"></a>
 ### 1. Run in Development Mode
+**Requirements**: 
+- [Rust](https://www.rust-lang.org/) (latest stable)
+- [Node.js](https://nodejs.org/) (v18 or later)
+- [npm](https://www.npmjs.com/) (comes with Node.js)
+- [Tauri CLI](https://tauri.app/v2/guides/getting-started/prerequisites) (install with `cargo install tauri-cli` if not already installed)
+
 Starts the frontend dev server and the Tauri window with hot-reload enabled.
 ```bash
 cargo tauri dev
@@ -87,6 +97,10 @@ cargo tauri dev
 
 <a id="build-for-production"></a>
 ### 2. Build for Production
+**Additional Requirements**: 
+- [Microsoft Visual Studio Build Tools/Visual Studio 2022](https://visualstudio.microsoft.com/downloads/) with C++ tools & Windows SDK
+- [NSIS](https://nsis.sourceforge.io/Download) (for installer creation)
+
 Compiles the application and enables optimizations. This creates the installer (`.exe` / `.msi`) in `src-tauri/target/release/bundle/`.
 ```bash
 cargo tauri build
