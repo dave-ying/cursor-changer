@@ -1,107 +1,152 @@
-# Cursor Changer
+<div align="center">
+
+# 🌟 Cursor Changer
+
+_A simple yet powerful Windows tool to customize your mouse cursor with any image._
+
+</div>
+
+<div align="center">
+
+[![MIT License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
+[![GitHub Release](https://img.shields.io/github/v/release/dave-ying/cursor-changer?style=flat-square)](https://github.com/dave-ying/cursor-changer/releases)
+![Platform](https://img.shields.io/badge/Platform-Windows-blue?style=flat-square)
+![GitHub Stars](https://img.shields.io/github/stars/dave-ying/cursor-changer?style=flat-square)
+![GitHub Issues](https://img.shields.io/github/issues/dave-ying/cursor-changer?style=flat-square)
+
+</div>
+
+---
+
+## ✨ Overview
 
 **Cursor Changer** is a simple and powerful tool for Windows that allows you to customize your mouse cursor with any image.
 
-Easily change your Windows cursor or create a custom one from any image. No technical skills required—just add your image, and you are ready to go!
-
-## 📚 Table of Contents
-
-- [Features](#features)
-- [Download & Installation](#download)
-- [Changelog](#changelog)
-- [For Developers](#for-developers)
-    - [Tech Stack](#tech-stack)
-    - [Important Commands](#important-commands)
-        - [Run in Development Mode](#run-in-development-mode)
-        - [Build for Production](#build-for-production)
-
-<a id="features"></a>
-## ✨ Features
-
--   **🖱️ Full Cursor Control**: Change your Windows cursor theme in seconds, with easy access to customize all 15 pointer styles the OS supports.
--   **🪄 Instant Cursor Creation**: Automatically turn any image (PNG, JPG/.JPEG, SVG, ICO, or BMP) into a functional cursor at the maximum 256×256 resolution with full alpha transparency—no external tools needed.
--   **📂 Personal Library**: Store and organize all your custom cursors in one convenient location.
--   **📦 Cursor Packs**: Effortlessly create, export, and import cursor collections. Share your custom sets with others or backup your library in a single file.
--   **🎯 Precise Accuracy**: Easily adjust your cursor’s click point (cursor hotspot) for perfect control.
--   **🍏 Mac Cursor Pack**: Swap Windows defaults for a full macOS-style cursor set instantly (Available as a ready-to-use cursor pack).
--   **🚀 Performance Focused**: Runs efficiently in the background without slowing down your computer.
--   **⚡ Real-Time Updates**: Apply new cursors immediately without restarting your computer.
--   **⌨️ Quick Toggle**: Hide or show your cursor instantly with a keyboard shortcut (Default: `Ctrl` + `Shift` + `X`).
--   **📏 Adjustable Size**: Make cursors as tiny or as large as you'd like (up to 256 px)
--   **🛡️ One-Click Reset**: Revert to the default Windows cursor instantly at any time.
--   **🧼 Non-Intrusive by Design**: When Cursor Changer closes, it automatically restores Windows' default cursor theme, leaving no trace.
-
-<a id="download"></a>
-## 📥 Download & Installation (v1.0.1)
-
-You can install Cursor Changer in two ways:
-
-### 🏪 Microsoft Store (Recommended)
-<div align="center">
-  <a href="https://apps.microsoft.com/store/detail/9NKWG9X10811?cid=github-readme">
-    <img src="assets/badges/get-it-from-microsoft-store-dark.svg" alt="Get it from Microsoft Store" style="max-width: 200px;">
-  </a>
-</div>
-
-### 🔧 Direct Download
-Or download the installer directly: [Cursor.Changer_1.0.1_x64-setup.exe](https://github.com/dave-ying/cursor-changer/releases/download/v1.0.1/Cursor.Changer_1.0.1_x64-setup.exe) and follow the installation prompts.
-
-You can also find all releases on the [GitHub Releases](https://github.com/dave-ying/cursor-changer/releases) page.
-
-<a id="changelog"></a>
-## 📄 Changelog
-
-See the full [CHANGELOG.md](CHANGELOG.md) document for release details, fixes, and improvements.
+Easily change your Windows cursor or create a custom one from any image. No technical skills required — just add your image, and you are ready to go!
 
 ---
 
-<div align="center">
+## 🚀 Features
 
-### 🧑‍💻 — Developer Zone Below —
-
-</div>
+| Feature | Description |
+|---------|-------------|
+| 🖱️ **Full Cursor Control** | Change all 15 Windows cursor types |
+| 🪄 **Instant Creation** | Turn any image into a cursor instantly |
+| 📂 **Personal Library** | Store and organize custom cursors |
+| 📦 **Cursor Packs** | Export and import cursor collections |
+| 🎯 **Precise Hotspots** | Adjust click point accuracy |
+| 🍎 **Mac Cursor Pack** | Ready-to-use macOS-style cursors |
+| ⚡ **Performance** | Efficient background operation |
+| 🔄 **Real-Time Updates** | Apply changes instantly |
+| ⌨️ **Quick Toggle** | Hide/show cursor with shortcut (Ctrl+Shift+X) |
+| 📏 **Adjustable Size** | Up to 256px |
+| 🛡️ **One-Click Reset** | Restore defaults anytime |
+| 🧼 **Non-Intrusive** | Auto-restores Windows cursors on close |
 
 ---
 
-<a id="for-developers"></a>
-# For Developers
+## 📥 Download & Installation
 
-This section is for developers interested in the technology behind Cursor Changer.
+### Microsoft Store (Recommended)
 
-<a id="tech-stack"></a>
-## 🛠️ Tech Stack
+<a href="https://apps.microsoft.com/store/detail/9NKWG9X10811?cid=github-readme">
+  <img src="assets/badges/get-it-from-microsoft-store-dark.svg" alt="Get it from Microsoft Store" width="200"/>
+</a>
 
-This project is built using a modern, high-performance stack:
+### Direct Download
 
-*   **Core**: [Rust](https://www.rust-lang.org/) ([Tauri framework](https://github.com/tauri-apps/tauri)) - Provides native performance and system integration.
-*   **Frontend**: [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) - Handles the UI and logic.
-*   **Build Tool**: [Vite](https://vitejs.dev/) - fast build tool for the frontend.
-*   **Styling**: [TailwindCSS](https://tailwindcss.com/) - Utility-first CSS framework.
-*   **State**: [Zustand](https://github.com/pmndrs/zustand) - Minimalist state management.
+Or download the installer directly: **[Cursor.Changer_1.0.1_x64-setup.exe](https://github.com/dave-ying/cursor-changer/releases/download/v1.0.1/Cursor.Changer_1.0.1_x64-setup.exe)**
 
-<a id="important-commands"></a>
-## 💻 Important Commands
+All releases are available on **[GitHub Releases](https://github.com/dave-ying/cursor-changer/releases)**.
 
-<a id="run-in-development-mode"></a>
-### 1. Run in Development Mode
-**Requirements**: 
-- [Rust](https://www.rust-lang.org/) (latest stable)
-- [Node.js](https://nodejs.org/) (v18 or later)
-- [npm](https://www.npmjs.com/) (comes with Node.js)
-- [Tauri CLI](https://tauri.app/v2/guides/getting-started/prerequisites) (install with `cargo install tauri-cli` if not already installed)
+---
 
-Starts the frontend dev server and the Tauri window with hot-reload enabled.
+## 📖 How to Use
+
+## How to Add Custom Cursors
+
+Add cursors to your library by uploading an image or a native cursor file:
+
+### Method 1: Turn Any Image into a Cursor
+Convert any image into a cursor at 256×256 max resolution with full alpha transparency. Supported formats: **PNG, JPG, SVG, ICO, BMP**.
+
+1. Click **Add** in the Library section and select an image
+2. Set the cursor click point (hotspot) by clicking on the preview image
+3. Click **Save** to add to your Library
+
+### Method 2: Import Native Cursor Files
+Use existing cursor files directly without conversion. Supports **.cur** (static) and **.ani** (animated) files.
+
+1. Click **Add** in the Library section
+2. Select a cursor file (.cur for static, .ani for animated)
+3. The cursor is added directly to your Library
+
+### Changing Cursors
+
+1. Drag any cursor from your **Library**
+2. Drop it onto the cursor type you want to change in the **Active** section
+3. The change applies instantly
+
+### App Modes
+
+- **Simple Mode** — Customize just the 2 main cursors (your regular pointer and link pointer)
+- **Advanced Mode** — Fine-tune all 15 cursor types individually
+
+## 📜 Changelog
+
+See **[CHANGELOG.md](CHANGELOG.md)** for release details.
+
+---
+
+## 👨‍💻 For Developers
+
+### Tech Stack
+
+| Technology | Purpose |
+|------------|---------|
+| Rust + Tauri | Core framework — native performance |
+| React + TypeScript | UI components |
+| Vite | Build tool |
+| TailwindCSS | Styling |
+| Zustand | State management |
+
+---
+
+### Development Commands
+
+<details>
+<summary>▶️ Run in Development Mode</summary>
+
+**Requirements:**
+- Rust (latest stable)
+- Node.js (v18+)
+- Tauri CLI (`cargo install tauri-cli`)
+
 ```bash
 cargo tauri dev
 ```
 
-<a id="build-for-production"></a>
-### 2. Build for Production
-**Additional Requirements**: 
-- [Microsoft Visual Studio Build Tools/Visual Studio 2022](https://visualstudio.microsoft.com/downloads/) with C++ tools & Windows SDK
-- [NSIS](https://nsis.sourceforge.io/Download) (for installer creation)
+</details>
 
-Compiles the application and enables optimizations. This creates the installer (`.exe` / `.msi`) in `src-tauri/target/release/bundle/`.
+<details>
+<summary>📦 Build for Production</summary>
+
+**Requirements:**
+- Visual Studio 2022 with C++ tools & Windows SDK
+- NSIS (for installer)
+
 ```bash
 cargo tauri build
 ```
+
+The installer will be created in `src-tauri/target/release/bundle/`.
+
+</details>
+
+---
+
+<div align="center">
+
+_Made with ❤️ by **[dave-ying](https://github.com/dave-ying)**_
+
+</div>
