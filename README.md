@@ -32,7 +32,7 @@ Easily change your Windows cursor or create a custom one from any image. No tech
 -   **🧼 Non-Intrusive by Design**: When Cursor Changer closes, it automatically restores Windows' default cursor theme, leaving no trace.
 
 <a id="download"></a>
-## 📥 Download & Installation (v1.0.0)
+## 📥 Download & Installation (v1.0.1)
 
 You can install Cursor Changer in two ways:
 
@@ -44,7 +44,7 @@ You can install Cursor Changer in two ways:
 </div>
 
 ### 🔧 Direct Download
-Or download the installer directly: [Cursor.Changer_1.0.0_x64-setup.exe](https://github.com/dave-ying/cursor-changer/releases/download/v1.0.0/Cursor.Changer_1.0.0_x64-setup.exe) and follow the installation prompts.
+Or download the installer directly: [Cursor.Changer_1.0.1_x64-setup.exe](https://github.com/dave-ying/cursor-changer/releases/download/v1.0.1/Cursor.Changer_1.0.1_x64-setup.exe) and follow the installation prompts.
 
 You can also find all releases on the [GitHub Releases](https://github.com/dave-ying/cursor-changer/releases) page.
 

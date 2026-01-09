@@ -141,7 +141,7 @@ fn export_schemas_to_json(output_path: &str) -> Result<(), String> {
     let schemas = get_command_schemas();
 
     let registry = CommandSchemaRegistry {
-        version: "1.0.0".to_string(),
+        version: "1.0.1".to_string(),
         commands: schemas,
     };
 
@@ -184,7 +184,7 @@ mod tests {
             !registry.commands.is_empty(),
             "Registry should contain commands"
         );
-        assert_eq!(registry.version, "1.0.0", "Version should be 1.0.0");
+        assert_eq!(registry.version, "1.0.1", "Version should be 1.0.1");
 
         println!(
             "✓ Exported {} command schemas to {}",
@@ -198,7 +198,7 @@ mod tests {
     fn test_schema_json_validity() {
         let schemas = get_command_schemas();
         let registry = CommandSchemaRegistry {
-            version: "1.0.0".to_string(),
+            version: "1.0.1".to_string(),
             commands: schemas,
         };
 

@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
  * Mirrors the non-modal Settings layout styling for future content.
  */
 export function InfoSection() {
-  const [version, setVersion] = useState<string>('1.0.0');
+  const [version, setVersion] = useState<string>('1.0.1');
   const isTauri = typeof window !== 'undefined' && '__TAURI__' in window;
 
   useEffect(() => {
