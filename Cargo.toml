@@ -1,6 +1,6 @@
 [package]
 name = "cursor_changer"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 description = "Windows cursor customization library"
 license = "MIT"

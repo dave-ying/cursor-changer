@@ -191,9 +191,46 @@ export function useHotspotLogic({
     // Create/revoke a blob URL for the uploaded file for preview
     useEffect(() => {
         if (file) {
-            const url = URL.createObjectURL(file);
-            setObjectUrl(url);
-            return () => URL.revokeObjectURL(url);
+            // In MSIX packages, blob URLs from drag-dropped files don't work due to sandboxing
+            // Always use backend to read file and create data URL (works in MSIX)
+            const readFileAsDataURL = async () => {
+                try {
+                    // In MSIX packages, blob URLs from drag-dropped files don't work due to sandboxing.
+                    // If we have a file path, we can ask the backend to read it directly and return
+                    // a data URL. This is MUCH faster and more reliable than byte conversion.
+                    const path = (file as any).path;
+                    if (path) {
+                        const dataUrl = await invokeCommand(invokeRef.current, Commands.readCursorFileAsDataUrl, {
+                            file_path: path
+                        });
+                        setObjectUrl(dataUrl);
+                        return;
+                    }
+
+                    // Fallback: Read file bytes and convert to data URL (for background-removed blobs, etc.)
+                    let arrayBuffer: ArrayBuffer;
+                    if (typeof file.arrayBuffer === 'function') {
+                        arrayBuffer = await file.arrayBuffer();
+                    } else {
+                        arrayBuffer = await new Response(file).arrayBuffer();
+                    }
+                    const bytes = new Uint8Array(arrayBuffer);
+                    const data = Array.from(bytes);
+
+                    // Use backend to convert bytes to data URL (works in MSIX)
+                    const mimeType = file.type || 'application/octet-stream';
+                    const dataUrl = await invokeCommand(invokeRef.current, Commands.convertBytesToDataUrl, {
+                        bytes: data,
+                        mime_type: mimeType
+                    });
+                    setObjectUrl(dataUrl);
+                } catch (error) {
+                    logger.error('Failed to read file for preview:', error);
+                    showMessageRef.current('Failed to load image preview', 'error');
+                }
+            };
+
+            readFileAsDataURL();
         } else if (filePath) {
             // Load existing library cursor with hotspot information
             invokeCommand(invokeRef.current, Commands.getCursorWithClickPoint, { file_path: filePath })
@@ -215,7 +252,6 @@ export function useHotspotLogic({
                     showMessageRef.current('Failed to load cursor info', 'error');
                 });
         }
-        return undefined;
     }, [file, filePath]);
 
     const handlePick = (e: React.MouseEvent<HTMLDivElement>) => {

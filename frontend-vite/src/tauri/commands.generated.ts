@@ -36,6 +36,7 @@ export const Commands = {
   renderCursorImagePreview: 'render_cursor_image_preview',
   readCursorFileAsDataUrl: 'read_cursor_file_as_data_url',
   readCursorFileAsBytes: 'read_cursor_file_as_bytes',
+  convertBytesToDataUrl: 'convert_bytes_to_data_url',
   convertImageToCurWithClickPoint: 'convert_image_to_cur_with_click_point',
   addUploadedCursorToLibrary: 'add_uploaded_cursor_to_library',
   addUploadedImageWithClickPointToLibrary: 'add_uploaded_image_with_click_point_to_library',

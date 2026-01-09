@@ -160,8 +160,18 @@ export function useCursorFileHandler({
             // This will cause the useEffect to create a new objectUrl
             // Note: This is a simplified approach - in a real app you might want to
             // handle this differently to preserve the original file reference
-            const url = URL.createObjectURL(processedFile);
-            setObjectUrl(url);
+            // In MSIX packages, blob URLs from background removal won't work due to sandboxing.
+            // Always use backend to convert the resulting bytes to a data URL.
+            const arrayBuffer = await processedBlob.arrayBuffer();
+            const bytes = new Uint8Array(arrayBuffer);
+            const data = Array.from(bytes);
+
+            const dataUrl = await invokeCommand(invoke, Commands.convertBytesToDataUrl, {
+                bytes: data,
+                mime_type: 'image/png'
+            });
+
+            setObjectUrl(dataUrl);
 
             showMessage('Background removed successfully!', 'success');
         } catch (error) {

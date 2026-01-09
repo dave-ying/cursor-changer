@@ -62,6 +62,8 @@ export type CommandArgsMap = {
 
   [Commands.readCursorFileAsBytes]: { file_path: string };
 
+  [Commands.convertBytesToDataUrl]: { bytes: number[]; mime_type: string };
+
   [Commands.browseCursorFile]: undefined;
 
   [Commands.getCursorWithClickPoint]: { file_path: string };
@@ -182,6 +184,8 @@ export type CommandResultMap = {
   [Commands.readCursorFileAsDataUrl]: string;
 
   [Commands.readCursorFileAsBytes]: number[];
+
+  [Commands.convertBytesToDataUrl]: string;
 
   [Commands.browseCursorFile]: string | null;
 

@@ -772,7 +772,7 @@ dependencies = [
 
 [[package]]
 name = "cursor_changer"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "winapi",
  "windows 0.62.2",
@@ -781,7 +781,7 @@ dependencies = [
 
 [[package]]
 name = "cursor_changer_tauri"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "base64 0.22.1",
  "chrono",

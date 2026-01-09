@@ -5,6 +5,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { logger } from '../../../utils/logger';
+import { Commands } from '../../../tauri/commands';
 
 // Tauri drag-drop event payload type
 interface DragDropPayload {
@@ -79,7 +80,10 @@ export function BrowseModal({
         mimeType = `image/${ext === 'svg' ? 'svg+xml' : ext}`;
       }
       const blob = base64ToBlob(base64Data, mimeType);
-      return new File([blob], fileName, { type: mimeType });
+      const file = new File([blob], fileName, { type: mimeType });
+      // Preserve the original file path for MSIX compatibility
+      (file as any).path = filePath;
+      return file;
     };
 
     // For image files, we need to read the file and create a File object
@@ -127,13 +131,13 @@ export function BrowseModal({
     let unlistenLeave: UnlistenFn | undefined;
 
     const setupListeners = async () => {
-      unlistenDrop = await listen<DragDropPayload>('tauri://drag-drop', (event) => {
+      unlistenDrop = await listen<DragDropPayload>('tauri://drag-drop', async (event) => {
         logger.info('Tauri file drop event received:', event.payload);
         setIsDragging(false);
         const paths = event.payload.paths;
-        if (paths && paths.length > 0) {
-          // Process the first dropped file
-          processFilePath(paths[0]);
+        if (paths && paths.length > 0 && paths[0]) {
+          // Process first dropped file
+          await processFilePath(paths[0]);
         }
       });
 
@@ -170,8 +174,25 @@ export function BrowseModal({
     return () => window.removeEventListener('keydown', handleEscape);
   }, [isOpen, handleClose]);
 
+  const handleBrowseClick = useCallback(async () => {
+    try {
+      const selectedPath = await invoke<string | null>(Commands.browseCursorFile);
+      if (selectedPath) {
+        await processFilePath(selectedPath);
+      }
+    } catch (error) {
+      logger.error('Failed to browse files:', error);
+    }
+  }, [processFilePath]);
+
   // Only render if modal should be open. Placed after hooks to keep hook order stable.
   if (!isOpen) return null;
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    processFile(file);
+  };
 
   const processFile = (file: File) => {
     const name = file.name || '';
@@ -209,12 +230,6 @@ export function BrowseModal({
     onClose?.();
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    processFile(file);
-  };
-
   const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -250,7 +265,7 @@ export function BrowseModal({
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       event.stopPropagation();
-      inputRef.current?.click();
+      handleBrowseClick();
       return;
     }
 
@@ -314,6 +329,10 @@ export function BrowseModal({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onKeyDown={handleKeyboardInteract}
+            onClick={(e) => {
+              e.preventDefault();
+              handleBrowseClick();
+            }}
           >
             <input
               type="file"

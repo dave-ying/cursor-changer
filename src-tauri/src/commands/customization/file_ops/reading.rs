@@ -86,3 +86,30 @@ pub fn read_cursor_file_as_bytes(file_path: String) -> Result<Vec<u8>, String> {
     // Read and return raw bytes
     fs::read(path).map_err(|e| format!("Failed to read file: {}", e))
 }
+
+/// Convert file bytes to a data URL (bypasses MSIX sandbox file path issues)
+/// This is used when uploading files in MSIX packages where blob URLs don't work
+#[tauri::command]
+pub fn convert_bytes_to_data_url(bytes: Vec<u8>, mime_type: String) -> Result<String, String> {
+    // Handle SVG: prefer percent-encoded text data URL for better compatibility
+    if mime_type == "image/svg+xml" || mime_type.contains("svg") {
+        match std::str::from_utf8(&bytes) {
+            Ok(text) => {
+                let mut encoded = String::with_capacity(bytes.len() * 3);
+                for &b in text.as_bytes() {
+                    encoded.push_str(&format!("%{:02X}", b));
+                }
+                return Ok(format!("data:image/svg+xml;charset=utf-8,{}", encoded));
+            }
+            Err(_) => {
+                // Fallback to base64 if not valid UTF-8
+                let base64 = base64_encode(&bytes);
+                return Ok(format!("data:image/svg+xml;base64,{}", base64));
+            }
+        }
+    }
+
+    // For other image types, use base64 encoding
+    let base64 = base64_encode(&bytes);
+    Ok(format!("data:{};base64,{}", mime_type, base64))
+}

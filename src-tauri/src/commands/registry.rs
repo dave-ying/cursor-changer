@@ -37,6 +37,7 @@ pub fn register(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wr
         crate::commands::customization::file_ops::preview::render_cursor_image_preview,
         crate::commands::customization::file_ops::reading::read_cursor_file_as_data_url,
         crate::commands::customization::file_ops::reading::read_cursor_file_as_bytes,
+        crate::commands::customization::file_ops::reading::convert_bytes_to_data_url,
         crate::commands::customization::file_ops::conversion::convert_image_to_cur_with_click_point,
         crate::commands::customization::file_ops::library_integration::add_uploaded_cursor_to_library,
         crate::commands::customization::file_ops::library_integration::add_uploaded_image_with_click_point_to_library,
